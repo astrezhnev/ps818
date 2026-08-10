@@ -88,7 +88,7 @@
     "href": "schedule.html#week-2-introduction-to-likelihood-inference",
     "title": "Schedule",
     "section": "Week 2: Introduction to Likelihood Inference",
-    "text": "Week 2: Introduction to Likelihood Inference\nMonday, September 14 & Wednesday, September 16\nTopics:\n\nWhat are statistical models good for?\nWhat is a “parametric” model?\nThe likelihood function\nMaximum likelihood estimation\n\nReadings:\n\nReview: Chapters 1-7; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\n\n\n\n\n\n\n\nProblem Set 1 assigned Wednesday, September 16 – due Wednesday, September 30."
+    "text": "Week 2: Introduction to Likelihood Inference\nMonday, September 14 & Wednesday, September 16\nTopics:\n\nWhat are statistical models good for?\nWhat is a “parametric” model?\nThe likelihood function\nMaximum likelihood estimation\n\nReadings:\n\nChapter 6 (“Likelihood Inference”); Evans, Michael J., and Jeffrey S. Rosenthal. 2010. Probability and Statistics: The Science of Uncertainty, 2nd ed. New York: W.H. Freeman. Freely available from the authors.\n\n\n\n\n\n\n\nProblem Set 1 assigned Wednesday, September 16 – due Wednesday, September 30."
   },
   {
     "objectID": "schedule.html#week-3-generalized-linear-models",
