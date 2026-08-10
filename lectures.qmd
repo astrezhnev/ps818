@@ -1,0 +1,76 @@
+---
+title: "Lectures"
+---
+
+## Lecture Slides
+
+Lecture slides are available as self-contained `.html` files made with RevealJS from a Quarto `.qmd` file. You can choose to print these to a PDF document by using the "PDF Export Mode" in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the `.qmd` file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday's lectures.
+
+Links become active as the materials for each week are posted.
+
+<!-- Template for each week once slides are posted:
+
+- [Week N Github Repository](https://github.com/astrezhnev/ps818/tree/main/slides/weekN/)
+- [Week N `.html` slides](https://www.antonstrezhnev.com/ps818/slides/weekN/weekN_topic.html)
+
+-->
+
+### Week 1: Course Introduction and Review
+
+*To be posted*
+
+### Week 2: Introduction to Likelihood Inference
+
+*To be posted*
+
+### Week 3: Generalized Linear Models
+
+*To be posted*
+
+### Week 4: More Likelihood Models
+
+*To be posted*
+
+### Week 5: Bayesian Inference
+
+*To be posted*
+
+### Week 6: Multilevel Regression Models
+
+*To be posted*
+
+### Week 7: Predicting from Models
+
+*To be posted*
+
+### Week 8: Working with Survey Data
+
+*To be posted*
+
+### Week 9: Mixture Models and the EM Algorithm
+
+*To be posted*
+
+### Week 10: Item Response Theory and Ideal Point Models
+
+*To be posted*
+
+### Week 11: Regularization and Model Selection
+
+*To be posted*
+
+### Week 12: Flexible Regression -- Trees and Forests
+
+*To be posted*
+
+### Week 13: Flexible Regression -- Kernels and Gaussian Processes
+
+*To be posted*
+
+### Week 14: Semiparametric and Nonparametric Estimation
+
+*To be posted*
+
+### Week 15: Big, Fast Regressions
+
+*To be posted*

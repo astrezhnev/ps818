@@ -1,0 +1,50 @@
+---
+title: "Assignments"
+---
+
+## Schedule
+
+| Assignment        | Assigned            | Due                  |
+|-------------------|---------------------|----------------------|
+| Problem Set 1     | Sept 9 (Week 2)     | Sept 23 (Week 4)     |
+| Problem Set 2     | Sept 30 (Week 5)    | Oct 14 (Week 7)      |
+| **Midterm Exam**  | Oct 14 (Week 7)     | Oct 21 (Week 8)      |
+| Problem Set 3     | Oct 28 (Week 9)     | Nov 11 (Week 11)     |
+| Problem Set 4     | Nov 11 (Week 11)    | Dec 2 (Week 14)      |
+| **Final Exam**    | Exam period (Dec 11-17) | **TBA**          |
+
+Problem Set 4 is given extra time because of the Thanksgiving recess (November 26-29).
+
+---
+
+## Problem Sets
+
+Problem sets are distributed as `.qmd` files along with their rendered `.html` form. You should edit the provided `.qmd` file and render to `.html` when submitting the assignment. Additional files (e.g. datasets) are located in sub-folders. For convenience, all the combined files are also distributed as a `.zip` compressed archive.
+
+Links become active when each assignment is released.
+
+### Problem Set 1
+
+- [Github Repository](https://github.com/astrezhnev/ps818/tree/main/psets/ps1)
+- [`.zip` archive](https://www.antonstrezhnev.com/ps818/psets/ps1.zip)
+
+### Problem Set 2
+
+- [Github Repository](https://github.com/astrezhnev/ps818/tree/main/psets/ps2)
+- [`.zip` archive](https://www.antonstrezhnev.com/ps818/psets/ps2.zip)
+
+### Problem Set 3
+
+- [Github Repository](https://github.com/astrezhnev/ps818/tree/main/psets/ps3)
+- [`.zip` archive](https://www.antonstrezhnev.com/ps818/psets/ps3.zip)
+
+### Problem Set 4
+
+- [Github Repository](https://github.com/astrezhnev/ps818/tree/main/psets/ps4)
+- [`.zip` archive](https://www.antonstrezhnev.com/ps818/psets/ps4.zip)
+
+---
+
+## Exams
+
+The take-home midterm and final exams have the same format and structure as the problem sets, with one key difference: you are **not** permitted to collaborate with other students or any other individual on the exams. Clarifying questions will be answered on the discussion board, but substantive questions will not.

@@ -1,0 +1,80 @@
+---
+title: "Resources"
+---
+
+## Textbooks
+
+These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.
+
+- **Gelman, Andrew, Jennifer Hill, and Aki Vehtari.** *Regression and Other Stories*. Cambridge University Press, 2020.
+  - [Free online version and examples](https://avehtari.github.io/ROS-Examples/index.html)
+
+- **Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin.** *Bayesian Data Analysis*. 3rd Edition. Chapman and Hall/CRC, 2013.
+  - [Free PDF available](http://www.stat.columbia.edu/~gelman/book/)
+
+- **James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani.** *An Introduction to Statistical Learning*. Springer, 2013.
+  - [Free PDF available](https://www.statlearning.com/)
+
+- **Hastie, Trevor, Robert Tibshirani, and Jerome Friedman.** *The Elements of Statistical Learning: Data Mining, Inference, and Prediction*. 2nd Edition. Springer, 2009.
+  - [Free PDF available](https://hastie.su.domains/ElemStatLearn/)
+
+- **McElreath, Richard.** *Statistical Rethinking: A Bayesian Course with Examples in R and Stan*. 2nd Edition. Chapman and Hall/CRC, 2020.
+  - [Course materials and lectures](https://xcelab.net/rm/)
+
+- **Wood, Simon N.** *Generalized Additive Models: An Introduction with R*. 2nd Edition. Chapman and Hall/CRC, 2017.
+  - [UW-Madison Library Access](https://search.library.wisc.edu/)
+
+---
+
+## Software
+
+### R and RStudio
+
+This course uses R for all programming assignments. You are welcome to use the RStudio Interactive Development Environment (IDE) to write code and edit the assignment write-up. Due to the extensive integration of Quarto into Posit-developed IDEs, I encourage using either RStudio or the more recent Positron IDE.
+
+- **R:** Download from [https://www.r-project.org](https://www.r-project.org)
+- **RStudio:** Download from [https://posit.co/download/rstudio-desktop/](https://posit.co/download/rstudio-desktop/)
+- **Positron:** Download from [https://positron.posit.co/](https://positron.posit.co/)
+
+#### Recommended Guides for R Programming
+
+- **R For Data Science** Available at [https://r4ds.hadley.nz/](https://r4ds.hadley.nz/)
+- **Data Visualization: A Practical Introduction** Available at [https://socviz.co/](https://socviz.co/)
+
+### Stan
+
+We will use [Stan](https://mc-stan.org/) for specifying and estimating Bayesian models. Stan is written in C++ but has bindings for a variety of programming languages. In this course we will use two interfaces to Stan from R: `RStan` and `brms`. Running Stan locally requires a working C++ toolchain -- consult the installation guide for the specific requirements of your operating system.
+
+- **Installation guide:** [https://mc-stan.org/install/](https://mc-stan.org/install/)
+- **Stan user's guide:** [https://mc-stan.org/docs/stan-users-guide/](https://mc-stan.org/docs/stan-users-guide/)
+- **brms:** [https://paulbuerkner.com/brms/](https://paulbuerkner.com/brms/)
+
+### Quarto and Markdown
+
+The assignments are distributed as `.qmd` Quarto files. [Quarto](https://quarto.org/) is the successor to R Markdown and lets you present your analysis, code, figures and written discussion all in a single document. It uses Markdown syntax for formatting text and supports embedded R code chunks that execute when you render the document.
+
+To complete assignments, you will edit the provided `.qmd` file, adding your code and written responses, then render it to an HTML file for submission. Both your `.html` output and `.qmd` file will be submitted via Gradescope.
+
+- **Quarto:** Download from [https://quarto.org/docs/get-started/](https://quarto.org/docs/get-started/)
+- **Quarto Guide:** [https://quarto.org/docs/guide/](https://quarto.org/docs/guide/)
+- **Markdown Basics:** [https://quarto.org/docs/authoring/markdown-basics.html](https://quarto.org/docs/authoring/markdown-basics.html)
+- Note also the [chapter on Quarto](https://r4ds.hadley.nz/quarto.html) in **R For Data Science**
+
+---
+
+## Data Sources
+
+Applied examples in this course draw heavily on large-scale public opinion surveys. The following are useful sources of data for your own work:
+
+- **American National Election Studies (ANES):** [https://electionstudies.org/](https://electionstudies.org/)
+- **Cooperative Election Study (CES):** [https://cces.gov.harvard.edu/](https://cces.gov.harvard.edu/)
+- **European Social Survey (ESS):** [https://www.europeansocialsurvey.org/](https://www.europeansocialsurvey.org/)
+- **General Social Survey (GSS):** [https://gss.norc.org/](https://gss.norc.org/)
+
+---
+
+## Tutorials
+
+Below are some additional tutorials to help supplement the main course material. They will generally focus on specific topics in statistical computing and things that we did not have time to cover as part of the main set of lectures.
+
+*To be posted.*
