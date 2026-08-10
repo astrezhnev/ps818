@@ -6,12 +6,12 @@ title: "Assignments"
 
 | Assignment        | Assigned            | Due                  |
 |-------------------|---------------------|----------------------|
-| Problem Set 1     | Sept 9 (Week 2)     | Sept 23 (Week 4)     |
-| Problem Set 2     | Sept 30 (Week 5)    | Oct 14 (Week 7)      |
-| **Midterm Exam**  | Oct 14 (Week 7)     | Oct 21 (Week 8)      |
-| Problem Set 3     | Oct 28 (Week 9)     | Nov 11 (Week 11)     |
-| Problem Set 4     | Nov 11 (Week 11)    | Dec 2 (Week 14)      |
-| **Final Exam**    | Exam period (Dec 11-17) | **TBA**          |
+| Problem Set 1     | Sept 16 (Week 2)    | Sept 30 (Week 4)     |
+| Problem Set 2     | Sept 30 (Week 4)    | Oct 14 (Week 6)      |
+| **Midterm Exam**  | Oct 28 (Week 8)     | **In-Class**         |
+| Problem Set 3     | Nov 4 (Week 9)      | Nov 18 (Week 11)     |
+| Problem Set 4     | Nov 18 (Week 11)    | Dec 9 (Week 14)      |
+| **Final Exam**    | Exam week (Dec 11-17) | **Date/Location TBA** |
 
 Problem Set 4 is given extra time because of the Thanksgiving recess (November 26-29).
 
@@ -47,4 +47,7 @@ Links become active when each assignment is released.
 
 ## Exams
 
-The take-home midterm and final exams have the same format and structure as the problem sets, with one key difference: you are **not** permitted to collaborate with other students or any other individual on the exams. Clarifying questions will be answered on the discussion board, but substantive questions will not.
+Both exams are **in person**, closed-book, pen-and-paper examinations involving both theory questions and practical interpretation of sample code and results.
+
+- **Midterm:** in class on Wednesday, October 28, covering material through Week 7.
+- **Final:** during the university exam period, December 11-17. The date, time and room are assigned by the registrar and will be posted here once available. The final covers material from the full semester.

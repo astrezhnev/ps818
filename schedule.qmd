@@ -8,9 +8,13 @@ Monday lectures will typically introduce the core theory for the week's topic wh
 
 All hyperlinks to papers are either to the published version of the paper (if published) or to the working paper. You should use your university library access to obtain the full version if the article is not open access. Likewise, textbook readings will be to the free/open version of the book (if available) or to the UW-Madison university library eBook.
 
+::: {.callout-note appearance="simple"}
+There is **no class during the first week of instruction** (September 2 and 7). The course begins on Wednesday, September 9.
+:::
+
 ## Week 1: Course Introduction and Review
 
-*Wednesday, September 2*
+*Wednesday, September 9*
 
 **Topics:**
 
@@ -26,7 +30,7 @@ All hyperlinks to papers are either to the published version of the paper (if pu
 
 ## Week 2: Introduction to Likelihood Inference
 
-*Monday, September 7 (**Labor Day -- no class**) & Wednesday, September 9*
+*Monday, September 14 & Wednesday, September 16*
 
 **Topics:**
 
@@ -40,14 +44,14 @@ All hyperlinks to papers are either to the published version of the paper (if pu
 - **Review:** Chapters 1-7; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
 
 ::: {.callout-note appearance="simple"}
-**Problem Set 1** assigned Wednesday, September 9 -- due Wednesday, September 23.
+**Problem Set 1** assigned Wednesday, September 16 -- due Wednesday, September 30.
 :::
 
 ---
 
 ## Week 3: Generalized Linear Models
 
-*Monday, September 14 & Wednesday, September 16*
+*Monday, September 21 & Wednesday, September 23*
 
 **Topics:**
 
@@ -63,7 +67,7 @@ All hyperlinks to papers are either to the published version of the paper (if pu
 
 ## Week 4: More Likelihood Models
 
-*Monday, September 21 & Wednesday, September 23*
+*Monday, September 28 & Wednesday, September 30*
 
 **Topics:**
 
@@ -75,11 +79,15 @@ All hyperlinks to papers are either to the published version of the paper (if pu
 - Box-Steffensmeier, Janet M., and Bradford S. Jones. 1997. "Time Is of the Essence: Event History Models in Political Science." *American Journal of Political Science* 41 (4): 1414-1461.
 - Chapter 8; Wooldridge, Jeffrey M. 1999. "Quasi-Likelihood Methods for Count Data." In *Handbook of Applied Econometrics*, vol. 2, 352-406.
 
+::: {.callout-note appearance="simple"}
+**Problem Set 1** due Wednesday, September 30. **Problem Set 2** assigned Wednesday, September 30 -- due Wednesday, October 14.
+:::
+
 ---
 
 ## Week 5: Bayesian Inference
 
-*Monday, September 28 & Wednesday, September 30*
+*Monday, October 5 & Wednesday, October 7*
 
 **Topics:**
 
@@ -93,15 +101,11 @@ All hyperlinks to papers are either to the published version of the paper (if pu
 - Chapter 9; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
 - Chapters 10-11; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. [*Bayesian Data Analysis*.](http://www.stat.columbia.edu/~gelman/book/) 3rd ed. Boca Raton: Chapman and Hall/CRC.
 
-::: {.callout-note appearance="simple"}
-**Problem Set 2** assigned Wednesday, September 30 -- due Wednesday, October 14.
-:::
-
 ---
 
 ## Week 6: Multilevel Regression Models
 
-*Monday, October 5 & Wednesday, October 7*
+*Monday, October 12 & Wednesday, October 14*
 
 **Topics:**
 
@@ -115,49 +119,32 @@ All hyperlinks to papers are either to the published version of the paper (if pu
 - Chapters 9, 11, and Appendix A; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
 - Chapter 15; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. [*Bayesian Data Analysis*.](http://www.stat.columbia.edu/~gelman/book/) 3rd ed. Boca Raton: Chapman and Hall/CRC.
 
----
-
-## Week 7: Predicting from Models
-
-*Monday, October 12 & Wednesday, October 14*
-
-**Topics:**
-
-- Out-of-sample prediction and model validation
-- Estimating useful quantities of interest
-
-**Readings:**
-
-- Rohrer, Julia M., and Vincent Arel-Bundock. 2025. "Models as Prediction Machines: How to Convert Confusing Coefficients into Clear Quantities." Working paper.
-
 ::: {.callout-note appearance="simple"}
-**Problem Set 2** due Wednesday, October 14. **Midterm Exam** assigned Wednesday, October 14 -- due Wednesday, October 21.
+**Problem Set 2** due Wednesday, October 14.
 :::
 
 ---
 
-## Week 8: Working with Survey Data
+## Week 7: Predicting from Models and Survey Data
 
 *Monday, October 19 & Wednesday, October 21*
 
 **Topics:**
 
-- How to approach population inference from non-probability samples
-- Constructing and using survey weights
+- Out-of-sample prediction and model validation
+- Estimating useful quantities of interest
+- Population inference from non-probability samples: constructing and using weights
 - Multilevel regression and post-stratification (MRP)
 
 **Readings:**
 
-- Caughey, Devin, Adam J. Berinsky, Sara Chatfield, Erin Hartman, Eric Schickler, and Jasjeet S. Sekhon. 2020. *Target Estimation and Adjustment Weighting for Survey Nonresponse and Sampling Bias*. Cambridge: Cambridge University Press.
+- Rohrer, Julia M., and Vincent Arel-Bundock. 2025. "Models as Prediction Machines: How to Convert Confusing Coefficients into Clear Quantities." Working paper.
 - Hanretty, Chris. 2020. "An Introduction to Multilevel Regression and Post-Stratification for Estimating Constituency Opinion." *Political Studies Review* 18 (4): 630-645.
-
-::: {.callout-note appearance="simple"}
-**Midterm Exam** due Wednesday, October 21.
-:::
+- Caughey, Devin, Adam J. Berinsky, Sara Chatfield, Erin Hartman, Eric Schickler, and Jasjeet S. Sekhon. 2020. *Target Estimation and Adjustment Weighting for Survey Nonresponse and Sampling Bias*. Cambridge: Cambridge University Press.
 
 ---
 
-## Week 9: Mixture Models and the EM Algorithm
+## Week 8: Mixture Models and the EM Algorithm
 
 *Monday, October 26 & Wednesday, October 28*
 
@@ -165,6 +152,7 @@ All hyperlinks to papers are either to the published version of the paper (if pu
 
 - Exploratory data analysis and clustering models
 - MLE and MAP estimation via the "Expectation-Maximization" algorithm
+- **Midterm exam** on Wednesday **October 28th**
 
 **Readings:**
 
@@ -172,13 +160,13 @@ All hyperlinks to papers are either to the published version of the paper (if pu
 - McLachlan, Geoffrey J., Sharon X. Lee, and Suren I. Rathnayake. 2019. "Finite Mixture Models." *Annual Review of Statistics and Its Application* 6: 355-378.
 - Chapters 13 and 22; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. [*Bayesian Data Analysis*.](http://www.stat.columbia.edu/~gelman/book/) 3rd ed. Boca Raton: Chapman and Hall/CRC.
 
-::: {.callout-note appearance="simple"}
-**Problem Set 3** assigned Wednesday, October 28 -- due Wednesday, November 11.
+::: {.callout-important appearance="simple"}
+**In-person midterm exam** in class on Wednesday, October 28. The exam covers material through Week 7.
 :::
 
 ---
 
-## Week 10: Item Response Theory and Ideal Point Models
+## Week 9: Item Response Theory and Ideal Point Models
 
 *Monday, November 2 & Wednesday, November 4*
 
@@ -195,9 +183,13 @@ All hyperlinks to papers are either to the published version of the paper (if pu
 - Martin, Andrew D., and Kevin M. Quinn. 2002. "Dynamic Ideal Point Estimation via Markov Chain Monte Carlo for the U.S. Supreme Court, 1953-1999." *Political Analysis* 10 (2): 134-153.
 - Bürkner, Paul-Christian. 2019. ["Bayesian Item Response Modeling in R with brms and Stan."](https://arxiv.org/abs/1905.09501) arXiv:1905.09501.
 
+::: {.callout-note appearance="simple"}
+**Problem Set 3** assigned Wednesday, November 4 -- due Wednesday, November 18.
+:::
+
 ---
 
-## Week 11: Regularization and Model Selection
+## Week 10: Regularization and Model Selection
 
 *Monday, November 9 & Wednesday, November 11*
 
@@ -211,13 +203,9 @@ All hyperlinks to papers are either to the published version of the paper (if pu
 - Chapters 6-7; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. [*An Introduction to Statistical Learning*.](https://www.statlearning.com/) New York: Springer.
 - Stanescu, Diana, Erik Wang, and Soichiro Yamauchi. 2019. ["Using LASSO to Assist Imputation and Predict Child Well-Being."](https://journals.sagepub.com/doi/10.1177/2378023118814623) *Socius* 5: 2378023118814623.
 
-::: {.callout-note appearance="simple"}
-**Problem Set 3** due Wednesday, November 11. **Problem Set 4** assigned Wednesday, November 11 -- due Wednesday, December 2 (extra time due to Thanksgiving recess).
-:::
-
 ---
 
-## Week 12: Flexible Regression -- Trees and Forests
+## Week 11: Flexible Regression -- Trees and Forests
 
 *Monday, November 16 & Wednesday, November 18*
 
@@ -232,9 +220,13 @@ All hyperlinks to papers are either to the published version of the paper (if pu
 - Chapters 9 and 15; Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2009. [*The Elements of Statistical Learning: Data Mining, Inference, and Prediction*.](https://hastie.su.domains/ElemStatLearn/) 2nd ed. New York: Springer.
 - Chapter 8; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. [*An Introduction to Statistical Learning*.](https://www.statlearning.com/) New York: Springer.
 
+::: {.callout-note appearance="simple"}
+**Problem Set 3** due Wednesday, November 18. **Problem Set 4** assigned Wednesday, November 18 -- due Wednesday, December 9 (extra time due to Thanksgiving recess).
+:::
+
 ---
 
-## Week 13: Flexible Regression -- Kernels and Gaussian Processes
+## Week 12: Flexible Regression -- Kernels and Gaussian Processes
 
 *Monday, November 23 & Wednesday, November 25*
 
@@ -253,7 +245,7 @@ Thanksgiving recess runs November 26-29. Class meets as usual on Monday and Wedn
 
 ---
 
-## Week 14: Semiparametric and Nonparametric Estimation
+## Week 13: Semiparametric and Nonparametric Estimation
 
 *Monday, November 30 & Wednesday, December 2*
 
@@ -267,13 +259,9 @@ Thanksgiving recess runs November 26-29. Class meets as usual on Monday and Wedn
 
 - Kennedy, Edward H. 2024. ["Semiparametric Doubly Robust Targeted Double Machine Learning: A Review."](https://arxiv.org/abs/2203.06469) In *Handbook of Statistical Methods for Precision Medicine*, 207-236.
 
-::: {.callout-note appearance="simple"}
-**Problem Set 4** due Wednesday, December 2.
-:::
-
 ---
 
-## Week 15: Big, Fast Regressions
+## Week 14: Big, Fast Regressions
 
 *Monday, December 7 & Wednesday, December 9*
 
@@ -289,5 +277,13 @@ Thanksgiving recess runs November 26-29. Class meets as usual on Monday and Wedn
 - Lal, Apoorva, Alexander Fischer, and Matthew Wardrop. 2024. ["Large Scale Longitudinal Experiments: Estimation and Inference."](https://arxiv.org/abs/2410.09952) arXiv:2410.09952.
 
 ::: {.callout-note appearance="simple"}
-**Final Exam** distributed during the university exam period (December 11-17, 2026). Exact dates TBA.
+**Problem Set 4** due Wednesday, December 9.
 :::
+
+---
+
+## Final Exam
+
+*In person, during the university exam period (December 11-17, 2026)*
+
+The date, time and room for the final exam are assigned by the registrar and will be posted here once available.
