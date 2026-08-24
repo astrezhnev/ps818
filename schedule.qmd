@@ -9,7 +9,7 @@ Monday lectures will typically introduce the core theory for the week's topic wh
 All hyperlinks to papers are either to the published version of the paper (if published) or to the working paper. You should use your university library access to obtain the full version if the article is not open access. Likewise, textbook readings will be to the free/open version of the book (if available) or to the UW-Madison university library eBook.
 
 ::: {.callout-note appearance="simple"}
-There is **no class during the first week of instruction** (September 2 and 7). The course begins on Wednesday, September 9.
+There is **no class during the first week of instruction** due to APSA and Labor Day (September 2 and 7). The course begins on Wednesday, September 9.
 :::
 
 ## Week 1: Course Introduction and Review
@@ -26,6 +26,10 @@ There is **no class during the first week of instruction** (September 2 and 7). 
 
 - **Review:** Chapters 1-7; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
 
+::: {.callout-note appearance="simple"}
+**Problem Set 1** assigned Wednesday, September 9 -- due Wednesday, September 23.
+:::
+
 ---
 
 ## Week 2: Introduction to Likelihood Inference
@@ -34,18 +38,13 @@ There is **no class during the first week of instruction** (September 2 and 7). 
 
 **Topics:**
 
-- What are statistical models good for?
 - What is a "parametric" model?
 - The likelihood function
 - Maximum likelihood estimation
 
 **Readings:**
 
-- **Review:** Chapters 1-7; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
-
-::: {.callout-note appearance="simple"}
-**Problem Set 1** assigned Wednesday, September 16 -- due Wednesday, September 30.
-:::
+- Chapter 6 ("Likelihood Inference"); Evans, Michael J., and Jeffrey S. Rosenthal. 2010. [*Probability and Statistics: The Science of Uncertainty*](https://utstat.toronto.edu/mikevans/jeffrosenthal/chapt6.pdf), 2nd ed. New York: W.H. Freeman.
 
 ---
 
@@ -63,6 +62,10 @@ There is **no class during the first week of instruction** (September 2 and 7). 
 
 - Chapters 13-14; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
 
+::: {.callout-note appearance="simple"}
+**Problem Set 1** due Wednesday, September 23. **Problem Set 2** assigned Wednesday, September 23 -- due Wednesday, October 7.
+:::
+
 ---
 
 ## Week 4: More Likelihood Models
@@ -71,47 +74,57 @@ There is **no class during the first week of instruction** (September 2 and 7). 
 
 **Topics:**
 
-- Duration models
-- Event count models
+- Duration models (parametric and Cox hazard ratio)
+- Event count models (Poisson regression and quasi-MLE methods)
 
 **Readings:**
 
-- Box-Steffensmeier, Janet M., and Bradford S. Jones. 1997. "Time Is of the Essence: Event History Models in Political Science." *American Journal of Political Science* 41 (4): 1414-1461.
+- Chapters 15; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
+
+- Clark, T. G., M. J. Bradburn, S. B. Love, and D. G. Altman. 2003. ["Survival Analysis Part I: Basic Concepts and First Analyses."](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2394262/) *British Journal of Cancer* 89 (2): 232-238.
+- Stensrud, Mats J., and Miguel A. Hernán. 2020. ["Why Test for Proportional Hazards?"](https://jamanetwork.com/journals/jama/fullarticle/2763185) *JAMA* 323 (14): 1401-1402.
 - Chapter 8; Wooldridge, Jeffrey M. 1999. "Quasi-Likelihood Methods for Count Data." In *Handbook of Applied Econometrics*, vol. 2, 352-406.
 
-::: {.callout-note appearance="simple"}
-**Problem Set 1** due Wednesday, September 30. **Problem Set 2** assigned Wednesday, September 30 -- due Wednesday, October 14.
-:::
 
 ---
 
+
 ## Week 5: Bayesian Inference
 
-*Monday, October 5 & Wednesday, October 7*
+*Monday, October 5*
 
 **Topics:**
 
 - Principles of posterior inference
 - How to write a Bayesian model
 - Quantities of interest: posterior mode, posterior mean, credible intervals
-- Estimation and inference via Markov Chain Monte Carlo
 
 **Readings:**
 
 - Chapter 9; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
 - Chapters 10-11; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. [*Bayesian Data Analysis*.](http://www.stat.columbia.edu/~gelman/book/) 3rd ed. Boca Raton: Chapman and Hall/CRC.
 
+::: {.callout-note appearance="simple"}
+**Problem Set 2** due Wednesday, October 7. **Problem Set 3** assigned Wednesday, October 7 -- due Wednesday, October 21.
+:::
+
 ---
 
-## Week 6: Multilevel Regression Models
+::: {.callout-important appearance="simple"}
+**Midterm 1** In-Class, Wednesday, October 7th
+:::
+
+---
+
+## Week 6: Estimating Bayesian Models
 
 *Monday, October 12 & Wednesday, October 14*
 
 **Topics:**
 
-- "Hierarchical" regression models -- random slopes/random intercept models
-- Estimation via MCMC in [Stan](https://mc-stan.org/)
-- Interpreting and analyzing results
+- Analytically tractable solutions through conjugate priors
+- Markov Chain Monte Carlo methods
+- Introduction to MCMC in [Stan](https://mc-stan.org/)
 
 **Readings:**
 
@@ -119,21 +132,17 @@ There is **no class during the first week of instruction** (September 2 and 7). 
 - Chapters 9, 11, and Appendix A; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
 - Chapter 15; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. [*Bayesian Data Analysis*.](http://www.stat.columbia.edu/~gelman/book/) 3rd ed. Boca Raton: Chapman and Hall/CRC.
 
-::: {.callout-note appearance="simple"}
-**Problem Set 2** due Wednesday, October 14.
-:::
 
 ---
 
-## Week 7: Predicting from Models and Survey Data
+## Week 7: Multilevel Regression Models
 
 *Monday, October 19 & Wednesday, October 21*
 
 **Topics:**
 
-- Out-of-sample prediction and model validation
-- Estimating useful quantities of interest
-- Population inference from non-probability samples: constructing and using weights
+- Partial pooling through priors
+- Methods for model validation
 - Multilevel regression and post-stratification (MRP)
 
 **Readings:**
@@ -141,6 +150,10 @@ There is **no class during the first week of instruction** (September 2 and 7). 
 - Rohrer, Julia M., and Vincent Arel-Bundock. 2025. "Models as Prediction Machines: How to Convert Confusing Coefficients into Clear Quantities." Working paper.
 - Hanretty, Chris. 2020. "An Introduction to Multilevel Regression and Post-Stratification for Estimating Constituency Opinion." *Political Studies Review* 18 (4): 630-645.
 - Caughey, Devin, Adam J. Berinsky, Sara Chatfield, Erin Hartman, Eric Schickler, and Jasjeet S. Sekhon. 2020. *Target Estimation and Adjustment Weighting for Survey Nonresponse and Sampling Bias*. Cambridge: Cambridge University Press.
+
+::: {.callout-note appearance="simple"}
+**Problem Set 3** due Wednesday, October 21. **Problem Set 4** assigned Wednesday, October 21 -- due Wednesday, November 4.
+:::
 
 ---
 
@@ -152,12 +165,9 @@ There is **no class during the first week of instruction** (September 2 and 7). 
 
 - Exploratory data analysis and clustering models
 - MLE and MAP estimation via the "Expectation-Maximization" algorithm
-- **Midterm exam** on Wednesday **October 28th**
 
 **Readings:**
 
-- Imai, Kosuke, and Dustin Tingley. 2012. "A Statistical Method for Empirical Testing of Competing Theories." *American Journal of Political Science* 56 (1): 218-236.
-- McLachlan, Geoffrey J., Sharon X. Lee, and Suren I. Rathnayake. 2019. "Finite Mixture Models." *Annual Review of Statistics and Its Application* 6: 355-378.
 - Chapters 13 and 22; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. [*Bayesian Data Analysis*.](http://www.stat.columbia.edu/~gelman/book/) 3rd ed. Boca Raton: Chapman and Hall/CRC.
 
 ::: {.callout-important appearance="simple"}
@@ -168,13 +178,12 @@ There is **no class during the first week of instruction** (September 2 and 7). 
 
 ## Week 9: Item Response Theory and Ideal Point Models
 
-*Monday, November 2 & Wednesday, November 4*
+*Monday, November 2*
 
 **Topics:**
 
 - Latent variable models from a Bayesian perspective
 - "Ideal point" models for voting
-- Extensions to models of networks
 
 **Readings:**
 
@@ -183,11 +192,14 @@ There is **no class during the first week of instruction** (September 2 and 7). 
 - Martin, Andrew D., and Kevin M. Quinn. 2002. "Dynamic Ideal Point Estimation via Markov Chain Monte Carlo for the U.S. Supreme Court, 1953-1999." *Political Analysis* 10 (2): 134-153.
 - Bürkner, Paul-Christian. 2019. ["Bayesian Item Response Modeling in R with brms and Stan."](https://arxiv.org/abs/1905.09501) arXiv:1905.09501.
 
-::: {.callout-note appearance="simple"}
-**Problem Set 3** assigned Wednesday, November 4 -- due Wednesday, November 18.
+---
+
+::: {.callout-important appearance="simple"}
+**Midterm 2** In-Class, Wednesday, November 4th
 :::
 
 ---
+
 
 ## Week 10: Regularization and Model Selection
 
@@ -245,7 +257,7 @@ Thanksgiving recess runs November 26-29. Class meets as usual on Monday and Wedn
 
 ---
 
-## Week 13: Semiparametric and Nonparametric Estimation
+## Week 13: Semi- and Non-parametric estimation theory
 
 *Monday, November 30 & Wednesday, December 2*
 
@@ -261,7 +273,13 @@ Thanksgiving recess runs November 26-29. Class meets as usual on Monday and Wedn
 
 ---
 
-## Week 14: Big, Fast Regressions
+::: {.callout-important appearance="simple"}
+**Poster Session** Friday, December 4th
+:::
+
+---
+
+## Week 14: Methods for large datasets
 
 *Monday, December 7 & Wednesday, December 9*
 
@@ -269,21 +287,11 @@ Thanksgiving recess runs November 26-29. Class meets as usual on Monday and Wedn
 
 - Stochastic gradient descent
 - Efficient data compression
-- End-of-course review
 
 **Readings:**
 
 - Wong, Jeffrey, Eskil Forsell, Randall Lewis, Tobias Mao, and Matthew Wardrop. 2021. ["You Only Compress Once: Optimal Data Compression for Estimating Linear Models."](https://arxiv.org/abs/2102.11297) arXiv:2102.11297.
 - Lal, Apoorva, Alexander Fischer, and Matthew Wardrop. 2024. ["Large Scale Longitudinal Experiments: Estimation and Inference."](https://arxiv.org/abs/2410.09952) arXiv:2410.09952.
 
-::: {.callout-note appearance="simple"}
-**Problem Set 4** due Wednesday, December 9.
-:::
 
 ---
-
-## Final Exam
-
-*In person, during the university exam period (December 11-17, 2026)*
-
-The date, time and room for the final exam are assigned by the registrar and will be posted here once available.
