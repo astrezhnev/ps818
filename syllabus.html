@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.27">
+<meta name="generator" content="quarto-1.7.33">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -32,15 +32,14 @@ ul.task-list li input[type="checkbox"] {
 <meta name="quarto:offset" content="./">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-e0f92233e851a9c04a4295667bbfc04b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-5061bc4d280d4b29597cc3b3aa4db27b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <link href="site_libs/quarto-contrib/fontawesome6-6.7.2/all.min.css" rel="stylesheet">
 <link href="site_libs/quarto-contrib/fontawesome6-6.7.2/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
@@ -117,8 +116,8 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Resources</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="https://edstem.org/"> 
-<span class="menu-text">Ed</span></a>
+    <a class="nav-link" href="https://uw-mpolscimethods.slack.com/"> 
+<span class="menu-text">Slack</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="https://www.gradescope.com/"> 
@@ -153,9 +152,9 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#textbooks" id="toc-textbooks" class="nav-link" data-scroll-target="#textbooks">Textbooks</a></li>
   <li><a href="#grading" id="toc-grading" class="nav-link" data-scroll-target="#grading">Grading</a>
   <ul class="collapse">
-  <li><a href="#problem-sets-25" id="toc-problem-sets-25" class="nav-link" data-scroll-target="#problem-sets-25">Problem Sets (25%)</a></li>
-  <li><a href="#in-person-midterm-25" id="toc-in-person-midterm-25" class="nav-link" data-scroll-target="#in-person-midterm-25">In-person Midterm (25%)</a></li>
-  <li><a href="#in-person-final-40" id="toc-in-person-final-40" class="nav-link" data-scroll-target="#in-person-final-40">In-person Final (40%)</a></li>
+  <li><a href="#problem-sets-10" id="toc-problem-sets-10" class="nav-link" data-scroll-target="#problem-sets-10">Problem Sets (10%)</a></li>
+  <li><a href="#in-person-midterms-50" id="toc-in-person-midterms-50" class="nav-link" data-scroll-target="#in-person-midterms-50">In-person Midterms (50%)</a></li>
+  <li><a href="#replication-project-30" id="toc-replication-project-30" class="nav-link" data-scroll-target="#replication-project-30">Replication project (30%)</a></li>
   <li><a href="#participation-10" id="toc-participation-10" class="nav-link" data-scroll-target="#participation-10">Participation (10%)</a></li>
   </ul></li>
   <li><a href="#computing" id="toc-computing" class="nav-link" data-scroll-target="#computing">Computing</a></li>
@@ -190,13 +189,14 @@ ul.task-list li input[type="checkbox"] {
 <section id="course-overview" class="level2">
 <h2 class="anchored" data-anchor-id="course-overview">Course Overview</h2>
 <p>Statistical models provide a structure for the analysis of data. Often many scientific questions revolve around drawing statistical inferences about some parameter, such as a regression coefficient. Alternatively, models provide a structured way for generating predictions on new or out-of-sample data. Understanding the fundamentals of how to define, estimate and validate a statistical model is essential to the process of quantitative empirical research.</p>
-<p>This course is part of the second year of the quantitative methods sequence and builds on the material covered in the first year. It will introduce students to likelihood and Bayesian inference with a focus on multilevel/hierarchical regression models. The overarching framework of this class is model-based inference for description and prediction – a complement to the design-based framework of causal inference. We will discuss, however, how to incorporate predictive models into a causal inference workflow, particularly when adjusting for confounding in selection-on-observables designs. Students will learn both the theory behind Bayesian modeling as well as how to implement common estimators (e.g.&nbsp;Expectation-Maximization, Markov Chain Monte Carlo (MCMC)) in the <i class="fa-brands fa-r-project" aria-label="r-project"></i> statistical programming language. They will also be exposed to modern machine learning methods for flexible estimation of regression models – techniques such as random forests and kernel methods/gaussian processes among others. Applied examples will be drawn from across the political science literature, with a particular emphasis on the analysis of large survey data (e.g.&nbsp;the American National Election Survey (ANES), the Cooperative Election Survey (CES), the European Social Survey (ESS)).</p>
-<p>This course will involve a combination of lectures and problem sets. Lectures will focus on introducing the core theoretical concepts being taught in this course as well as providing illustrations through worked applied examples. Problem sets will contain a mixture of both theoretical and applied questions and serve to reinforce key concepts and allow students to assess their progress and understanding throughout the course.</p>
+<p>This course is part of the second year of the quantitative methods sequence and builds on the material covered in the first year. It will introduce students to likelihood, Bayesian and semi-/non-parametric approaches to statistical inference. The overarching framework of this class is model-based inference for description and prediction – a complement to the design-based framework of causal inference. However, we will also discuss how to incorporate predictive models into a causal inference workflow, particularly when adjusting for confounding in selection-on-observables designs and searching for treatment effect heterogeneity. Students will learn both the theory behind these estimation approaches and the computational methods used to implement these estimators, starting from Newton-Raphson approaches for finding maxima in simple parametric models to Markov Chain Monte Carlo (MCMC) and (variational) Expectation-Maximization (EM) methods for bayesian models, concluding with a brief introduction to stochastic gradient descent methods for modern large-data settings. All approaches will be demonstrated in the <i class="fa-brands fa-r-project" aria-label="r-project"></i> statistical programming language. They will also be exposed to modern machine learning methods for flexible estimation of regression models – techniques such as penalized regression, random forests and kernel methods/gaussian processes among others. Applied examples will be drawn from across the political science literature, with a particular focus on the analysis of large survey data (e.g.&nbsp;the American National Election Survey (ANES), the Cooperative Election Survey (CES), the European Social Survey (ESS)).</p>
+<p>In general, this course aims to provide students with a broad overview of the history and the present of statistical modelling in political science as well as an understanding of where the discipline is likely to move in the future.</p>
+<p>This course will involve a combination of lectures and problem sets as well as a final replication project developed through the course of the semester. Lectures will focus on introducing the core theoretical concepts being taught in this course as well as providing illustrations through worked applied examples. Problem sets will contain a mixture of both theoretical and applied questions and serve to reinforce key concepts and allow students to assess their progress and understanding throughout the course. Two in-person examinations will take place during class days.</p>
 <p>Assignments will involve analysis of data using the <i class="fa-brands fa-r-project" aria-label="r-project"></i> programming language. This is a free and open source language for statistical computing that is used extensively for data analysis in many fields. Prior experience with the fundamentals of <i class="fa-brands fa-r-project" aria-label="r-project"></i> programming is required. Assignments will be written and distributed using the <a href="https://quarto.org/">Quarto</a> publishing system – the most recent extension of the R Markdown notebook interface.</p>
 </section>
 <section id="prerequisites" class="level2">
 <h2 class="anchored" data-anchor-id="prerequisites">Prerequisites</h2>
-<p>This course assumes that you have both a background in the core concepts of probability, statistics and inference as well as prior exposure to linear regression models. Completing the first two courses in the political science graduate methodology sequence should prepare you for the material in this class. However, there are no strict, specific course pre-requisites as many different disciplines and departments offer introductory statistics classes that cover the relevant material.</p>
+<p>This course assumes that you have both a background in the core concepts of probability, statistics and inference as well as prior exposure to linear regression models. Completing the first two courses in the political science graduate methodology sequence should prepare you for the material in this class. However, there are no strict, specific course pre-requisites as many different disciplines and departments offer introductory statistics classes that cover the relevant material. Prior exposure to causal inference from a counterfactual/potential outcomes framework is helpful but not strictly required. Some weeks will assume familiarity with quantities like the (conditional) average treatment effect as well as the identifying assumptions underpinning experiments and selection-on-observables designs.</p>
 <p>If you are unsure of whether you meet the requirements, skim/read through the first six chapters of <em>Regression and Other Stories</em>, one of the books being used by this course. You should find most of the concepts behind the material relatively familiar, aside from the references to Bayesian models (which will be covered in this course).</p>
 <p>Please contact the instructor at <a href="mailto:strezhnev@wisc.edu">strezhnev@wisc.edu</a> if you are interested in enrolling but are unsure of the requirements.</p>
 </section>
@@ -207,25 +207,26 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 <p>You should attend lectures regularly as they comprise a significant element of the course instruction. Lecture materials will be posted on the course website.</p>
 <ul>
-<li><p><strong>Discussion Forum</strong>: We will be using <a href="https://edstem.org/">Ed</a> as our primary course discussion platform. If you are enrolled in the class on Canvas, you should already have access to the Ed board for this class. Please use this to post questions about the readings/lecture material as well as about the problem sets.</p></li>
+<li><p><strong>Discussion Forum</strong>: We will be using <a href="https://uw-mpolscimethods.slack.com/">Slack</a> as our primary course discussion platform. You should have an invitation to the research methods slack channel. Please use this to post questions about the readings/lecture material and the problem sets as well as to contact the instructional staff.</p></li>
 <li><p><strong>Course Materials</strong>: Lecture materials, problem sets and tutorial code will be posted on the course website. Problem set solutions will be posted after the due date on Canvas. Links to readings can be found on the <a href="./schedule.html">Schedule</a> page organized by week.</p></li>
 </ul>
 </section>
 <section id="textbooks" class="level2">
 <h2 class="anchored" data-anchor-id="textbooks">Textbooks</h2>
-<p>The course will involve readings from a variety of different textbook chapters and published papers. The class will not require the purchase of any textbook as they are available online. However, you may wish to obtain a paper copy for your own personal use or reference.</p>
-<p>Two textbooks from which many readings will be drawn are:</p>
+<p>The course will involve readings from a variety of different textbook chapters and published papers. The class will not require the purchase of any textbook as they are available online either directly from the author’s website or via the University library. However, you may wish to obtain a paper copy for your own personal use or reference.</p>
+<p>Three textbooks from which many readings will be drawn are:</p>
 <ul>
-<li>Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. <a href="https://avehtari.github.io/ROS-Examples/index.html"><em>Regression and Other Stories</em>.</a> Cambridge University Press. (An introduction to regression and multilevel modeling from an applied perspective.)</li>
-<li>Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. <a href="http://www.stat.columbia.edu/~gelman/book/"><em>Bayesian Data Analysis</em>.</a> 3rd Edition. Chapman and Hall/CRC. (A more advanced text on Bayesian modeling.)</li>
+<li>McElreath, Richard. 2020. <a href="https://learning-oreilly-com.ezproxy.library.wisc.edu/library/view/statistical-rethinking-2nd/9780429639142/"><em>Statistical Rethinking: A Bayesian Course with Examples in R and Stan</em>.</a> 2nd Edition. Chapman and Hall/CRC.</li>
+<li>Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. <a href="https://avehtari.github.io/ROS-Examples/index.html"><em>Regression and Other Stories</em>.</a> Cambridge University Press.</li>
+<li>Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. <a href="http://www.stat.columbia.edu/~gelman/book/"><em>Bayesian Data Analysis</em>.</a> 3rd Edition. Chapman and Hall/CRC.</li>
 </ul>
 <p>A complete list of textbooks and supplementary references can be found on the <a href="./resources.html">Resources</a> page.</p>
 </section>
 <section id="grading" class="level2">
 <h2 class="anchored" data-anchor-id="grading">Grading</h2>
 <p>Students’ final grades are based on four components:</p>
-<section id="problem-sets-25" class="level3">
-<h3 class="anchored" data-anchor-id="problem-sets-25">Problem Sets (25%)</h3>
+<section id="problem-sets-10" class="level3">
+<h3 class="anchored" data-anchor-id="problem-sets-10">Problem Sets (10%)</h3>
 <p>Students will complete a total of four problem sets throughout the semester. Problem sets will primarily cover topics from the lectures for that week and the previous week. A complete schedule of the assignments can be found on the <a href="./assignments.html">Assignments</a> page.</p>
 <p>The goal of the problem sets is to encourage exploration of the material and to provide you with a clear and credible means of assessing your understanding and progress through the course. As such, problem sets are <em>designed</em> to be challenging and I expect students to find some questions difficult.</p>
 <p>Problem sets will be graded on a (+/✓/-) scale:</p>
@@ -247,23 +248,23 @@ ul.task-list li input[type="checkbox"] {
 <p>Problem sets will be distributed as HTML and Quarto files (<code>.qmd</code>). You should submit your answers and any relevant R code in the same format: including the Quarto file (<code>.qmd</code> extension) and a corresponding rendered <code>.html</code> file as your submission. Quarto builds on the earlier R Markdown project, which allows you to combine the text formatting syntax of the Markdown markup language with the ability to embed and execute chunks of code directly into a text document. This allows you to present your code, graphical output, and discussion/write-up all in the same document. I highly recommend that you edit the distributed Quarto assignment file for each problem set directly to make organization easier.</p>
 </section>
 </section>
-<section id="in-person-midterm-25" class="level3">
-<h3 class="anchored" data-anchor-id="in-person-midterm-25">In-person Midterm (25%)</h3>
-<p>We will have an in-person midterm examination on <strong>Wednesday, October 28th, 2026</strong>. This exam will cover the material in the first half of the course (likelihood inference, generalized linear models, Bayesian inference, multilevel models, and prediction from models). The exam will take the form of a standard pen-and-paper timed examination involving both theory and practical analysis of sample code and results.</p>
+<section id="in-person-midterms-50" class="level3">
+<h3 class="anchored" data-anchor-id="in-person-midterms-50">In-person Midterms (50%)</h3>
+<p>We will have two in-person midterm examinations on <strong>Wednesday, October 7th, 2026</strong> and on <strong>Wednesday, November 4th, 2026</strong>. Each exam will take the form of a standard pen-and-paper timed examination involving both theory and practical analysis of sample code and results.</p>
 </section>
-<section id="in-person-final-40" class="level3">
-<h3 class="anchored" data-anchor-id="in-person-final-40">In-person Final (40%)</h3>
-<p>The final exam will take place in person during exams week (December 11-17, 2026). The date, time and room are assigned by the registrar and will be posted on the <a href="./schedule.html">Schedule</a> page once available. The exam will take the same form as the midterm, but will be slightly longer given the additional time available during the exam period, and will cover material from the full semester.</p>
+<section id="replication-project-30" class="level3">
+<h3 class="anchored" data-anchor-id="replication-project-30">Replication project (30%)</h3>
+<p>Students will complete a replication project and present their results in the form of a poster to be presented at the Models, Experiments and Data (MEAD) workshop poster session on <strong>December 4th</strong>. Students will be pa</p>
 </section>
 <section id="participation-10" class="level3">
 <h3 class="anchored" data-anchor-id="participation-10">Participation (10%)</h3>
-<p>I expect students to take an active role in learning in lecture. Engagement with the teaching staff by asking and answering questions will contribute to this grade as will interaction on the discussion board.</p>
+<p>I expect students to take an active role in learning in lecture. Engagement with the teaching staff by asking and answering questions will contribute to this grade as will interaction on the Slack channel.</p>
 </section>
 </section>
 <section id="computing" class="level2">
 <h2 class="anchored" data-anchor-id="computing">Computing</h2>
 <p>This course will use the R programming language. This is a free and open source programming language that is available for nearly all computing platforms. You should download and install it from <a href="https://www.r-project.org">https://www.r-project.org</a>.</p>
-<p>Unless you have strong preferences for a specific coding environment, I also highly recommend that you use the free <a href="https://rstudio.com">RStudio</a> Desktop Integrated Development Environment (IDE) which you can download from <a href="https://rstudio.com/products/rstudio/download/#download">https://rstudio.com/products/rstudio/download/#download</a>. In addition to being a great and simple to use environment for editing code, RStudio makes it very easy to write and compile Quarto documents: the format in which problem sets will be distributed. For a guide to using Quarto, see <a href="https://quarto.org">https://quarto.org</a>.</p>
+<p>Unless you have strong preferences for a specific coding environment, I also highly recommend that you use either the <a href="https://rstudio.com">RStudio</a> Desktop Integrated Development Environment (IDE) or the <a href="https://positron.posit.co/">Positron</a> IDE. Both are designed to give you a simple and easy-to-use environment for editing code and are built with data science in mind. These IDEs also make it very easy to write and compile Quarto documents: the format in which the problem sets will be distributed. Personally, I still like how RStudio handles the editing and previewing of these documents, but recent updates to Positron have made it a very reasonable alternative and I expect to migrate over completely in the coming months/years.</p>
 <p>In addition to base R, we will be frequently using data management and processing tools found in the <a href="https://www.tidyverse.org/">tidyverse</a> set of packages along with basic graphics and visualization using <a href="https://ggplot2.tidyverse.org/">ggplot2</a>.</p>
 <p>The course will also introduce the <a href="https://mc-stan.org/">Stan</a> language and software for specifying and estimating Bayesian models. Stan is written in C++ but has bindings for a variety of programming languages. We will use two interfaces for Stan in R: <code>RStan</code> and <code>brms</code>. Running Stan on your local machine will require that you have the correct libraries installed to allow you to compile C++ source code into an executable. See the <a href="https://mc-stan.org/install/">installation guide</a> for more details on the requirements for your particular operating system.</p>
 <p>See the <a href="./resources.html">Resources</a> page for additional information.</p>
@@ -281,7 +282,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Lastly, any LLM policy needs to consider its feasibility. It is clear to me that any restrictions on LLM use aside from <em>restricted, in-class pen-and-paper examination</em> use are fundamentally unenforceable. Therefore, with respect to the problem sets, students are permitted to use LLMs in whatever capacity they see fit. I have attempted to design the problem sets such that they contain “out-of-distribution” challenges (e.g.&nbsp;a replication of an existing paper that concludes contrary to the original result) and otherwise general “traps” that try to evaluate deep substantive knowledge of the problem. Over the last two years, I have found on (e.g.&nbsp;take home exams) that LLM-using students produce mediocre but not completely terrible results. Nevertheless, they do make mistakes (and often behave in ways that could be described as “not wrong, just strange”) and it is clear to me which students use them to their detriment. Perhaps this will change in the next year or two - such is the nature of this field. Indeed, my decision to move entirely to in-person assessment was driven by the observation that although take-home exams still provided <em>some</em> variation among students, that variation was dramatically lower than the in-class exams. So in short:</p>
 <ul>
 <li>You may use them.</li>
-<li>I discourage it for anything important.</li>
+<li>I discourage it for problem sets</li>
 <li>I’ll know if you use them poorly.</li>
 <li><a href="https://en.wikipedia.org/wiki/Deal_with_the_Devil">Ignore the problem sets at your own peril. The consequences will arrive at exam time.</a></li>
 </ul>
@@ -352,14 +353,13 @@ ul.task-list li input[type="checkbox"] {
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
         }
-      }
-      return codeEl.innerText;
+        return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
