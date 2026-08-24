@@ -28,18 +28,19 @@ Please contact the instructor at [strezhnev@wisc.edu](mailto:strezhnev@wisc.edu)
 
 You should attend lectures regularly as they comprise a significant element of the course instruction. Lecture materials will be posted on the course website.
 
-- **Discussion Forum**: We will be using [Ed](https://edstem.org/) as our primary course discussion platform. If you are enrolled in the class on Canvas, you should already have access to the Ed board for this class. Please use this to post questions about the readings/lecture material as well as about the problem sets.
+- **Discussion Forum**: We will be using [Slack](https://uw-mpolscimethods.slack.com/) as our primary course discussion platform. You should have an invitation to the research methods slack channel. Please use this to post questions about the readings/lecture material and the problem sets as well as to contact the instructional staff.
 
 - **Course Materials**: Lecture materials, problem sets and tutorial code will be posted on the course website. Problem set solutions will be posted after the due date on Canvas. Links to readings can be found on the [Schedule](schedule.qmd) page organized by week.
 
 ## Textbooks
 
-The course will involve readings from a variety of different textbook chapters and published papers. The class will not require the purchase of any textbook as they are available online. However, you may wish to obtain a paper copy for your own personal use or reference.
+The course will involve readings from a variety of different textbook chapters and published papers. The class will not require the purchase of any textbook as they are available online either directly from the author's website or via the University library. However, you may wish to obtain a paper copy for your own personal use or reference.
 
-Two textbooks from which many readings will be drawn are:
+Three textbooks from which many readings will be drawn are:
 
-- Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge University Press. (An introduction to regression and multilevel modeling from an applied perspective.)
-- Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. [*Bayesian Data Analysis*.](http://www.stat.columbia.edu/~gelman/book/) 3rd Edition. Chapman and Hall/CRC. (A more advanced text on Bayesian modeling.)
+- McElreath, Richard. 2020. [*Statistical Rethinking: A Bayesian Course with Examples in R and Stan*.](https://learning-oreilly-com.ezproxy.library.wisc.edu/library/view/statistical-rethinking-2nd/9780429639142/) 2nd Edition. Chapman and Hall/CRC.
+- Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge University Press.
+- Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. [*Bayesian Data Analysis*.](http://www.stat.columbia.edu/~gelman/book/) 3rd Edition. Chapman and Hall/CRC.
 
 A complete list of textbooks and supplementary references can be found on the [Resources](resources.qmd) page.
 
@@ -73,21 +74,21 @@ Problem sets will be distributed as HTML and Quarto files (`.qmd`). You should s
 
 ### In-person Midterms (50%)
 
-We will have two in-person midterm examinations on **Wednesday, October 28th, 2026**.  The exam will take the form of a standard pen-and-paper timed examination involving both theory and practical analysis of sample code and results.
+We will have two in-person midterm examinations on **Wednesday, October 7th, 2026** and on **Wednesday, November 4th, 2026**. Each exam will take the form of a standard pen-and-paper timed examination involving both theory and practical analysis of sample code and results.
 
 ### Replication project (30%)
 
-Students will complete a replication project and present their results in the form of a poster. 
+Students will complete a replication project and present their results in the form of a poster to be presented at the Models, Experiments and Data (MEAD) workshop poster session on **December 4th**. Students will be pa
 
 ### Participation (10%)
 
-I expect students to take an active role in learning in lecture. Engagement with the teaching staff by asking and answering questions will contribute to this grade as will interaction on the discussion board.
+I expect students to take an active role in learning in lecture. Engagement with the teaching staff by asking and answering questions will contribute to this grade as will interaction on the Slack channel.
 
 ## Computing
 
 This course will use the R programming language. This is a free and open source programming language that is available for nearly all computing platforms. You should download and install it from [https://www.r-project.org](https://www.r-project.org).
 
-Unless you have strong preferences for a specific coding environment, I also highly recommend that you use either the free [RStudio](https://rstudio.com) Desktop Integrated Development Environment (IDE) or the [Positron](https://positron.posit.co/) IDE. Both are designed to give you a simple and easy-to-use environment for editing code and are built with data science in mind. These IDEs also make it very easy to write and compile Quarto documents: the format in which the problem sets will be distributed. In my experience, RStudio is still a bit better with regards to how it handles the editing and previewing of these documents, but recent updates to Positron have made it a reasonable alternative.
+Unless you have strong preferences for a specific coding environment, I also highly recommend that you use either the [RStudio](https://rstudio.com) Desktop Integrated Development Environment (IDE) or the [Positron](https://positron.posit.co/) IDE. Both are designed to give you a simple and easy-to-use environment for editing code and are built with data science in mind. These IDEs also make it very easy to write and compile Quarto documents: the format in which the problem sets will be distributed. Personally, I still like how RStudio handles the editing and previewing of these documents, but recent updates to Positron have made it a very reasonable alternative and I expect to migrate over completely in the coming months/years.
 
 In addition to base R, we will be frequently using data management and processing tools found in the [tidyverse](https://www.tidyverse.org/) set of packages along with basic graphics and visualization using [ggplot2](https://ggplot2.tidyverse.org/).
 

@@ -21,9 +21,6 @@ These textbooks provide a number of the readings that will be used through the c
 - **McElreath, Richard.** *Statistical Rethinking: A Bayesian Course with Examples in R and Stan*. 2nd Edition. Chapman and Hall/CRC, 2020.
   - [Course materials and lectures](https://xcelab.net/rm/)
 
-- **Wood, Simon N.** *Generalized Additive Models: An Introduction with R*. 2nd Edition. Chapman and Hall/CRC, 2017.
-  - [UW-Madison Library Access](https://search.library.wisc.edu/)
-
 ---
 
 ## Software
@@ -72,9 +69,3 @@ Applied examples in this course draw heavily on large-scale public opinion surve
 - **General Social Survey (GSS):** [https://gss.norc.org/](https://gss.norc.org/)
 
 ---
-
-## Tutorials
-
-Below are some additional tutorials to help supplement the main course material. They will generally focus on specific topics in statistical computing and things that we did not have time to cover as part of the main set of lectures.
-
-*To be posted.*

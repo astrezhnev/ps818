@@ -19,13 +19,13 @@ title: "Staff"
 | **Office**       | North Hall 322D                                     |
 | **Email**        | [strezhnev@wisc.edu](mailto:strezhnev@wisc.edu)     |
 | **Website**      | [antonstrezhnev.com](https://www.antonstrezhnev.com)|
-| **Office Hours** | TBA (or by appointment via email)                   |
+| **Office Hours** | Tuesdays 9-11am (or by appointment via email or Slack)       |
 
 ---
 
 ## Contact Policy
 
-- **Course questions:** Please post questions about course content on the Ed discussion forum so that all students can benefit from the answers.
-- **Personal matters:** Email the instructor directly.
-- **Problem set questions:** Post on the discussion forum or come to office hours.
+- **Course questions:** Please post questions about course content on the Slack channel so that all students can benefit from the answers.
+- **Personal matters:** Contact the instructor directly via e-mail or Slack private message.
+- **Problem set questions:** Post on Slack or come to office hours.
 - **Expected response time:** I aim to respond to discussion posts within 24 hours on weekdays.

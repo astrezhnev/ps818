@@ -27,8 +27,8 @@ website:
         href: assignments.qmd
       - text: "Resources"
         href: resources.qmd
-      - text: "Ed"
-        href: https://edstem.org/
+      - text: "Slack"
+        href: https://uw-mpolscimethods.slack.com/
       - text: "Gradescope"
         href: https://www.gradescope.com/
     right:
