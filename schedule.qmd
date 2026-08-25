@@ -152,6 +152,10 @@ Chapters 3, 9. McElreath, Richard. 2020. [Statistical Rethinking: A Bayesian Cou
 **Problem Set 3** due Wednesday, October 21. **Problem Set 4** assigned Wednesday, October 21 -- due Wednesday, November 4.
 :::
 
+::: {.callout-note appearance="simple"}
+**Replication project memo** due Wednesday, October 21
+:::
+
 ---
 
 ## Week 8: Mixture Models and the EM Algorithm
@@ -237,7 +241,7 @@ Thanksgiving recess runs November 26-29. Class meets as usual on Monday this wee
 
 **Topics:**
 
-- 
+- Infinite dimensional function spaces
 - Kernel ridge regression
 - Gaussian process regression
 
@@ -271,19 +275,20 @@ Thanksgiving recess runs November 26-29. Class meets as usual on Monday this wee
 
 ---
 
-## Week 14: Neural networks
+## Week 14: Working with "Big" datasets
 
 *Monday, December 7 & Wednesday, December 9*
 
 **Topics:**
 
-- Introduction to neural networks
-- Estimation via stochastic gradient descent
-- Supervised fine-tuning of pre-trained models
+- Estimation with out-of-memory data
+- Stochastic gradient descent
+- Lossless compression in regression
 
 **Readings:**
 
-- Chapter 10; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. [*An Introduction to Statistical Learning*.](https://www.statlearning.com/) New York: Springer.
+- Toulis, Panos, and Edoardo M. Airoldi. ["Scalable estimation strategies based on stochastic approximations: classical results and new insights."](https://doi.org/10.1007/s11222-015-9560-y) *Statistics and Computing* 25, no. 4 (2015): 781-795.
+- Wong, Jeffrey, Eskil Forsell, Randall A. Lewis, Tobias Mao, and Matthew Wardrop. 2021. ["You Only Compress Once: Optimal Data Compression for Estimating Linear Models."](https://arxiv.org/abs/2102.11297) arXiv preprint arXiv:2102.11297.
 
 
 ---

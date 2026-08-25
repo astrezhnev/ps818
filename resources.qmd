@@ -58,14 +58,3 @@ To complete assignments, you will edit the provided `.qmd` file, adding your cod
 - Note also the [chapter on Quarto](https://r4ds.hadley.nz/quarto.html) in **R For Data Science**
 
 ---
-
-## Data Sources
-
-Applied examples in this course draw heavily on large-scale public opinion surveys. The following are useful sources of data for your own work:
-
-- **American National Election Studies (ANES):** [https://electionstudies.org/](https://electionstudies.org/)
-- **Cooperative Election Study (CES):** [https://cces.gov.harvard.edu/](https://cces.gov.harvard.edu/)
-- **European Social Survey (ESS):** [https://www.europeansocialsurvey.org/](https://www.europeansocialsurvey.org/)
-- **General Social Survey (GSS):** [https://gss.norc.org/](https://gss.norc.org/)
-
----

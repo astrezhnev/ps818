@@ -24,13 +24,13 @@ Please contact the instructor at [strezhnev@wisc.edu](mailto:strezhnev@wisc.edu)
 
 ## Logistics
 
-- **Lectures**: Mondays/Wednesdays from 9:30am-10:45am
+- **Lectures**: Mondays/Wednesdays from 9:30am-10:45am in **Sterling Hall 1339**
 
 You should attend lectures regularly as they comprise a significant element of the course instruction. Lecture materials will be posted on the course website.
 
-- **Discussion Forum**: We will be using [Slack](https://uw-mpolscimethods.slack.com/) as our primary course discussion platform. You should have an invitation to the research methods slack channel. Please use this to post questions about the readings/lecture material and the problem sets as well as to contact the instructional staff.
+- **Discussion Forum**: We will be using [Slack](https://uw-mpolscimethods.slack.com/) as our primary course discussion platform. You should have received an invitation to this Slack channel from me. Please e-mail me if you have not. You should use the channel to chat with your students about the readings/lecture material and the problem sets as well as to contact the instructional staff with direct questions.
 
-- **Course Materials**: Lecture materials, problem sets and tutorial code will be posted on the course website. Problem set solutions will be posted after the due date on Canvas. Links to readings can be found on the [Schedule](schedule.qmd) page organized by week.
+- **Course Materials**: Lecture materials and problem sets will be posted on the course website. Problem set solutions will be posted after the due date on Canvas. Links to readings can be found on the [Schedule](schedule.qmd) page organized by week.
 
 ## Textbooks
 
@@ -48,7 +48,7 @@ A complete list of textbooks and supplementary references can be found on the [R
 
 Students' final grades are based on four components:
 
-### Problem Sets (10%)
+### Problem Sets (20%)
 
 Students will complete a total of four problem sets throughout the semester. Problem sets will primarily cover topics from the lectures for that week and the previous week. A complete schedule of the assignments can be found on the [Assignments](assignments.qmd) page.
 
@@ -72,13 +72,34 @@ Students should feel free to discuss any questions about the problem sets with m
 
 Problem sets will be distributed as HTML and Quarto files (`.qmd`). You should submit your answers and any relevant R code in the same format: including the Quarto file (`.qmd` extension) and a corresponding rendered `.html` file as your submission. Quarto builds on the earlier R Markdown project, which allows you to combine the text formatting syntax of the Markdown markup language with the ability to embed and execute chunks of code directly into a text document. This allows you to present your code, graphical output, and discussion/write-up all in the same document. I highly recommend that you edit the distributed Quarto assignment file for each problem set directly to make organization easier.
 
-### In-person Midterms (50%)
+### In-person Midterms (40%)
 
 We will have two in-person midterm examinations on **Wednesday, October 7th, 2026** and on **Wednesday, November 4th, 2026**. Each exam will take the form of a standard pen-and-paper timed examination involving both theory and practical analysis of sample code and results.
 
 ### Replication project (30%)
 
-Students will complete a replication project and present their results in the form of a poster to be presented at the Models, Experiments and Data (MEAD) workshop poster session on **December 4th**. Students will be pa
+Students will work in pairs to complete a replication project and write up their results in the form of a poster to be presented at the Models, Experiments and Data (MEAD) workshop poster session on **December 4th**. 
+
+You should first read the two articles by Gary King on the nature and purpose of the replication assignment:
+
+- King, Gary. 1995. ["Replication, Replication."](https://gking.harvard.edu/files/replication.pdf) *PS: Political Science & Politics* 28, no. 3 (1995): 444-452.
+- King, Gary. 2006. ["Publication, Publication."](https://gking.harvard.edu/files/paperspub.pdf) *PS: Political Science & Politics* 39, no. 1 (2006): 119-125.
+
+The assignment consists of five steps:
+
+1) Identify a published article in political science that is of interest to you and which implements some form of statistical analysis.
+2) Obtain the original dataset and analysis code.
+3) Replicate the core results of interest.
+4) Propose and write the analysis code for your modification or extension of the original analysis.
+5) Write up your results in the form of an academic poster.
+
+There are many directions that you could choose to go in your replication and I will work with you to identify promising avenues for improving on earlier work. For example, our class will spend time covering flexible methods for regression adjustment. You may wish to replicate a selection-on-observables paper that uses a typical additive linear regression adjustment using these techniques appropriately to see if the results change (that is, if the original results failed to sufficiently adjust for the presented confounders). You might also propose additional confounders not addressed in the original study. Feel free to bring in materials and concepts learned from previous courses in the sequence such as 813. You will also likely need to read ahead or read additional papers in order to come up with a promising direction for the project. That is one of the goals of the replication project: to encourage you to read broadly and learn about quantitative methods in the context of papers that you find interesting.
+
+You will complete steps 1-3 and submit a short memo to me demonstrating that you have identified a paper and replicated the result(s) of interest (or that replication fails!). The memo should also outline your plans for extending or modifying the analysis, though you do not need to have written the code for this or implemented it yet. This memo is ungraded, but it will ensure that you are completing the project at a reasonable pace and allow me to guide you in the right direction or identify any potential issues that you might encounter. The memo is due **Wednesday, October 21**
+
+Thanks to the work of many scholars over the last several decades, obtaining replication data for most published work is relatively straightforward - you will often find the archives hosted directly by the journal as part of their replication policy or on a centralized repository like Harvard's Dataverse. Computational reproducibility is also very straightforward and complete replication failures are very rare for modern papers. One thing to note, however, is that you may have to convert the analysis code over to your preferred language - for example, from Stata to R. This is the sort of task that LLMs are *ideal* for in my view. You do not need to use 
+
+You will submit your complete analysis code along with your poster and present your poster in person at the MEAD poster session. I should be able to generate all figures and results presented in the poster from your provided code. If you want to use this as an opportunity to learn how to work Quarto, I would encourage you to make it possible to generate *the poster itself* from your replication code.
 
 ### Participation (10%)
 

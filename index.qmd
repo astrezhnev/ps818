@@ -43,7 +43,7 @@ page-layout: full
 - {{< fa calendar >}} &nbsp; Mondays & Wednesdays
 - {{< fa calendar-alt >}} &nbsp; 9/9/2026 - 12/9/2026
 - {{< fa clock >}} &nbsp; 9:30am - 10:45am
-- {{< fa location-dot >}} &nbsp; Room TBA
+- {{< fa location-dot >}} &nbsp; Sterling Hall 1339
 
 :::
 
