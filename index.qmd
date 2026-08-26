@@ -8,9 +8,9 @@ page-layout: full
 
 ::: {.g-col-12 .g-col-sm-8 .order-2 .order-sm-1}
 
-[Statistical Models]{style="font-size: 4em; font-weight: bold;"}
+[Data Analysis with Statistical Models]{style="font-size: 4em; font-weight: bold;"}
 
-[Likelihood and Bayesian inference for description and prediction]{style="font-size: 2em;"}
+[Likelihood, Bayesian and Machine Learning methods for description and prediction]{style="font-size: 2em;"}
 
 [PoliSci 818 • Fall 2026<br>University of Wisconsin-Madison]{style="color: grey;"}
 
@@ -51,7 +51,7 @@ page-layout: full
 
 ### Contacting me
 
-E-mail is the best way to get in touch with me. My dedicated office hours are **TBA** if you want to meet in-person. I am also generally in my office on weekdays during normal hours and my door is open, so you are welcome to drop in. You can also feel free to e-mail me to confirm availability or to schedule a virtual meeting via Zoom.
+Slack is the best way to get in touch with me. My dedicated office hours are **9AM-11AM on Tuesdays** if you want to meet in-person. I am also generally in my office on weekdays during normal hours and my door is open, so you are welcome to drop in. You can also feel free to contact me to confirm availability or to schedule a virtual meeting via Zoom.
 
 :::
 

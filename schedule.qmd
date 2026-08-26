@@ -44,7 +44,7 @@ There is **no class during the first week of instruction** due to APSA and Labor
 
 **Readings:**
 
-- Chapter 5 ("Parametric Models"); Aronow, P. M. and Benjamin T. Miller. 2019 [*Foundations of Agnostic Statistics*](https://www.cambridge.org/core/books/foundations-of-agnostic-statistics/parametric-models/E101D209A3DD22F95E7853B64FB7257F)
+- Chapter 5 ("Parametric Models"); Aronow, P. M. and Benjamin T. Miller. 2019. [*Foundations of Agnostic Statistics*.](https://www-cambridge-org.ezproxy.library.wisc.edu/core/books/foundations-of-agnostic-statistics/parametric-models/E101D209A3DD22F95E7853B64FB7257F) Cambridge: Cambridge University Press.
 - Chapter 6 ("Likelihood Inference"); Evans, Michael J., and Jeffrey S. Rosenthal. 2010. [*Probability and Statistics: The Science of Uncertainty*](https://utstat.toronto.edu/mikevans/jeffrosenthal/chapt6.pdf), 2nd ed. New York: W.H. Freeman.
 
 ---
@@ -80,13 +80,12 @@ There is **no class during the first week of instruction** due to APSA and Labor
 
 **Readings:**
 
-- Chapters 15; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
+- Chapter 15; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
 - Clark, T. G., M. J. Bradburn, S. B. Love, and D. G. Altman. 2003. ["Survival Analysis Part I: Basic Concepts and First Analyses."](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2394262/) *British Journal of Cancer* 89 (2): 232-238.
 - Stensrud, Mats J., and Miguel A. Hernán. 2020. ["Why Test for Proportional Hazards?"](https://jamanetwork.com/journals/jama/fullarticle/2763185) *JAMA* 323 (14): 1401-1402.
 - Chapter 8; Wooldridge, Jeffrey M. 1999. ["Quasi-Likelihood Methods for Count Data."](https://doi.org/10.1111/b.9780631216339.1999.00009.x) In *Handbook of Applied Econometrics*, vol. 2, 352-406.
 
 ---
-
 
 ## Week 5: Bayesian Inference
 
@@ -127,8 +126,7 @@ There is **no class during the first week of instruction** due to APSA and Labor
 
 **Readings:**
 
-Chapters 3, 9. McElreath, Richard. 2020. [Statistical Rethinking: A Bayesian Course with Examples in R and Stan](https://learning-oreilly-com.ezproxy.library.wisc.edu/library/view/statistical-rethinking-2nd/9780429639142/) 2nd. ed.
-
+- Chapters 3 and 9; McElreath, Richard. 2020. [*Statistical Rethinking: A Bayesian Course with Examples in R and Stan*.](https://learning-oreilly-com.ezproxy.library.wisc.edu/library/view/statistical-rethinking-2nd/9780429639142/) 2nd ed. Boca Raton: Chapman and Hall/CRC.
 
 ---
 
@@ -144,7 +142,7 @@ Chapters 3, 9. McElreath, Richard. 2020. [Statistical Rethinking: A Bayesian Cou
 
 **Readings:**
 
-- Chapters 9, 11, and Appendix A; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
+- Chapter 11 and Appendix A; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
 - Chapter 15; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. [*Bayesian Data Analysis*.](http://www.stat.columbia.edu/~gelman/book/) 3rd ed. Boca Raton: Chapman and Hall/CRC.
 - Park, David K., Andrew Gelman, and Joseph Bafumi. 2004. ["Bayesian Multilevel Estimation with Poststratification: State-Level Estimates from National Polls."](https://doi.org/10.1093/pan/mph024) *Political Analysis* 12 (4): 375-385.
 
@@ -187,16 +185,17 @@ Chapters 3, 9. McElreath, Richard. 2020. [Statistical Rethinking: A Bayesian Cou
 
 - Martin, Andrew D., and Kevin M. Quinn. 2002. ["Dynamic Ideal Point Estimation via Markov Chain Monte Carlo for the U.S. Supreme Court, 1953-1999."](https://doi.org/10.1093/pan/10.2.134) *Political Analysis* 10 (2): 134-153.
 - Clinton, Joshua, Simon Jackman, and Douglas Rivers. 2004. ["The Statistical Analysis of Roll Call Data."](https://doi.org/10.1017/S0003055404001194) *American Political Science Review* 98 (2): 355-370.
-- Imai, Kosuke, James Lo, and Jonathan Olmsted. ["Fast estimation of ideal points with massive data."](https://doi.org/10.1017/S000305541600037X) *American Political Science Review* 110, no. 4 (2016): 631-656.
+- Imai, Kosuke, James Lo, and Jonathan Olmsted. 2016. ["Fast Estimation of Ideal Points with Massive Data."](https://doi.org/10.1017/S000305541600037X) *American Political Science Review* 110 (4): 631-656.
 
----
+::: {.callout-note appearance="simple"}
+**Problem Set 4** due Wednesday, November 4.
+:::
 
 ::: {.callout-important appearance="simple"}
 **Midterm 2** In-Class, Wednesday, November 4th
 :::
 
 ---
-
 
 ## Week 10: Regularization and Model Selection
 
@@ -236,7 +235,7 @@ Chapters 3, 9. McElreath, Richard. 2020. [Statistical Rethinking: A Bayesian Cou
 *Monday, November 23*
 
 ::: {.callout-important appearance="simple"}
-Thanksgiving recess runs November 26-29. Class meets as usual on Monday this week.
+Thanksgiving recess runs November 26-29. Class meets as usual on Monday this week. Wednesday is cancelled.
 :::
 
 **Topics:**
@@ -247,12 +246,12 @@ Thanksgiving recess runs November 26-29. Class meets as usual on Monday this wee
 
 **Readings:**
 
-- Hainmueller, Jens, and Chad Hazlett. ["Kernel regularized least squares: Reducing misspecification bias with a flexible and interpretable machine learning approach."](https://doi.org/10.1093/pan/mpt019) *Political Analysis* 22, no. 2 (2014): 143-168.
+- Hainmueller, Jens, and Chad Hazlett. 2014. ["Kernel Regularized Least Squares: Reducing Misspecification Bias with a Flexible and Interpretable Machine Learning Approach."](https://doi.org/10.1093/pan/mpt019) *Political Analysis* 22 (2): 143-168.
 - Chapters 2 and 4; Rasmussen, Carl Edward, and Christopher K. I. Williams. 2006. [*Gaussian Processes for Machine Learning*.](https://gaussianprocess.org/gpml/) Cambridge, MA: MIT Press.
 
 ---
 
-## Week 13: Causal inference with flexible regression
+## Week 13: Causal Inference with Flexible Regression
 
 *Monday, November 30 & Wednesday, December 2*
 
@@ -264,7 +263,7 @@ Thanksgiving recess runs November 26-29. Class meets as usual on Monday this wee
 
 **Readings:**
 
-- Fisher, Aaron, and Edward H. Kennedy. ["Visually communicating and teaching intuition for influence functions."](https://doi.org/10.1080/00031305.2020.1717620) *The American Statistician* 75, no. 2 (2021): 162-172.
+- Fisher, Aaron, and Edward H. Kennedy. 2021. ["Visually Communicating and Teaching Intuition for Influence Functions."](https://doi.org/10.1080/00031305.2020.1717620) *The American Statistician* 75 (2): 162-172.
 - Kennedy, Edward H. 2024. ["Semiparametric Doubly Robust Targeted Double Machine Learning: A Review."](https://arxiv.org/abs/2203.06469) In *Handbook of Statistical Methods for Precision Medicine*, 207-236.
 
 ---
@@ -275,7 +274,7 @@ Thanksgiving recess runs November 26-29. Class meets as usual on Monday this wee
 
 ---
 
-## Week 14: Working with "Big" datasets
+## Week 14: Working with "Big" Datasets
 
 *Monday, December 7 & Wednesday, December 9*
 
@@ -287,7 +286,7 @@ Thanksgiving recess runs November 26-29. Class meets as usual on Monday this wee
 
 **Readings:**
 
-- Toulis, Panos, and Edoardo M. Airoldi. ["Scalable estimation strategies based on stochastic approximations: classical results and new insights."](https://doi.org/10.1007/s11222-015-9560-y) *Statistics and Computing* 25, no. 4 (2015): 781-795.
+- Toulis, Panos, and Edoardo M. Airoldi. 2015. ["Scalable Estimation Strategies Based on Stochastic Approximations: Classical Results and New Insights."](https://doi.org/10.1007/s11222-015-9560-y) *Statistics and Computing* 25 (4): 781-795.
 - Wong, Jeffrey, Eskil Forsell, Randall A. Lewis, Tobias Mao, and Matthew Wardrop. 2021. ["You Only Compress Once: Optimal Data Compression for Estimating Linear Models."](https://arxiv.org/abs/2102.11297) arXiv preprint arXiv:2102.11297.
 
 

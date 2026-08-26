@@ -19,7 +19,17 @@ These textbooks provide a number of the readings that will be used through the c
   - [Free PDF available](https://hastie.su.domains/ElemStatLearn/)
 
 - **McElreath, Richard.** *Statistical Rethinking: A Bayesian Course with Examples in R and Stan*. 2nd Edition. Chapman and Hall/CRC, 2020.
+  - [UW-Madison library eBook](https://learning-oreilly-com.ezproxy.library.wisc.edu/library/view/statistical-rethinking-2nd/9780429639142/)
   - [Course materials and lectures](https://xcelab.net/rm/)
+
+- **Aronow, P. M., and Benjamin T. Miller.** *Foundations of Agnostic Statistics*. Cambridge University Press, 2019.
+  - [UW-Madison library eBook](https://www-cambridge-org.ezproxy.library.wisc.edu/core/books/foundations-of-agnostic-statistics/684756357E7E9B3DFF0A8157FB2DCECA)
+
+- **Evans, Michael J., and Jeffrey S. Rosenthal.** *Probability and Statistics: The Science of Uncertainty*. 2nd Edition. W.H. Freeman, 2010.
+  - [Free PDF available](https://utstat.toronto.edu/mikevans/jeffrosenthal/)
+
+- **Rasmussen, Carl Edward, and Christopher K. I. Williams.** *Gaussian Processes for Machine Learning*. MIT Press, 2006.
+  - [Free PDF available](https://gaussianprocess.org/gpml/)
 
 ---
 

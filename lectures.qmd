@@ -35,11 +35,11 @@ Links become active as the materials for each week are posted.
 
 *To be posted*
 
-### Week 6: Multilevel Regression Models
+### Week 6: Estimating Bayesian Models
 
 *To be posted*
 
-### Week 7: Predicting from Models and Survey Data
+### Week 7: Multilevel Regression Models
 
 *To be posted*
 
@@ -63,10 +63,10 @@ Links become active as the materials for each week are posted.
 
 *To be posted*
 
-### Week 13: Semiparametric and Nonparametric Estimation
+### Week 13: Causal Inference with Flexible Regression
 
 *To be posted*
 
-### Week 14: Big, Fast Regressions
+### Week 14: Working with "Big" Datasets
 
 *To be posted*
