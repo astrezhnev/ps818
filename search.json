@@ -77,6 +77,454 @@
     "text": "Acknowledgments\nThis course is indebted to the many wonderful and generous scholars who have developed statistical methods curricula in political science departments throughout the world and who have made their course materials available to the public. This course in particular has been heavily inspired by Gov 2001 and Gov 2003 at Harvard University as well as Quant III at MIT. In particular, I thank Matthew Blackwell, Brandon Stewart, Erin Hartman, Molly Roberts, Kosuke Imai, Teppei Yamamoto, Jens Hainmueller, Adam Glynn, Gary King, Justin Grimmer, and In Song Kim whose lecture notes and syllabi have been immensely valuable in the creation of this course.\nLastly, thanks to Andrew Heiss and Matt Blackwell for their Quarto website templates, which I have extensively borrowed from in designing this course site."
   },
   {
+    "objectID": "slides/week1/week1_intro_and_review.html#welcome",
+    "href": "slides/week1/week1_intro_and_review.html#welcome",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Welcome!",
+    "text": "Welcome!\n\\[\n  \\require{cancel}\n  \\DeclareMathOperator*{\\argmin}{arg\\,min}\n\\]\n\\[\n\\DeclareMathOperator*{\\argmax}{arg\\,max}\n\\]"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#week-overview",
+    "href": "slides/week1/week1_intro_and_review.html#week-overview",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Week overview",
+    "text": "Week overview\n\nThis week\n\nIntroductions + course logistics\nWhat is a statistical model and what is it good for?\nReview: estimands, estimators, and linear regression\n\nNext week\n\nParametric models and the likelihood function\nMaximum likelihood estimation\n\nLong-run\n\nlikelihood \\(\\to\\) Bayes \\(\\to\\) flexible regression"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#course-overview",
+    "href": "slides/week1/week1_intro_and_review.html#course-overview",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Course Overview",
+    "text": "Course Overview\n\nInstructor: Anton Strezhnev\nLogistics:\n\nLectures Mon/Wed - 9:30am-10:45am, Sterling Hall 1339\n4 Problem Sets (~ 2 weeks each)\n2 in-class midterms (October 7, November 4)\nReplication project poster (December 4th)\nNo final exam during the university exam period"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#course-overview-1",
+    "href": "slides/week1/week1_intro_and_review.html#course-overview-1",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Course Overview",
+    "text": "Course Overview\n\nMy office hours: Tuesdays 9am-11am (North Hall 322D)\n\nOr just drop in – I’m usually around and my door is open.\n\nCourse Website: https://www.antonstrezhnev.com/ps818\nAnnouncements and discussion happen on Slack - you should have received an invite.\nProblem sets are submitted on Gradescope; solutions get posted to Canvas."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#course-objectives",
+    "href": "slides/week1/week1_intro_and_review.html#course-objectives",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Course objectives",
+    "text": "Course objectives\n\nWhat is this course about?\n\nDefining statistical models via their data-generating process\nEstimating model parameters and conducting inference\nInterpreting model output and evaluating model quality\n\nGoals for the course\n\nGive you the tools to understand descriptive and predictive inference via statistical models – and to comment on other researchers’ work.\nEquip you with the fundamentals of likelihood and Bayesian inference so that you can learn new models that build on these principles.\nConnect these principles to the particular research questions you want to answer.\nTeach you how to program and implement estimators by yourself!"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#course-workflow",
+    "href": "slides/week1/week1_intro_and_review.html#course-workflow",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Course workflow",
+    "text": "Course workflow\n\nLectures (Mondays/Wednesdays)\n\nTopics organized by week: Monday introduces the core theory, Wednesday goes deeper and works through applications.\nLectures are the “course notes” – readings are the reference manuals.\nI want lectures to be interactive - you should ask questions and interrupt!\n\nReadings\n\nMix of textbooks and papers – see the Schedule page.\nMain texts: Regression and Other Stories (Gelman, Hill, and Vehtari 2020), Bayesian Data Analysis (Gelman et al. 2013), Statistical Rethinking (McElreath 2020), and An Introduction to Statistical Learning (James et al. 2013)\nEverything is available digitally, either free online or through the UW-Madison library.\nDo the readings before that week’s lectures – definitely before the Wednesday."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#course-workflow-1",
+    "href": "slides/week1/week1_intro_and_review.html#course-workflow-1",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Course workflow",
+    "text": "Course workflow\n\nProblem sets (20% of your grade)\n\nFour problem sets, each covering roughly a two-week block of material.\nMeant as a check on your understanding of the material and a way of communicating with me about the course.\nDesigned to be challenging – I expect you to find some questions hard.\nCollaboration is strongly encouraged – ask and answer questions on Slack.\n\nBut write up your own answers and your own code.\n\nDistributed as .qmd + rendered .html; submit both on Gradescope.\nGraded holistically on a plus/check/minus system."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#course-workflow-2",
+    "href": "slides/week1/week1_intro_and_review.html#course-workflow-2",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Course workflow",
+    "text": "Course workflow\n\nTwo in-class midterms (20% of your grade each)\n\nOctober 7 – material through Week 4 (likelihood inference and GLMs)\nNovember 4 – material from Weeks 5-8 (Bayesian inference, multilevel models, mixtures)\nClosed-book, pen-and-paper, in class. Both theory and interpretation of sample code/output.\nThis is a change from previous years – no more take-home exams."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#course-workflow-3",
+    "href": "slides/week1/week1_intro_and_review.html#course-workflow-3",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Course workflow",
+    "text": "Course workflow\n\nReplication project (30% of your grade)\n\nWork in pairs to replicate and extend a published paper.\nStart by reading King (1995) on why we do this.\nSteps: find a paper \\(\\to\\) obtain the data \\(\\to\\) reproduce the result \\(\\to\\) extend it \\(\\to\\) write it up.\n\nThe extension is where this course comes in: flexible regression adjustment, a better-specified likelihood, a multilevel model, additional confounders…\n\nUngraded check-in memo due October 21 – shows me you’ve replicated something and have a plan.\nPresented as a poster at the MEAD graduate poster session, December 4th."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#course-workflow-4",
+    "href": "slides/week1/week1_intro_and_review.html#course-workflow-4",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Course workflow",
+    "text": "Course workflow\n\nParticipation (10% of your grade)\n\nIt is important that you actively engage with lecture – ask and answer questions.\nDo the reading!\nParticipating on Slack counts towards this as well, as does attending MEAD talks.\n\nModels, Experiments and Data (MEAD) workshop\n\nCheck out the Fall 2026 schedule: https://sites.google.com/view/meadwisc/home"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#assignment-timeline",
+    "href": "slides/week1/week1_intro_and_review.html#assignment-timeline",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Assignment timeline",
+    "text": "Assignment timeline\n\nProblem Set 1: Assigned September 9, due September 23\nProblem Set 2: Assigned September 23, due October 7\nMidterm 1: In class, Wednesday, October 7\nProblem Set 3: Assigned October 7, due October 21\nReplication memo: Due October 21\nProblem Set 4: Assigned October 21, due November 4\nMidterm 2: In class, Wednesday, November 4\nReplication poster: MEAD poster session, Friday, December 4"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#class-requirements",
+    "href": "slides/week1/week1_intro_and_review.html#class-requirements",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Class Requirements",
+    "text": "Class Requirements\n\nOverall: An interest in learning and willingness to ask questions.\nI assume a background in intro probability and statistics (the 1st year sequence)\n\nYou should be comfortable thinking about basic estimands/estimators + their properties.\nYou should be able to interpret a confidence interval for (e.g.) a difference-in-means.\n\nSome prior knowledge of causal inference is helpful but not critical\n\nWe’ll be connecting predictive models to causal estimands.\nIdeally you’re familiar with the potential outcomes framework.\n\nYou should also be familiar with linear regression\n\n\\(\\hat{\\beta} = (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}\\mathbf{X}^{\\prime}Y\\) should be a familiar expression.\nYou should know when it’s unbiased for \\(\\mathbb{E}[Y|\\mathbf{X}]\\), and when it’s efficient.\n\nIf you want some review, check out chapters 1-7 of Regression and Other Stories"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#statistical-computing",
+    "href": "slides/week1/week1_intro_and_review.html#statistical-computing",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Statistical computing",
+    "text": "Statistical computing\n\nAll of the work in this course is done in \n\nWe will implement estimators from scratch – optimizers, samplers, EM steps.\nPackaged implementations are great, but you should know what’s inside the box.\n\nWe’ll also use Stan for Bayesian models (via rstan/brms)\n\nStan needs a working C++ toolchain – get this installed early, not the night before Problem Set 3.\n\nAssignments are written and submitted in Quarto\nMore broadly, I want you to learn how your computer works for research\n\nKieran Healy’s Modern Plain Text Computing (Healy 2025) is a great resource."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#llm-policy",
+    "href": "slides/week1/week1_intro_and_review.html#llm-policy",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "LLM Policy",
+    "text": "LLM Policy\n\nSee the syllabus for the long version.\nIn short…\n\nYou should have LLMs do things for you\nYou should not have LLMs think for you\nYou should definitely not have LLMs speak for you\n\nFormally, you may use LLMs however you like on the problem sets – any other rule is unenforceable.\n\nBut the problem sets are how you learn to code, and the midterms are the check.\nDelegating the mechanics means you can’t debug, and you can’t diagnose errors.\n\nEmpirical research has an “O-ring” production function – one tiny error breaks everything.\n\nAnd LLM failure modes are weirder than human failure modes.\n\nThe replication poster must be entirely human-authored."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#acknowledgements",
+    "href": "slides/week1/week1_intro_and_review.html#acknowledgements",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Acknowledgements",
+    "text": "Acknowledgements\n\nThis course is an iteration in the broader project of methods education in political methodology and is indebted to many of those who have taught versions of this course in the past and at other institutions.\n\nParticularly Gov 2001/Gov 2003 at Harvard and Quant III at MIT.\nThanks to Matthew Blackwell, Brandon Stewart, Erin Hartman, Molly Roberts, Kosuke Imai, Teppei Yamamoto, Jens Hainmueller, Adam Glynn, Gary King, Justin Grimmer, and In Song Kim, whose lecture notes and syllabi have been immensely valuable.\nAnd special thanks to Andrew Heiss for the modern website/Quarto approach to teaching materials."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#a-brief-overview",
+    "href": "slides/week1/week1_intro_and_review.html#a-brief-overview",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "A brief overview",
+    "text": "A brief overview\n\nWeeks 2-4: Likelihood inference and generalized linear models\n\nThe likelihood function, MLE and its asymptotic properties\nBinary outcome models, count models, duration models\nFirst midterm: Wednesday, October 7\n\nWeeks 5-7: Bayesian inference and multilevel models\n\nPosteriors, priors, and the data; posterior means and credible intervals\nEstimation via MCMC in Stan\nMultilevel regression and post-stratification (MRP)\n\nWeek 8: Mixture models and the EM algorithm\nWeek 9: Item response theory and ideal point models\n\nSecond midterm: Wednesday, November 4"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#a-brief-overview-1",
+    "href": "slides/week1/week1_intro_and_review.html#a-brief-overview-1",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "A brief overview",
+    "text": "A brief overview\n\nWeek 10: Regularization and model selection (ridge, LASSO, cross-fitting)\nWeek 11: Flexible regression – trees, forests and BART\nWeek 12: Flexible regression – kernels and Gaussian processes\nWeek 13: Causal inference with flexible regression\n\nInfluence functions and “doubly-robust”/Neyman-orthogonal estimators\nMEAD poster session: Friday, December 4\n\nWeek 14: Working with “big” datasets\n\nOut-of-memory estimation, stochastic gradient descent, lossless compression"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#what-is-a-statistical-model",
+    "href": "slides/week1/week1_intro_and_review.html#what-is-a-statistical-model",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "What is a statistical model?",
+    "text": "What is a statistical model?"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#what-is-a-statistical-model-1",
+    "href": "slides/week1/week1_intro_and_review.html#what-is-a-statistical-model-1",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "What is a statistical model?",
+    "text": "What is a statistical model?\n\nA statistical model is a set of assumptions about the process that generated the data.\n\nFormally: a family of probability distributions \\(\\{f(y; \\theta) : \\theta \\in \\Theta\\}\\) indexed by a parameter \\(\\theta\\).\nWe assume the observed data are a draw from one member of that family, and we want to figure out which one.\n\nTwo things a model buys you:\n\nStructure – a way to pool information and extrapolate beyond exactly what you observed.\nA likelihood – an explicit statement of how probable your data are under any candidate \\(\\theta\\).\n\nTwo things it costs you:\n\nEvery assumption is a place where you can be wrong.\nModel-based answers are only as good as the model."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#what-is-a-statistical-model-2",
+    "href": "slides/week1/week1_intro_and_review.html#what-is-a-statistical-model-2",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "What is a statistical model?",
+    "text": "What is a statistical model?\n\nAll models are wrong, but some are useful.\n— George Box (1976)\n\n\nThe relevant question is never “is the model true?” (it isn’t)\nIt’s: is the model wrong in a way that matters for the question I’m asking?\n\nA misspecified likelihood can still give a consistent estimator of a well-defined estimand.\nOr it can give you a confidently wrong answer.\n\nMuch of this course is about developing the judgment to tell those two cases apart."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#what-is-a-model-good-for",
+    "href": "slides/week1/week1_intro_and_review.html#what-is-a-model-good-for",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "What is a model good for?",
+    "text": "What is a model good for?\n\nDescription: summarize a joint distribution\n\n“How does turnout vary with age, once we account for education?”\n\nPrediction: guess \\(Y\\) for a unit where we observe only \\(X\\)\n\n“What share of this state’s voters support the referendum?” (Week 7 – MRP)\n\nMeasurement: recover a latent quantity we never observe directly\n\n“How liberal is this Supreme Court justice?” (Week 9 – ideal points)\n\nCausal inference: a design identifies the estimand; a model does the adjustment\n\n“What would turnout have been under a different policy?” (Week 13)"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#two-cultures",
+    "href": "slides/week1/week1_intro_and_review.html#two-cultures",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Two cultures",
+    "text": "Two cultures\n\nBreiman (2001) draws a distinction between two ways of using models:\n\nData modeling: assume a stochastic model generated the data; estimate and interpret its parameters.\nAlgorithmic modeling: treat the data-generating process as unknown; find a function that predicts well.\n\nShmueli (2010) makes a related point: explaining and predicting are different goals and lead to different modeling choices.\n\nThe model with the lowest prediction error is often not the model with the most interpretable parameters.\n\nThis course walks from one end to the other:\n\nWeeks 2-9 are firmly “data modeling” – we write down a DGP.\nWeeks 10-12 are “algorithmic” – we care about fit, not parameters.\nWeek 13 shows how to use the second in service of the first."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#estimation-review",
+    "href": "slides/week1/week1_intro_and_review.html#estimation-review",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Estimation review",
+    "text": "Estimation review"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#random-variables",
+    "href": "slides/week1/week1_intro_and_review.html#random-variables",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Random variables",
+    "text": "Random variables\n\nUnderstanding the behavior and properties of random variables is at the core of statistical theory.\n(Simply put) a random variable \\(X\\) is a mapping from a sample space to the real number line\n\nRandom variables have a distribution (which we may or may not assume we know) defined by the cumulative distribution function (CDF)\n\n\\[F(x) = Pr(X \\le x)\\]"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#random-variables-1",
+    "href": "slides/week1/week1_intro_and_review.html#random-variables-1",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Random variables",
+    "text": "Random variables\n\nDiscrete random variables take on a countable number of values (e.g. a Bernoulli r.v. can take on 0 or 1) and have a probability mass function (PMF)\n\\[p(x) = Pr(X = x)\\]\nContinuous random variables take on an uncountable number of values (e.g. the Normal distribution on \\((-\\infty,  \\infty)\\)).\n\nNo PMF, but a density function (PDF) that integrates to a probability\n\n\\[Pr(X \\in \\mathcal{A}) = \\int_{\\mathcal{A}} f(x)dx\\]\nRemember: PMFs (and PDFs) sum (integrate) to \\(1\\) over the support of the random variable."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#expectations",
+    "href": "slides/week1/week1_intro_and_review.html#expectations",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Expectations",
+    "text": "Expectations\n\nOne important property of a random variable is its expectation \\(\\mathbb{E}[X]\\). We’ll often make assumptions about the expectation of an r.v. while remaining agnostic about its true distribution.\n\nThe expectation is a weighted average. For a discrete r.v. \\(X\\), we sum over the support of the random variable \\(\\mathcal{X}\\).\n\n\\[\\mathbb{E}[X] = \\sum_{x \\in \\mathcal{X}} x \\, Pr(X = x)\\]\nFor a continuous r.v. we have an integral\n\\[\\mathbb{E}[X] = \\int_{\\mathcal{X}} x f(x) dx\\]\nFun fact: we can get the expectation of any function \\(g(X)\\) just by plugging it into the integral\n\\[\\mathbb{E}[g(X)] = \\int_{\\mathcal{X}} g(x) f(x) dx\\]"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#expectations-1",
+    "href": "slides/week1/week1_intro_and_review.html#expectations-1",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Expectations",
+    "text": "Expectations\n\nYou’ll need to know some essential properties of expectations to simplify certain problems\nMost important: linearity. For any two random variables \\(X\\) and \\(Y\\) and constants \\(a\\) and \\(b\\)\n\\[\\mathbb{E}[aX + bY] = a\\mathbb{E}[X] + b\\mathbb{E}[Y]\\]\nNote that for a generic function \\(g(\\cdot)\\), \\(\\mathbb{E}[g(X)] \\neq g(\\mathbb{E}[X])\\). If \\(g(\\cdot)\\) is convex, then by Jensen’s inequality \\(\\mathbb{E}[g(X)] \\ge g(\\mathbb{E}[X])\\)\nFor a binary r.v. \\(X \\in \\{0, 1\\}\\), it’s helpful to remember the “fundamental bridge” between expectations and probability\n\\[\\mathbb{E}[X] = Pr(X = 1)\\]"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#variance",
+    "href": "slides/week1/week1_intro_and_review.html#variance",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Variance",
+    "text": "Variance\n\nWe also care about the spread of a random variable – how far is the average draw of \\(X\\) from its mean \\(\\mathbb{E}[X]\\)? One measure of this is the variance.\n\\[Var(X) = \\mathbb{E}[(X - \\mathbb{E}[X])^2]\\]\nAlso written as\n\\[Var(X) = \\mathbb{E}[X^2] - \\mathbb{E}[X]^2\\]\nNote that the square is a convex function, which means that by Jensen’s inequality \\(\\mathbb{E}[X^2] \\ge \\mathbb{E}[X]^2\\). Variances cannot be negative!\nWe also can define a covariance between two variables (does \\(X\\) take high values when \\(Y\\) takes high values?)\n\\[Cov(X, Y) = \\mathbb{E}\\left[(X - \\mathbb{E}[X])(Y - \\mathbb{E}[Y])\\right] = \\mathbb{E}[XY] - \\mathbb{E}[X]\\mathbb{E}[Y]\\]"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#variance-1",
+    "href": "slides/week1/week1_intro_and_review.html#variance-1",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Variance",
+    "text": "Variance\n\nVariances also have some useful properties.\nFor a constant \\(a\\)\n\\[Var(aX) = a^2Var(X)\\]\nFor any two random variables \\(X\\) and \\(Y\\)\n\\[Var(X + Y) = Var(X) + Var(Y) + 2Cov(X,Y)\\] \\[Var(X - Y) = Var(X) + Var(Y) - 2Cov(X,Y)\\]\nFor independent random variables \\(X\\) and \\(Y\\), \\(Cov(X,Y) = 0\\), so\n\\[Var(X + Y) = Var(X) + Var(Y)\\] \\[Var(X - Y) = Var(X) + Var(Y)\\]"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#conditional-probabilities",
+    "href": "slides/week1/week1_intro_and_review.html#conditional-probabilities",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Conditional probabilities",
+    "text": "Conditional probabilities\n\nWe will also spend a lot of time with conditional distributions and conditional expectations of random variables.\n\nWhat’s the probability that an individual enrolls in a job training program given their income?\n\nWe represent the conditioning set using a vertical bar, with the right-hand side denoting what is being conditioned on.\n\nFor example: \\(Pr(D_i = 1 | X_i = x)\\)"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#conditional-probabilities-1",
+    "href": "slides/week1/week1_intro_and_review.html#conditional-probabilities-1",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Conditional probabilities",
+    "text": "Conditional probabilities\n\nKey concept – dependence and independence. If two variables are independent, the distribution of one does not change conditional on the other. We’ll write this using the \\(\\perp \\!\\!\\! \\perp\\) notation.\n\n\\(Y_i \\perp \\!\\!\\! \\perp D_i\\) implies\n\n\\[f(Y_i | D_i = 1) = f(Y_i| D_i = 0) = f(Y_i)\\]\nTwo variables can be conditionally independent in that they are independent only when conditioning on a third variable. For example, we can have \\(Y_i \\cancel{\\perp \\!\\!\\! \\perp} D_i\\) but \\(Y_i \\perp \\!\\!\\! \\perp D_i | X_i\\). This implies\n\\[f(Y_i| D_i = 1, X_i = x) = f(Y_i| D_i = 0, X_i = x) = f(Y_i | X_i = x)\\]\nRemember: conditional independence does not imply independence, or vice-versa!"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#conditional-expectations",
+    "href": "slides/week1/week1_intro_and_review.html#conditional-expectations",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Conditional expectations",
+    "text": "Conditional expectations\n\nA central object of interest in statistics is the conditional expectation function (CEF) \\(\\mathbb{E}[Y | X]\\).\n\nGiven a particular value of \\(X\\), what is the expectation of \\(Y\\)?\nThe CEF is a function of \\(X\\).\n\nAll the usual properties of expectations apply to conditional expectations.\n\nWe also will often make use of the law of total expectation\n\n\\[\\mathbb{E}[Y] = \\mathbb{E}[\\mathbb{E}[Y|X]]\\]\nEasiest to think about this in terms of discrete r.v.s\n\\[\\mathbb{E}[Y] = \\sum_{x \\in \\mathcal{X}} \\mathbb{E}[Y | X = x] Pr(X = x)\\]"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#estimation",
+    "href": "slides/week1/week1_intro_and_review.html#estimation",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Estimation",
+    "text": "Estimation\n\nOne critical use of statistical theory is understanding how to learn about things we don’t observe using things that we do observe. We call this estimation.\n\ne.g. What is the share of voters in Wisconsin who will turn out in the 2026 election?\nWhat is the share of voters who turn out among those assigned to receive a GOTV phone call?\n\nEstimand: the unobserved quantity that we want to learn about. Often denoted via a Greek letter (e.g. \\(\\mu\\), \\(\\pi\\))\n\nOften a “population” characteristic that we want to learn about via a sample.\n\nAlthough recall causal estimands can’t be fully observed even in a finite sample!\n\nImportant to define your estimand well (Lundberg, Johnson, and Stewart 2021)."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#estimation-1",
+    "href": "slides/week1/week1_intro_and_review.html#estimation-1",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Estimation",
+    "text": "Estimation\n\nEstimator: the function of random variables that we will use to try to estimate the quantity of interest. Often denoted with a hat on the parameter of interest (e.g. \\(\\hat{\\mu}\\), \\(\\hat{\\pi}\\))\n\nWhy are the variables random?\n\nClassic inference: we have a random sample from the population – if we took another sample, we would obtain a different realization of our estimator.\nRandomization inference: we have a randomly assigned treatment – if we were to re-run the experiment, we would observe a different treatment/control allocation.\n\n\nEstimate: a single realization of our estimator (e.g. 0.3, 9.535)\n\nWe often report both point estimates (“best guess”) and interval estimates (e.g. confidence intervals).\nCareful not to confuse properties of estimators with properties of the estimates themselves."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#estimation-2",
+    "href": "slides/week1/week1_intro_and_review.html#estimation-2",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Estimation",
+    "text": "Estimation"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#estimation-3",
+    "href": "slides/week1/week1_intro_and_review.html#estimation-3",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Estimation",
+    "text": "Estimation\n\nThe classic estimation problem in statistics is to estimate some unknown population mean \\(\\mu\\) from an i.i.d. sample of \\(n\\) observations \\(Y_1, Y_2, \\dotsc, Y_n\\).\n\nWe assume that each \\(Y_i\\) is a draw from the target population with mean \\(\\mu\\) (identically distributed) – therefore \\(\\mathbb{E}[Y_i] = \\mu\\)\nWe’ll also assume that knowing \\(Y_i\\) tells us nothing about any other \\(Y_j\\): \\(Y_i \\perp \\!\\!\\! \\perp Y_j\\) (independently distributed) – this implies \\(Cov(Y_i, Y_j) = 0\\)\n\nOur estimand: \\(\\mu\\)\nOur estimator: the sample mean \\(\\hat{\\mu} = \\bar{Y} = \\frac{1}{n}\\sum_{i=1}^n Y_i\\)\nOur estimate: a particular realization of that estimator based on our observed sample (e.g. \\(0.4\\))"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#estimation-4",
+    "href": "slides/week1/week1_intro_and_review.html#estimation-4",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Estimation",
+    "text": "Estimation\n\nNote that our estimator is a random variable – it’s a function of \\(Y_i\\)s, which are random variables.\n\nTherefore it has an expectation \\(\\mathbb{E}[\\hat{\\mu}]\\) (assuming \\(Y_i\\) has an expectation)\nIt has a variance \\(Var(\\hat{\\mu})\\) (again, under regularity conditions)\nIt has a distribution (which we may or may not know)."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#estimation-5",
+    "href": "slides/week1/week1_intro_and_review.html#estimation-5",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Estimation",
+    "text": "Estimation\n\nHow do we know if we’ve picked a good estimator? Will it be close to the truth? Will it be systematically higher or lower than the target?\nWe want to derive some of its properties\n\nBias: \\(\\mathbb{E}[\\hat{\\mu}] - \\mu\\)\nVariance: \\(Var(\\hat{\\mu})\\)\nConsistency: does \\(\\hat{\\mu}\\) converge in probability to \\(\\mu\\) as \\(n\\) goes to infinity?\nAsymptotic distribution: is the sampling distribution of \\(\\hat{\\mu}\\) well approximated by a known distribution?"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#unbiasedness",
+    "href": "slides/week1/week1_intro_and_review.html#unbiasedness",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Unbiasedness",
+    "text": "Unbiasedness\n\nIs the expectation of \\(\\hat{\\mu}\\) equal to \\(\\mu\\)?\n\\[\\mathbb{E}[\\hat{\\mu}] = \\mathbb{E}\\left[\\frac{1}{n}\\sum_{i=1}^n Y_i\\right] = \\frac{1}{n}\\mathbb{E}\\left[\\sum_{i=1}^n Y_i\\right]\\]\nNext we use linearity of expectations\n\\[\\frac{1}{n}\\mathbb{E}\\left[\\sum_{i=1}^n Y_i\\right] = \\frac{1}{n}\\sum_{i=1}^n \\mathbb{E}\\left[Y_i\\right]\\]\nFinally, under our i.i.d. assumption\n\\[\\frac{1}{n}\\sum_{i=1}^n \\mathbb{E}\\left[Y_i\\right] = \\frac{1}{n}\\sum_{i=1}^n \\mu = \\frac{n \\mu}{n} = \\mu\\]\nTherefore the bias is \\(\\text{Bias}(\\hat{\\mu}) = \\mathbb{E}[\\hat{\\mu}] - \\mu = 0\\)"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#variance-2",
+    "href": "slides/week1/week1_intro_and_review.html#variance-2",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Variance",
+    "text": "Variance\n\nWhat is the variance of \\(\\hat{\\mu}\\)? Again, start by pulling out the constant.\n\\[Var(\\hat{\\mu}) = Var\\left[\\frac{1}{n}\\sum_{i=1}^n Y_i\\right] = \\frac{1}{n^2}Var\\left[\\sum_{i=1}^n Y_i\\right]\\]\nWe can further simplify by using our i.i.d. assumption. The variance of a sum of independent random variables is the sum of the variances.\n\\[\\frac{1}{n^2}Var\\left[\\sum_{i=1}^n Y_i\\right] = \\frac{1}{n^2}\\sum_{i=1}^n Var\\left[Y_i\\right]\\]\nAnd by “identically distributed”, \\(Var(Y_i) = \\sigma^2\\) for all \\(i\\)\n\\[\\frac{1}{n^2}\\sum_{i=1}^n Var\\left[Y_i\\right] = \\frac{1}{n^2}\\sum_{i=1}^n \\sigma^2 = \\frac{n\\sigma^2}{n^2} = \\frac{\\sigma^2}{n}\\]\nTherefore, the variance is \\(\\frac{\\sigma^2}{n}\\)"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#asymptotic-behavior",
+    "href": "slides/week1/week1_intro_and_review.html#asymptotic-behavior",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Asymptotic behavior",
+    "text": "Asymptotic behavior\n\nAs \\(n\\) gets large, what can we say about the estimator \\(\\hat{\\mu}\\)?\nFirst, we can show that it is consistent – it converges in probability to the true parameter \\(\\mu\\)\n\nUnbiasedness + a variance that goes to \\(0\\) as \\(n\\) gets large.\nSome estimators may be biased but have bias terms that go to \\(0\\) – if the variance also goes to \\(0\\), these are still consistent.\n\nSecond, we can say something about the distribution of \\(\\hat{\\mu}\\).\n\nRemember, we’ve only made assumptions about \\(\\mathbb{E}[Y_i]\\) and \\(Var(Y_i)\\) (that they exist). We have made no assumptions on the distribution of \\(Y_i\\). \\(Y_i\\) can be normal, Poisson, Bernoulli, or whatever!\nHowever, we know something about sums and means of random variables – they are well-approximated by a normal distribution. The Central Limit Theorem!\nSo in large samples, the sampling distribution of \\(\\hat{\\mu}\\) is close to normal. This lets us construct confidence intervals and do inference with this approximation and be confident that we won’t be far off."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#regression-review",
+    "href": "slides/week1/week1_intro_and_review.html#regression-review",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Regression review",
+    "text": "Regression review"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#regression-review-1",
+    "href": "slides/week1/week1_intro_and_review.html#regression-review-1",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Regression review",
+    "text": "Regression review\n\nRather than just estimating a population mean, we are more typically interested in some population conditional expectation \\(\\mathbb{E}[Y|\\mathbf{X}]\\)\n\n\\(Y_i\\): outcome/response/dependent variable\n\\(X_i\\): vector of regressors/independent variables\n\n“How does the expected value of \\(Y\\) differ across different values of \\(X\\)?”\nSuppose we observe \\(n\\) paired observations of \\(\\{Y_i, X_i\\}\\).\n\nHow do we construct a “good” estimator of \\(\\mathbb{E}[Y|\\mathbf{X}]\\)?\nWhat assumptions do we have to make to get…consistency…unbiasedness…efficiency?"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#regression-review-2",
+    "href": "slides/week1/week1_intro_and_review.html#regression-review-2",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Regression review",
+    "text": "Regression review\n\nConsider the ordinary least squares estimator \\(\\hat{\\beta}\\), which solves the minimization problem\n\\[\\hat{\\beta} = \\argmin_b \\ \\sum_{i=1}^n (Y_i - X_i b)^2\\]\nWe can do some algebra and find a closed form solution for this optimization problem\n\\[\\hat{\\beta} = (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}Y)\\]"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#regression-review-3",
+    "href": "slides/week1/week1_intro_and_review.html#regression-review-3",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Regression review",
+    "text": "Regression review\n\nAssumption 1: Linearity\n\\[Y = \\mathbf{X}\\beta + \\epsilon\\]\nAssumption 2: Strict exogeneity of the errors\n\\[\\mathbb{E}[\\epsilon | \\mathbf{X}] = 0\\]\nThese two imply a linear CEF\n\\[\\mathbb{E}[Y|\\mathbf{X}] = \\mathbf{X}\\beta = \\beta_0 + \\beta_1X_{1} + \\beta_2X_{2} + \\dotsc + \\beta_kX_{k}\\]\nBest case: our CEF is truly linear (by luck, or because we have a saturated model)\nUsual case: we’re at least consistent for the best linear approximation to the CEF"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#regression-review-4",
+    "href": "slides/week1/week1_intro_and_review.html#regression-review-4",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Regression review",
+    "text": "Regression review\n\nAssumption 3: No perfect collinearity\n\n\\(\\mathbf{X}^{\\prime}\\mathbf{X}\\) is invertible\n\\(\\mathbf{X}\\) has full column rank\n\nThis assumption is needed for identifiability – otherwise no unique solution to the least squares minimization problem exists!\nFails when one column can be written as a linear combination of the others\n\nOr when there are more regressors than observations, \\(k &gt; n\\)\nKeep this in mind – Week 10 is all about what to do when \\(k &gt; n\\)."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#regression-review-5",
+    "href": "slides/week1/week1_intro_and_review.html#regression-review-5",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Regression review",
+    "text": "Regression review\n\nUnder assumptions 1-3, our OLS estimator \\(\\hat{\\beta}\\) is unbiased and consistent for \\(\\beta\\)\nLet’s do a quick proof for unbiasedness\n\n\\[\\begin{align*}\\hat{\\beta} &= (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}Y)\\\\\n&= (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}(\\mathbf{X}\\beta + \\epsilon))\\\\\n&= (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\mathbf{X})\\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon)\\\\\n&= \\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon)\n\\end{align*}\\]\n\nThen we can obtain the conditional expectation \\(\\mathbb{E}[\\hat{\\beta} | \\mathbf{X}]\\)\n\n\\[\\begin{align*} \\mathbb{E}[\\hat{\\beta} | \\mathbf{X}] &= \\mathbb{E}\\bigg[\\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon) \\bigg| \\mathbf{X} \\bigg]\\\\\n&= \\mathbb{E}[\\beta | \\mathbf{X}] + \\mathbb{E}[(\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon) | \\mathbf{X}]\\\\\n&= \\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}\\mathbf{X}^{\\prime} \\mathbb{E}[\\epsilon | \\mathbf{X}]\\\\\n&= \\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}\\mathbf{X}^{\\prime}0\\\\\n&= \\beta\n\\end{align*}\\]"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#regression-review-6",
+    "href": "slides/week1/week1_intro_and_review.html#regression-review-6",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Regression review",
+    "text": "Regression review\n\nLastly, by the law of total expectation\n\\[\\mathbb{E}[\\hat{\\beta}] = \\mathbb{E}[\\mathbb{E}[\\hat{\\beta}|\\mathbf{X}]]\\]\nTherefore\n\\[\\mathbb{E}[\\hat{\\beta}] = \\mathbb{E}[\\beta] = \\beta\\]\nConsistency requires us to show the convergence of \\((\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon)\\) to \\(0\\) in probability as \\(n \\to \\infty\\).\n\nThis actually requires weaker assumptions: \\(\\mathbb{E}[\\mathbf{X}^{\\prime}\\epsilon] = 0\\), but not necessarily \\(\\mathbb{E}[\\epsilon | \\mathbf{X}] = 0\\).\n\nBut what have we not assumed?\n\nAnything about the distribution of the errors!"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#regression-review-7",
+    "href": "slides/week1/week1_intro_and_review.html#regression-review-7",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Regression review",
+    "text": "Regression review\n\nAssumption 4 – Spherical errors\n\n\\[Var(\\epsilon | \\mathbf{X}) = \\begin{bmatrix}\n\\sigma^2 & 0 & \\cdots & 0\\\\\n0 & \\sigma^2 & \\cdots & 0\\\\\n\\vdots & \\vdots & \\ddots & \\vdots \\\\\n0 & 0 & \\cdots & \\sigma^2\n\\end{bmatrix} =  \\sigma^2 \\mathbf{I}\\]\n\nBenefits\n\nSimple, unbiased estimator for the variance of \\(\\hat{\\beta}\\)\nCompletes the Gauss-Markov assumptions \\(\\leadsto\\) OLS is BLUE (Best Linear Unbiased Estimator)\n\nDrawbacks\n\nBasically never true"
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#regression-review-8",
+    "href": "slides/week1/week1_intro_and_review.html#regression-review-8",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Regression review",
+    "text": "Regression review\n\nGood news! We can relax homoskedasticity (but still keep no correlation) and do inference on the variance of \\(\\hat{\\beta}\\)\n\\[Var(\\epsilon | \\mathbf{X}) = \\begin{bmatrix}\n\\sigma^2_1 & 0 & \\cdots & 0\\\\\n0 & \\sigma^2_2 & \\cdots & 0\\\\\n\\vdots & \\vdots & \\ddots & \\vdots \\\\\n0 & 0 & \\cdots & \\sigma^2_n\n\\end{bmatrix}\\]\n“Robust” standard errors using the Eicker-Huber-White “sandwich” estimator – consistent but not unbiased for the true sampling variance of \\(\\hat{\\beta}\\)\n\\[\\widehat{Var(\\hat{\\beta})} = (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1} \\mathbf{X}^{\\prime}\\hat{\\Sigma}\\mathbf{X}(\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}\\]\n\n\\(\\hat{\\Sigma}\\) is our estimate of the variance-covariance matrix, using the squared residuals on the diagonal\nExtensions to “clustered” standard errors allow arbitrary correlation within groups."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#regression-review-9",
+    "href": "slides/week1/week1_intro_and_review.html#regression-review-9",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Regression review",
+    "text": "Regression review\n\nAssumption 5 – Normality of the errors\n\\[\\epsilon | \\mathbf{X} \\sim \\mathcal{N}(0, \\sigma^2\\mathbf{I})\\]\nNot necessary even for the Gauss-Markov result\nNot needed to do asymptotic inference on \\(\\hat{\\beta}\\)\n\nWhy? Central Limit Theorem!\n\nBenefits?\n\nFinite-sample inference.\n\nAnd: this is the assumption that turns OLS into a likelihood model.\n\nWhich is exactly where we pick up next week."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#regression-review-10",
+    "href": "slides/week1/week1_intro_and_review.html#regression-review-10",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Regression review",
+    "text": "Regression review\n\nWhat do we need for OLS to be consistent for the “best linear approximation” to the CEF?\n\nVery little!\n\nWhat do we need for OLS to be consistent and unbiased for the conditional expectation function?\n\nA truly linear CEF\nBut still no assumptions about the outcome distribution!\n\nWhat do we need to do inference on \\(\\hat{\\beta}\\)?\n\nWe almost never assume homoskedasticity, because “robust” SE estimators are ubiquitous.\nEven some forms of error correlation are permitted (“cluster”-robust SEs).\nSample sizes are usually large enough that the Central Limit Theorem makes a normal sampling distribution a reasonable approximation."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#next-week",
+    "href": "slides/week1/week1_intro_and_review.html#next-week",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Next week",
+    "text": "Next week\n\nParametric models\n\nWhat are we buying and what are we paying when we assume a distribution for \\(Y\\)?\n\nThe likelihood function\n\nGiven the data, how relatively plausible is each candidate value of \\(\\theta\\)?\n\nMaximum likelihood estimation\n\nFinding the \\(\\hat{\\theta}\\) that maximizes the likelihood – analytically and numerically.\n\nReadings: Chapter 5 of Aronow and Miller (2019) and Chapter 6 of Evans and Rosenthal (2010)\nProblem Set 1 is assigned today and due Wednesday, September 23."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#references",
+    "href": "slides/week1/week1_intro_and_review.html#references",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "References",
+    "text": "References\n\n\nAronow, P. M., and Benjamin T. Miller. 2019. Foundations of Agnostic Statistics. Cambridge: Cambridge University Press. https://doi.org/10.1017/9781316831762.\n\n\nBox, George E. P. 1976. “Science and Statistics.” Journal of the American Statistical Association 71 (356): 791–99. https://doi.org/10.1080/01621459.1976.10480949.\n\n\nBreiman, Leo. 2001. “Statistical Modeling: The Two Cultures.” Statistical Science 16 (3): 199–231. https://doi.org/10.1214/ss/1009213726.\n\n\nEvans, Michael J., and Jeffrey S. Rosenthal. 2010. Probability and Statistics: The Science of Uncertainty. 2nd ed. New York: W.H. Freeman. https://utstat.toronto.edu/mikevans/jeffrosenthal/.\n\n\nGelman, Andrew, John B. Carlin, Hal S. Stern, David B. Dunson, Aki Vehtari, and Donald B. Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton, FL: Chapman; Hall/CRC. http://www.stat.columbia.edu/~gelman/book/.\n\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press. https://avehtari.github.io/ROS-Examples/index.html.\n\n\nHealy, Kieran. 2025. Modern Plain Text Computing. https://mptc.io/.\n\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer. https://www.statlearning.com/.\n\n\nKing, Gary. 1995. “Replication, Replication.” PS: Political Science & Politics 28 (3): 444–52. https://doi.org/10.2307/420301.\n\n\nLundberg, Ian, Rebecca Johnson, and Brandon M. Stewart. 2021. “What Is Your Estimand? Defining the Target Quantity Connects Statistical Evidence to Theory.” American Sociological Review 86 (3): 532–65. https://doi.org/10.1177/00031224211004187.\n\n\nMcElreath, Richard. 2020. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd ed. Boca Raton, FL: Chapman; Hall/CRC. https://xcelab.net/rm/.\n\n\nShmueli, Galit. 2010. “To Explain or to Predict?” Statistical Science 25 (3): 289–310. https://doi.org/10.1214/10-STS330."
+  },
+  {
+    "objectID": "resources.html",
+    "href": "resources.html",
+    "title": "Resources",
+    "section": "",
+    "text": "These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. Regression and Other Stories. Cambridge University Press, 2020.\n\nFree online version and examples\n\nGelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. Bayesian Data Analysis. 3rd Edition. Chapman and Hall/CRC, 2013.\n\nFree PDF available\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. An Introduction to Statistical Learning. Springer, 2013.\n\nFree PDF available\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd Edition. Springer, 2009.\n\nFree PDF available\n\nMcElreath, Richard. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd Edition. Chapman and Hall/CRC, 2020.\n\nUW-Madison library eBook\nCourse materials and lectures\n\nAronow, P. M., and Benjamin T. Miller. Foundations of Agnostic Statistics. Cambridge University Press, 2019.\n\nUW-Madison library eBook\n\nEvans, Michael J., and Jeffrey S. Rosenthal. Probability and Statistics: The Science of Uncertainty. 2nd Edition. W.H. Freeman, 2010.\n\nFree PDF available\n\nRasmussen, Carl Edward, and Christopher K. I. Williams. Gaussian Processes for Machine Learning. MIT Press, 2006.\n\nFree PDF available"
+  },
+  {
+    "objectID": "resources.html#textbooks",
+    "href": "resources.html#textbooks",
+    "title": "Resources",
+    "section": "",
+    "text": "These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. Regression and Other Stories. Cambridge University Press, 2020.\n\nFree online version and examples\n\nGelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. Bayesian Data Analysis. 3rd Edition. Chapman and Hall/CRC, 2013.\n\nFree PDF available\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. An Introduction to Statistical Learning. Springer, 2013.\n\nFree PDF available\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd Edition. Springer, 2009.\n\nFree PDF available\n\nMcElreath, Richard. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd Edition. Chapman and Hall/CRC, 2020.\n\nUW-Madison library eBook\nCourse materials and lectures\n\nAronow, P. M., and Benjamin T. Miller. Foundations of Agnostic Statistics. Cambridge University Press, 2019.\n\nUW-Madison library eBook\n\nEvans, Michael J., and Jeffrey S. Rosenthal. Probability and Statistics: The Science of Uncertainty. 2nd Edition. W.H. Freeman, 2010.\n\nFree PDF available\n\nRasmussen, Carl Edward, and Christopher K. I. Williams. Gaussian Processes for Machine Learning. MIT Press, 2006.\n\nFree PDF available"
+  },
+  {
+    "objectID": "resources.html#software",
+    "href": "resources.html#software",
+    "title": "Resources",
+    "section": "Software",
+    "text": "Software\n\nR and RStudio\nThis course uses R for all programming assignments. You are welcome to use the RStudio Interactive Development Environment (IDE) to write code and edit the assignment write-up. Due to the extensive integration of Quarto into Posit-developed IDEs, I encourage using either RStudio or the more recent Positron IDE.\n\nR: Download from https://www.r-project.org\nRStudio: Download from https://posit.co/download/rstudio-desktop/\nPositron: Download from https://positron.posit.co/\n\n\nRecommended Guides for R Programming\n\nR For Data Science Available at https://r4ds.hadley.nz/\nData Visualization: A Practical Introduction Available at https://socviz.co/\n\n\n\n\nStan\nWe will use Stan for specifying and estimating Bayesian models. Stan is written in C++ but has bindings for a variety of programming languages. In this course we will use two interfaces to Stan from R: RStan and brms. Running Stan locally requires a working C++ toolchain – consult the installation guide for the specific requirements of your operating system.\n\nInstallation guide: https://mc-stan.org/install/\nStan user’s guide: https://mc-stan.org/docs/stan-users-guide/\nbrms: https://paulbuerkner.com/brms/\n\n\n\nQuarto and Markdown\nThe assignments are distributed as .qmd Quarto files. Quarto is the successor to R Markdown and lets you present your analysis, code, figures and written discussion all in a single document. It uses Markdown syntax for formatting text and supports embedded R code chunks that execute when you render the document.\nTo complete assignments, you will edit the provided .qmd file, adding your code and written responses, then render it to an HTML file for submission. Both your .html output and .qmd file will be submitted via Gradescope.\n\nQuarto: Download from https://quarto.org/docs/get-started/\nQuarto Guide: https://quarto.org/docs/guide/\nMarkdown Basics: https://quarto.org/docs/authoring/markdown-basics.html\nNote also the chapter on Quarto in R For Data Science"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "PoliSci 818",
+    "section": "",
+    "text": "Data Analysis with Statistical Models\nLikelihood, Bayesian and Machine Learning methods for description and prediction\nPoliSci 818 • Fall 2026University of Wisconsin-Madison\n\n\n\n\n\n\n\nInstructor\n\n   Anton Strezhnev\n   North Hall 322D\n   strezhnev@wisc.edu\n\n\n\nCourse details\n\n   Mondays & Wednesdays\n   9/9/2026 - 12/9/2026\n   9:30am - 10:45am\n   Sterling Hall 1339\n\n\n\nContacting me\nSlack is the best way to get in touch with me. My dedicated office hours are 9AM-11AM on Tuesdays if you want to meet in-person. I am also generally in my office on weekdays during normal hours and my door is open, so you are welcome to drop in. You can also feel free to contact me to confirm availability or to schedule a virtual meeting via Zoom."
+  },
+  {
+    "objectID": "assignments.html",
+    "href": "assignments.html",
+    "title": "Assignments",
+    "section": "",
+    "text": "Assignment\nAssigned\nDue\n\n\n\n\nProblem Set 1\nSept 9 (Week 1)\nSept 23 (Week 3)\n\n\nProblem Set 2\nSept 23 (Week 3)\nOct 7 (Week 5)\n\n\nMidterm 1\n–\nIn class, Oct 7 (Week 5)\n\n\nProblem Set 3\nOct 7 (Week 5)\nOct 21 (Week 7)\n\n\nReplication project memo\n–\nOct 21 (Week 7)\n\n\nProblem Set 4\nOct 21 (Week 7)\nNov 4 (Week 9)\n\n\nMidterm 2\n–\nIn class, Nov 4 (Week 9)\n\n\nReplication poster\n–\nMEAD poster session, Fri Dec 4\n\n\n\nAll problem sets are assigned and due on Wednesdays. The replication project memo is ungraded; see the Syllabus for what it should contain."
+  },
+  {
+    "objectID": "assignments.html#schedule",
+    "href": "assignments.html#schedule",
+    "title": "Assignments",
+    "section": "",
+    "text": "Assignment\nAssigned\nDue\n\n\n\n\nProblem Set 1\nSept 9 (Week 1)\nSept 23 (Week 3)\n\n\nProblem Set 2\nSept 23 (Week 3)\nOct 7 (Week 5)\n\n\nMidterm 1\n–\nIn class, Oct 7 (Week 5)\n\n\nProblem Set 3\nOct 7 (Week 5)\nOct 21 (Week 7)\n\n\nReplication project memo\n–\nOct 21 (Week 7)\n\n\nProblem Set 4\nOct 21 (Week 7)\nNov 4 (Week 9)\n\n\nMidterm 2\n–\nIn class, Nov 4 (Week 9)\n\n\nReplication poster\n–\nMEAD poster session, Fri Dec 4\n\n\n\nAll problem sets are assigned and due on Wednesdays. The replication project memo is ungraded; see the Syllabus for what it should contain."
+  },
+  {
+    "objectID": "assignments.html#problem-sets",
+    "href": "assignments.html#problem-sets",
+    "title": "Assignments",
+    "section": "Problem Sets",
+    "text": "Problem Sets\nProblem sets are distributed as .qmd files along with their rendered .html form. You should edit the provided .qmd file and render to .html when submitting the assignment. Additional files (e.g. datasets) are located in sub-folders. For convenience, all the combined files are also distributed as a .zip compressed archive."
+  },
+  {
+    "objectID": "assignments.html#exams",
+    "href": "assignments.html#exams",
+    "title": "Assignments",
+    "section": "Exams",
+    "text": "Exams\nBoth exams are in person, closed-book, pen-and-paper examinations involving both theory questions and practical interpretation of sample code and results. Together they are worth 40% of the course grade. There is no final exam during the university exam period.\n\nMidterm 1: in class on Wednesday, October 7, covering material through Week 4.\nMidterm 2: in class on Wednesday, November 4, covering material from Weeks 5-8."
+  },
+  {
+    "objectID": "lectures.html",
+    "href": "lectures.html",
+    "title": "Lectures",
+    "section": "",
+    "text": "Lecture slides are available as self-contained .html files made with RevealJS from a Quarto .qmd file. You can choose to print these to a PDF document by using the “PDF Export Mode” in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the .qmd file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday’s lectures.\nLinks become active as the materials for each week are posted.\n\n\n\n\nWeek 1 Github Repository\nWeek 1 .html slides\n\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted"
+  },
+  {
+    "objectID": "lectures.html#lecture-slides",
+    "href": "lectures.html#lecture-slides",
+    "title": "Lectures",
+    "section": "",
+    "text": "Lecture slides are available as self-contained .html files made with RevealJS from a Quarto .qmd file. You can choose to print these to a PDF document by using the “PDF Export Mode” in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the .qmd file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday’s lectures.\nLinks become active as the materials for each week are posted.\n\n\n\n\nWeek 1 Github Repository\nWeek 1 .html slides\n\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted"
+  },
+  {
     "objectID": "schedule.html",
     "href": "schedule.html",
     "title": "Schedule",
@@ -180,76 +628,6 @@
     "title": "Schedule",
     "section": "Week 14: Working with “Big” Datasets",
     "text": "Week 14: Working with “Big” Datasets\nMonday, December 7 & Wednesday, December 9\nTopics:\n\nEstimation with out-of-memory data\nStochastic gradient descent\nLossless compression in regression\n\nReadings:\n\nToulis, Panos, and Edoardo M. Airoldi. 2015. “Scalable Estimation Strategies Based on Stochastic Approximations: Classical Results and New Insights.” Statistics and Computing 25 (4): 781-795.\nWong, Jeffrey, Eskil Forsell, Randall A. Lewis, Tobias Mao, and Matthew Wardrop. 2021. “You Only Compress Once: Optimal Data Compression for Estimating Linear Models.” arXiv preprint arXiv:2102.11297."
-  },
-  {
-    "objectID": "lectures.html",
-    "href": "lectures.html",
-    "title": "Lectures",
-    "section": "",
-    "text": "Lecture slides are available as self-contained .html files made with RevealJS from a Quarto .qmd file. You can choose to print these to a PDF document by using the “PDF Export Mode” in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the .qmd file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday’s lectures.\nLinks become active as the materials for each week are posted.\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted"
-  },
-  {
-    "objectID": "lectures.html#lecture-slides",
-    "href": "lectures.html#lecture-slides",
-    "title": "Lectures",
-    "section": "",
-    "text": "Lecture slides are available as self-contained .html files made with RevealJS from a Quarto .qmd file. You can choose to print these to a PDF document by using the “PDF Export Mode” in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the .qmd file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday’s lectures.\nLinks become active as the materials for each week are posted.\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted"
-  },
-  {
-    "objectID": "assignments.html",
-    "href": "assignments.html",
-    "title": "Assignments",
-    "section": "",
-    "text": "Assignment\nAssigned\nDue\n\n\n\n\nProblem Set 1\nSept 9 (Week 1)\nSept 23 (Week 3)\n\n\nProblem Set 2\nSept 23 (Week 3)\nOct 7 (Week 5)\n\n\nMidterm 1\n–\nIn class, Oct 7 (Week 5)\n\n\nProblem Set 3\nOct 7 (Week 5)\nOct 21 (Week 7)\n\n\nReplication project memo\n–\nOct 21 (Week 7)\n\n\nProblem Set 4\nOct 21 (Week 7)\nNov 4 (Week 9)\n\n\nMidterm 2\n–\nIn class, Nov 4 (Week 9)\n\n\nReplication poster\n–\nMEAD poster session, Fri Dec 4\n\n\n\nAll problem sets are assigned and due on Wednesdays. The replication project memo is ungraded; see the Syllabus for what it should contain."
-  },
-  {
-    "objectID": "assignments.html#schedule",
-    "href": "assignments.html#schedule",
-    "title": "Assignments",
-    "section": "",
-    "text": "Assignment\nAssigned\nDue\n\n\n\n\nProblem Set 1\nSept 9 (Week 1)\nSept 23 (Week 3)\n\n\nProblem Set 2\nSept 23 (Week 3)\nOct 7 (Week 5)\n\n\nMidterm 1\n–\nIn class, Oct 7 (Week 5)\n\n\nProblem Set 3\nOct 7 (Week 5)\nOct 21 (Week 7)\n\n\nReplication project memo\n–\nOct 21 (Week 7)\n\n\nProblem Set 4\nOct 21 (Week 7)\nNov 4 (Week 9)\n\n\nMidterm 2\n–\nIn class, Nov 4 (Week 9)\n\n\nReplication poster\n–\nMEAD poster session, Fri Dec 4\n\n\n\nAll problem sets are assigned and due on Wednesdays. The replication project memo is ungraded; see the Syllabus for what it should contain."
-  },
-  {
-    "objectID": "assignments.html#problem-sets",
-    "href": "assignments.html#problem-sets",
-    "title": "Assignments",
-    "section": "Problem Sets",
-    "text": "Problem Sets\nProblem sets are distributed as .qmd files along with their rendered .html form. You should edit the provided .qmd file and render to .html when submitting the assignment. Additional files (e.g. datasets) are located in sub-folders. For convenience, all the combined files are also distributed as a .zip compressed archive."
-  },
-  {
-    "objectID": "assignments.html#exams",
-    "href": "assignments.html#exams",
-    "title": "Assignments",
-    "section": "Exams",
-    "text": "Exams\nBoth exams are in person, closed-book, pen-and-paper examinations involving both theory questions and practical interpretation of sample code and results. Together they are worth 40% of the course grade. There is no final exam during the university exam period.\n\nMidterm 1: in class on Wednesday, October 7, covering material through Week 4.\nMidterm 2: in class on Wednesday, November 4, covering material from Weeks 5-8."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "PoliSci 818",
-    "section": "",
-    "text": "Data Analysis with Statistical Models\nLikelihood, Bayesian and Machine Learning methods for description and prediction\nPoliSci 818 • Fall 2026University of Wisconsin-Madison\n\n\n\n\n\n\n\nInstructor\n\n   Anton Strezhnev\n   North Hall 322D\n   strezhnev@wisc.edu\n\n\n\nCourse details\n\n   Mondays & Wednesdays\n   9/9/2026 - 12/9/2026\n   9:30am - 10:45am\n   Sterling Hall 1339\n\n\n\nContacting me\nSlack is the best way to get in touch with me. My dedicated office hours are 9AM-11AM on Tuesdays if you want to meet in-person. I am also generally in my office on weekdays during normal hours and my door is open, so you are welcome to drop in. You can also feel free to contact me to confirm availability or to schedule a virtual meeting via Zoom."
-  },
-  {
-    "objectID": "resources.html",
-    "href": "resources.html",
-    "title": "Resources",
-    "section": "",
-    "text": "These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. Regression and Other Stories. Cambridge University Press, 2020.\n\nFree online version and examples\n\nGelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. Bayesian Data Analysis. 3rd Edition. Chapman and Hall/CRC, 2013.\n\nFree PDF available\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. An Introduction to Statistical Learning. Springer, 2013.\n\nFree PDF available\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd Edition. Springer, 2009.\n\nFree PDF available\n\nMcElreath, Richard. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd Edition. Chapman and Hall/CRC, 2020.\n\nUW-Madison library eBook\nCourse materials and lectures\n\nAronow, P. M., and Benjamin T. Miller. Foundations of Agnostic Statistics. Cambridge University Press, 2019.\n\nUW-Madison library eBook\n\nEvans, Michael J., and Jeffrey S. Rosenthal. Probability and Statistics: The Science of Uncertainty. 2nd Edition. W.H. Freeman, 2010.\n\nFree PDF available\n\nRasmussen, Carl Edward, and Christopher K. I. Williams. Gaussian Processes for Machine Learning. MIT Press, 2006.\n\nFree PDF available"
-  },
-  {
-    "objectID": "resources.html#textbooks",
-    "href": "resources.html#textbooks",
-    "title": "Resources",
-    "section": "",
-    "text": "These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. Regression and Other Stories. Cambridge University Press, 2020.\n\nFree online version and examples\n\nGelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. Bayesian Data Analysis. 3rd Edition. Chapman and Hall/CRC, 2013.\n\nFree PDF available\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. An Introduction to Statistical Learning. Springer, 2013.\n\nFree PDF available\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd Edition. Springer, 2009.\n\nFree PDF available\n\nMcElreath, Richard. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd Edition. Chapman and Hall/CRC, 2020.\n\nUW-Madison library eBook\nCourse materials and lectures\n\nAronow, P. M., and Benjamin T. Miller. Foundations of Agnostic Statistics. Cambridge University Press, 2019.\n\nUW-Madison library eBook\n\nEvans, Michael J., and Jeffrey S. Rosenthal. Probability and Statistics: The Science of Uncertainty. 2nd Edition. W.H. Freeman, 2010.\n\nFree PDF available\n\nRasmussen, Carl Edward, and Christopher K. I. Williams. Gaussian Processes for Machine Learning. MIT Press, 2006.\n\nFree PDF available"
-  },
-  {
-    "objectID": "resources.html#software",
-    "href": "resources.html#software",
-    "title": "Resources",
-    "section": "Software",
-    "text": "Software\n\nR and RStudio\nThis course uses R for all programming assignments. You are welcome to use the RStudio Interactive Development Environment (IDE) to write code and edit the assignment write-up. Due to the extensive integration of Quarto into Posit-developed IDEs, I encourage using either RStudio or the more recent Positron IDE.\n\nR: Download from https://www.r-project.org\nRStudio: Download from https://posit.co/download/rstudio-desktop/\nPositron: Download from https://positron.posit.co/\n\n\nRecommended Guides for R Programming\n\nR For Data Science Available at https://r4ds.hadley.nz/\nData Visualization: A Practical Introduction Available at https://socviz.co/\n\n\n\n\nStan\nWe will use Stan for specifying and estimating Bayesian models. Stan is written in C++ but has bindings for a variety of programming languages. In this course we will use two interfaces to Stan from R: RStan and brms. Running Stan locally requires a working C++ toolchain – consult the installation guide for the specific requirements of your operating system.\n\nInstallation guide: https://mc-stan.org/install/\nStan user’s guide: https://mc-stan.org/docs/stan-users-guide/\nbrms: https://paulbuerkner.com/brms/\n\n\n\nQuarto and Markdown\nThe assignments are distributed as .qmd Quarto files. Quarto is the successor to R Markdown and lets you present your analysis, code, figures and written discussion all in a single document. It uses Markdown syntax for formatting text and supports embedded R code chunks that execute when you render the document.\nTo complete assignments, you will edit the provided .qmd file, adding your code and written responses, then render it to an HTML file for submission. Both your .html output and .qmd file will be submitted via Gradescope.\n\nQuarto: Download from https://quarto.org/docs/get-started/\nQuarto Guide: https://quarto.org/docs/guide/\nMarkdown Basics: https://quarto.org/docs/authoring/markdown-basics.html\nNote also the chapter on Quarto in R For Data Science"
   },
   {
     "objectID": "staff.html",
