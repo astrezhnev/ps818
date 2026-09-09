@@ -52,7 +52,7 @@ options(digits=3)
 - This week
   - **Introductions** + course logistics
   - What is a statistical model and what is it good for?
-  - Review: the conditional expectation function and linear regression
+  - Review of regression
 - Next week
   - Parametric models and the **likelihood function**
   - Maximum likelihood estimation
