@@ -88,7 +88,7 @@
     "href": "slides/week1/week1_intro_and_review.html#week-overview",
     "title": "Week 1: Course Introduction and Review",
     "section": "Week overview",
-    "text": "Week overview\n\nThis week\n\nIntroductions + course logistics\nWhat is a statistical model and what is it good for?\nReview: the conditional expectation function and linear regression\n\nNext week\n\nParametric models and the likelihood function\nMaximum likelihood estimation\n\nLong-run\n\nlikelihood \\(\\to\\) Bayes \\(\\to\\) semi-/non-parametrics"
+    "text": "Week overview\n\nThis week\n\nIntroductions + course logistics\nWhat is a statistical model and what is it good for?\nReview of regression\n\nNext week\n\nParametric models and the likelihood function\nMaximum likelihood estimation\n\nLong-run\n\nlikelihood \\(\\to\\) Bayes \\(\\to\\) semi-/non-parametrics"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#course-overview",
