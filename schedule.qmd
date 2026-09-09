@@ -19,8 +19,7 @@ There is **no class during the first week of instruction** due to APSA and Labor
 **Topics:**
 
 - What is a statistical model and what is it good for?
-- Review of estimands, estimators and their properties
-- Review of linear regression
+- Review of regression
 
 **Readings:**
 
