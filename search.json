@@ -81,21 +81,21 @@
     "href": "slides/week1/week1_intro_and_review.html#welcome",
     "title": "Week 1: Course Introduction and Review",
     "section": "Welcome!",
-    "text": "Welcome!\n\\[\n  \\require{cancel}\n  \\DeclareMathOperator*{\\argmin}{arg\\,min}\n\\]\n\\[\n\\DeclareMathOperator*{\\argmax}{arg\\,max}\n\\]"
+    "text": "Welcome!\n\n\\[\n\\DeclareMathOperator*{\\argmin}{arg\\,min}\n\\DeclareMathOperator*{\\argmax}{arg\\,max}\n\\]"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#week-overview",
     "href": "slides/week1/week1_intro_and_review.html#week-overview",
     "title": "Week 1: Course Introduction and Review",
     "section": "Week overview",
-    "text": "Week overview\n\nThis week\n\nIntroductions + course logistics\nWhat is a statistical model and what is it good for?\nReview: estimands, estimators, and linear regression\n\nNext week\n\nParametric models and the likelihood function\nMaximum likelihood estimation\n\nLong-run\n\nlikelihood \\(\\to\\) Bayes \\(\\to\\) flexible regression"
+    "text": "Week overview\n\nThis week\n\nIntroductions + course logistics\nWhat is a statistical model and what is it good for?\nReview: the conditional expectation function and linear regression\n\nNext week\n\nParametric models and the likelihood function\nMaximum likelihood estimation\n\nLong-run\n\nlikelihood \\(\\to\\) Bayes \\(\\to\\) semi-/non-parametrics"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#course-overview",
     "href": "slides/week1/week1_intro_and_review.html#course-overview",
     "title": "Week 1: Course Introduction and Review",
     "section": "Course Overview",
-    "text": "Course Overview\n\nInstructor: Anton Strezhnev\nLogistics:\n\nLectures Mon/Wed - 9:30am-10:45am, Sterling Hall 1339\n4 Problem Sets (~ 2 weeks each)\n2 in-class midterms (October 7, November 4)\nReplication project poster (December 4th)\nNo final exam during the university exam period"
+    "text": "Course Overview\n\nInstructor: Anton Strezhnev\nLogistics:\n\nLectures Mon/Wed - 9:30am-10:45am, Sterling Hall 1339\n4 Problem Sets (~ 2 weeks each)\n2 in-class midterms (October 7, November 4)\nReplication project poster (December 4th)"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#course-overview-1",
@@ -123,7 +123,7 @@
     "href": "slides/week1/week1_intro_and_review.html#course-workflow-1",
     "title": "Week 1: Course Introduction and Review",
     "section": "Course workflow",
-    "text": "Course workflow\n\nProblem sets (20% of your grade)\n\nFour problem sets, each covering roughly a two-week block of material.\nMeant as a check on your understanding of the material and a way of communicating with me about the course.\nDesigned to be challenging – I expect you to find some questions hard.\nCollaboration is strongly encouraged – ask and answer questions on Slack.\n\nBut write up your own answers and your own code.\n\nDistributed as .qmd + rendered .html; submit both on Gradescope.\nGraded holistically on a plus/check/minus system."
+    "text": "Course workflow\n\nProblem sets (20% of your grade)\n\nFour problem sets, each covering roughly a two-week block of material.\nMeant as a check on your understanding of the material and a way of communicating with me about the course.\nCollaboration is strongly encouraged – ask and answer questions on Slack.\n\nBut write up your own answers and your own code.\n\nDistributed as .qmd + rendered .html; submit both on Gradescope.\nGraded holistically on a plus/check/minus system."
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#course-workflow-2",
@@ -137,14 +137,14 @@
     "href": "slides/week1/week1_intro_and_review.html#course-workflow-3",
     "title": "Week 1: Course Introduction and Review",
     "section": "Course workflow",
-    "text": "Course workflow\n\nReplication project (30% of your grade)\n\nWork in pairs to replicate and extend a published paper.\nStart by reading King (1995) on why we do this.\nSteps: find a paper \\(\\to\\) obtain the data \\(\\to\\) reproduce the result \\(\\to\\) extend it \\(\\to\\) write it up.\n\nThe extension is where this course comes in: flexible regression adjustment, a better-specified likelihood, a multilevel model, additional confounders…\n\nUngraded check-in memo due October 21 – shows me you’ve replicated something and have a plan.\nPresented as a poster at the MEAD graduate poster session, December 4th."
+    "text": "Course workflow\n\nReplication project (30% of your grade)\n\nWork in pairs to replicate and extend a published paper.\nStart by reading King (1995) on why we do this.\nSteps: find a paper \\(\\to\\) obtain the data \\(\\to\\) reproduce the result \\(\\to\\) extend it \\(\\to\\) write it up.\n\nThe extension is where this course comes in: flexible regression adjustment, different likelihood model, adding multilevel structure, additional confounders…\n\nUngraded check-in memo due October 21\nPresented as a poster at the MEAD graduate poster session, December 4th."
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#course-workflow-4",
     "href": "slides/week1/week1_intro_and_review.html#course-workflow-4",
     "title": "Week 1: Course Introduction and Review",
     "section": "Course workflow",
-    "text": "Course workflow\n\nParticipation (10% of your grade)\n\nIt is important that you actively engage with lecture – ask and answer questions.\nDo the reading!\nParticipating on Slack counts towards this as well, as does attending MEAD talks.\n\nModels, Experiments and Data (MEAD) workshop\n\nCheck out the Fall 2026 schedule: https://sites.google.com/view/meadwisc/home"
+    "text": "Course workflow\n\nParticipation (10% of your grade)\n\nIt is important that you actively engage with lecture – ask and answer questions.\nParticipating on Slack counts towards this as well, as does attending MEAD talks.\n\nModels, Experiments and Data (MEAD) workshop\n\nCheck out the Fall 2026 schedule: https://sites.google.com/view/meadwisc/home"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#assignment-timeline",
@@ -165,14 +165,14 @@
     "href": "slides/week1/week1_intro_and_review.html#statistical-computing",
     "title": "Week 1: Course Introduction and Review",
     "section": "Statistical computing",
-    "text": "Statistical computing\n\nAll of the work in this course is done in \n\nWe will implement estimators from scratch – optimizers, samplers, EM steps.\nPackaged implementations are great, but you should know what’s inside the box.\n\nWe’ll also use Stan for Bayesian models (via rstan/brms)\n\nStan needs a working C++ toolchain – get this installed early, not the night before Problem Set 3.\n\nAssignments are written and submitted in Quarto\nMore broadly, I want you to learn how your computer works for research\n\nKieran Healy’s Modern Plain Text Computing (Healy 2025) is a great resource."
+    "text": "Statistical computing\n\nAll of the work in this course is done in \n\nWe will implement some estimators from scratch – optimizers, samplers, EM.\nPackaged implementations are great, but you should know what’s inside the box.\n\nWe’ll also use Stan for Bayesian models (via rstan/brms)\n\nStan needs a working C++ toolchain – get this installed early\n\nAssignments are written and submitted in Quarto\nMore broadly, I want you to learn how your computer works for research\n\nKieran Healy’s Modern Plain Text Computing (Healy 2025) is a great resource."
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#llm-policy",
     "href": "slides/week1/week1_intro_and_review.html#llm-policy",
     "title": "Week 1: Course Introduction and Review",
     "section": "LLM Policy",
-    "text": "LLM Policy\n\nSee the syllabus for the long version.\nIn short…\n\nYou should have LLMs do things for you\nYou should not have LLMs think for you\nYou should definitely not have LLMs speak for you\n\nFormally, you may use LLMs however you like on the problem sets – any other rule is unenforceable.\n\nBut the problem sets are how you learn to code, and the midterms are the check.\nDelegating the mechanics means you can’t debug, and you can’t diagnose errors.\n\nEmpirical research has an “O-ring” production function – one tiny error breaks everything.\n\nAnd LLM failure modes are weirder than human failure modes.\n\nThe replication poster must be entirely human-authored."
+    "text": "LLM Policy\n\nSee the syllabus for the long version.\nIn short…\n\nYou should have LLMs do things for you\nYou should not have LLMs think for you\nYou should definitely not have LLMs speak for you\n\nSometimes you may wish to not have the LLM do things in order for you to learn how to think\n\nI’d strongly encourage limiting your LLM use on the problem sets"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#acknowledgements",
@@ -207,7 +207,7 @@
     "href": "slides/week1/week1_intro_and_review.html#what-is-a-statistical-model-1",
     "title": "Week 1: Course Introduction and Review",
     "section": "What is a statistical model?",
-    "text": "What is a statistical model?\n\nA statistical model is a set of assumptions about the process that generated the data.\n\nFormally: a family of probability distributions \\(\\{f(y; \\theta) : \\theta \\in \\Theta\\}\\) indexed by a parameter \\(\\theta\\).\nWe assume the observed data are a draw from one member of that family, and we want to figure out which one.\n\nTwo things a model buys you:\n\nStructure – a way to pool information and extrapolate beyond exactly what you observed.\nA likelihood – an explicit statement of how probable your data are under any candidate \\(\\theta\\).\n\nTwo things it costs you:\n\nEvery assumption is a place where you can be wrong.\nModel-based answers are only as good as the model."
+    "text": "What is a statistical model?\n\nA statistical model is a set of assumptions about the process that generated the data.\n\nA family of probability distributions \\(\\{P_\\theta : \\theta \\in \\Theta\\}\\) indexed by a parameter \\(\\theta\\).\nWe assume the observed data are a draw from one member of that family, and we want to figure out which one.\n\nParametric models assume \\(\\Theta \\subseteq \\mathbb{R}^k\\) for finite \\(k\\)\n\nA few parameters define the entire distribution – most of the first half of the course.\n\nNonparametric models let \\(\\Theta\\) be infinite-dimensional\n\nStill involves assumptions, just weaker ones."
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#what-is-a-statistical-model-2",
@@ -221,147 +221,14 @@
     "href": "slides/week1/week1_intro_and_review.html#what-is-a-model-good-for",
     "title": "Week 1: Course Introduction and Review",
     "section": "What is a model good for?",
-    "text": "What is a model good for?\n\nDescription: summarize a joint distribution\n\n“How does turnout vary with age, once we account for education?”\n\nPrediction: guess \\(Y\\) for a unit where we observe only \\(X\\)\n\n“What share of this state’s voters support the referendum?” (Week 7 – MRP)\n\nMeasurement: recover a latent quantity we never observe directly\n\n“How liberal is this Supreme Court justice?” (Week 9 – ideal points)\n\nCausal inference: a design identifies the estimand; a model does the adjustment\n\n“What would turnout have been under a different policy?” (Week 13)"
+    "text": "What is a model good for?\n\nDescription: summarize a joint distribution\n\n“How does turnout vary with age, once we account for education?”\n\nPrediction: guess \\(Y\\) for a unit where we observe only \\(X\\)\n\n“What share of this state’s voters support the referendum?”\n\nMeasurement: recover a latent quantity we never observe directly\n\n“How liberal is this Supreme Court justice?”\n\nCausal inference: a design identifies the estimand; a model does the adjustment\n\n“What would turnout have been under a different policy?”"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#two-cultures",
     "href": "slides/week1/week1_intro_and_review.html#two-cultures",
     "title": "Week 1: Course Introduction and Review",
     "section": "Two cultures",
-    "text": "Two cultures\n\nBreiman (2001) draws a distinction between two ways of using models:\n\nData modeling: assume a stochastic model generated the data; estimate and interpret its parameters.\nAlgorithmic modeling: treat the data-generating process as unknown; find a function that predicts well.\n\nShmueli (2010) makes a related point: explaining and predicting are different goals and lead to different modeling choices.\n\nThe model with the lowest prediction error is often not the model with the most interpretable parameters.\n\nThis course walks from one end to the other:\n\nWeeks 2-9 are firmly “data modeling” – we write down a DGP.\nWeeks 10-12 are “algorithmic” – we care about fit, not parameters.\nWeek 13 shows how to use the second in service of the first."
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#estimation-review",
-    "href": "slides/week1/week1_intro_and_review.html#estimation-review",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Estimation review",
-    "text": "Estimation review"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#random-variables",
-    "href": "slides/week1/week1_intro_and_review.html#random-variables",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Random variables",
-    "text": "Random variables\n\nUnderstanding the behavior and properties of random variables is at the core of statistical theory.\n(Simply put) a random variable \\(X\\) is a mapping from a sample space to the real number line\n\nRandom variables have a distribution (which we may or may not assume we know) defined by the cumulative distribution function (CDF)\n\n\\[F(x) = Pr(X \\le x)\\]"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#random-variables-1",
-    "href": "slides/week1/week1_intro_and_review.html#random-variables-1",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Random variables",
-    "text": "Random variables\n\nDiscrete random variables take on a countable number of values (e.g. a Bernoulli r.v. can take on 0 or 1) and have a probability mass function (PMF)\n\\[p(x) = Pr(X = x)\\]\nContinuous random variables take on an uncountable number of values (e.g. the Normal distribution on \\((-\\infty,  \\infty)\\)).\n\nNo PMF, but a density function (PDF) that integrates to a probability\n\n\\[Pr(X \\in \\mathcal{A}) = \\int_{\\mathcal{A}} f(x)dx\\]\nRemember: PMFs (and PDFs) sum (integrate) to \\(1\\) over the support of the random variable."
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#expectations",
-    "href": "slides/week1/week1_intro_and_review.html#expectations",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Expectations",
-    "text": "Expectations\n\nOne important property of a random variable is its expectation \\(\\mathbb{E}[X]\\). We’ll often make assumptions about the expectation of an r.v. while remaining agnostic about its true distribution.\n\nThe expectation is a weighted average. For a discrete r.v. \\(X\\), we sum over the support of the random variable \\(\\mathcal{X}\\).\n\n\\[\\mathbb{E}[X] = \\sum_{x \\in \\mathcal{X}} x \\, Pr(X = x)\\]\nFor a continuous r.v. we have an integral\n\\[\\mathbb{E}[X] = \\int_{\\mathcal{X}} x f(x) dx\\]\nFun fact: we can get the expectation of any function \\(g(X)\\) just by plugging it into the integral\n\\[\\mathbb{E}[g(X)] = \\int_{\\mathcal{X}} g(x) f(x) dx\\]"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#expectations-1",
-    "href": "slides/week1/week1_intro_and_review.html#expectations-1",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Expectations",
-    "text": "Expectations\n\nYou’ll need to know some essential properties of expectations to simplify certain problems\nMost important: linearity. For any two random variables \\(X\\) and \\(Y\\) and constants \\(a\\) and \\(b\\)\n\\[\\mathbb{E}[aX + bY] = a\\mathbb{E}[X] + b\\mathbb{E}[Y]\\]\nNote that for a generic function \\(g(\\cdot)\\), \\(\\mathbb{E}[g(X)] \\neq g(\\mathbb{E}[X])\\). If \\(g(\\cdot)\\) is convex, then by Jensen’s inequality \\(\\mathbb{E}[g(X)] \\ge g(\\mathbb{E}[X])\\)\nFor a binary r.v. \\(X \\in \\{0, 1\\}\\), it’s helpful to remember the “fundamental bridge” between expectations and probability\n\\[\\mathbb{E}[X] = Pr(X = 1)\\]"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#variance",
-    "href": "slides/week1/week1_intro_and_review.html#variance",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Variance",
-    "text": "Variance\n\nWe also care about the spread of a random variable – how far is the average draw of \\(X\\) from its mean \\(\\mathbb{E}[X]\\)? One measure of this is the variance.\n\\[Var(X) = \\mathbb{E}[(X - \\mathbb{E}[X])^2]\\]\nAlso written as\n\\[Var(X) = \\mathbb{E}[X^2] - \\mathbb{E}[X]^2\\]\nNote that the square is a convex function, which means that by Jensen’s inequality \\(\\mathbb{E}[X^2] \\ge \\mathbb{E}[X]^2\\). Variances cannot be negative!\nWe also can define a covariance between two variables (does \\(X\\) take high values when \\(Y\\) takes high values?)\n\\[Cov(X, Y) = \\mathbb{E}\\left[(X - \\mathbb{E}[X])(Y - \\mathbb{E}[Y])\\right] = \\mathbb{E}[XY] - \\mathbb{E}[X]\\mathbb{E}[Y]\\]"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#variance-1",
-    "href": "slides/week1/week1_intro_and_review.html#variance-1",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Variance",
-    "text": "Variance\n\nVariances also have some useful properties.\nFor a constant \\(a\\)\n\\[Var(aX) = a^2Var(X)\\]\nFor any two random variables \\(X\\) and \\(Y\\)\n\\[Var(X + Y) = Var(X) + Var(Y) + 2Cov(X,Y)\\] \\[Var(X - Y) = Var(X) + Var(Y) - 2Cov(X,Y)\\]\nFor independent random variables \\(X\\) and \\(Y\\), \\(Cov(X,Y) = 0\\), so\n\\[Var(X + Y) = Var(X) + Var(Y)\\] \\[Var(X - Y) = Var(X) + Var(Y)\\]"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#conditional-probabilities",
-    "href": "slides/week1/week1_intro_and_review.html#conditional-probabilities",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Conditional probabilities",
-    "text": "Conditional probabilities\n\nWe will also spend a lot of time with conditional distributions and conditional expectations of random variables.\n\nWhat’s the probability that an individual enrolls in a job training program given their income?\n\nWe represent the conditioning set using a vertical bar, with the right-hand side denoting what is being conditioned on.\n\nFor example: \\(Pr(D_i = 1 | X_i = x)\\)"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#conditional-probabilities-1",
-    "href": "slides/week1/week1_intro_and_review.html#conditional-probabilities-1",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Conditional probabilities",
-    "text": "Conditional probabilities\n\nKey concept – dependence and independence. If two variables are independent, the distribution of one does not change conditional on the other. We’ll write this using the \\(\\perp \\!\\!\\! \\perp\\) notation.\n\n\\(Y_i \\perp \\!\\!\\! \\perp D_i\\) implies\n\n\\[f(Y_i | D_i = 1) = f(Y_i| D_i = 0) = f(Y_i)\\]\nTwo variables can be conditionally independent in that they are independent only when conditioning on a third variable. For example, we can have \\(Y_i \\cancel{\\perp \\!\\!\\! \\perp} D_i\\) but \\(Y_i \\perp \\!\\!\\! \\perp D_i | X_i\\). This implies\n\\[f(Y_i| D_i = 1, X_i = x) = f(Y_i| D_i = 0, X_i = x) = f(Y_i | X_i = x)\\]\nRemember: conditional independence does not imply independence, or vice-versa!"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#conditional-expectations",
-    "href": "slides/week1/week1_intro_and_review.html#conditional-expectations",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Conditional expectations",
-    "text": "Conditional expectations\n\nA central object of interest in statistics is the conditional expectation function (CEF) \\(\\mathbb{E}[Y | X]\\).\n\nGiven a particular value of \\(X\\), what is the expectation of \\(Y\\)?\nThe CEF is a function of \\(X\\).\n\nAll the usual properties of expectations apply to conditional expectations.\n\nWe also will often make use of the law of total expectation\n\n\\[\\mathbb{E}[Y] = \\mathbb{E}[\\mathbb{E}[Y|X]]\\]\nEasiest to think about this in terms of discrete r.v.s\n\\[\\mathbb{E}[Y] = \\sum_{x \\in \\mathcal{X}} \\mathbb{E}[Y | X = x] Pr(X = x)\\]"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#estimation",
-    "href": "slides/week1/week1_intro_and_review.html#estimation",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Estimation",
-    "text": "Estimation\n\nOne critical use of statistical theory is understanding how to learn about things we don’t observe using things that we do observe. We call this estimation.\n\ne.g. What is the share of voters in Wisconsin who will turn out in the 2026 election?\nWhat is the share of voters who turn out among those assigned to receive a GOTV phone call?\n\nEstimand: the unobserved quantity that we want to learn about. Often denoted via a Greek letter (e.g. \\(\\mu\\), \\(\\pi\\))\n\nOften a “population” characteristic that we want to learn about via a sample.\n\nAlthough recall causal estimands can’t be fully observed even in a finite sample!\n\nImportant to define your estimand well (Lundberg, Johnson, and Stewart 2021)."
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#estimation-1",
-    "href": "slides/week1/week1_intro_and_review.html#estimation-1",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Estimation",
-    "text": "Estimation\n\nEstimator: the function of random variables that we will use to try to estimate the quantity of interest. Often denoted with a hat on the parameter of interest (e.g. \\(\\hat{\\mu}\\), \\(\\hat{\\pi}\\))\n\nWhy are the variables random?\n\nClassic inference: we have a random sample from the population – if we took another sample, we would obtain a different realization of our estimator.\nRandomization inference: we have a randomly assigned treatment – if we were to re-run the experiment, we would observe a different treatment/control allocation.\n\n\nEstimate: a single realization of our estimator (e.g. 0.3, 9.535)\n\nWe often report both point estimates (“best guess”) and interval estimates (e.g. confidence intervals).\nCareful not to confuse properties of estimators with properties of the estimates themselves."
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#estimation-2",
-    "href": "slides/week1/week1_intro_and_review.html#estimation-2",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Estimation",
-    "text": "Estimation"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#estimation-3",
-    "href": "slides/week1/week1_intro_and_review.html#estimation-3",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Estimation",
-    "text": "Estimation\n\nThe classic estimation problem in statistics is to estimate some unknown population mean \\(\\mu\\) from an i.i.d. sample of \\(n\\) observations \\(Y_1, Y_2, \\dotsc, Y_n\\).\n\nWe assume that each \\(Y_i\\) is a draw from the target population with mean \\(\\mu\\) (identically distributed) – therefore \\(\\mathbb{E}[Y_i] = \\mu\\)\nWe’ll also assume that knowing \\(Y_i\\) tells us nothing about any other \\(Y_j\\): \\(Y_i \\perp \\!\\!\\! \\perp Y_j\\) (independently distributed) – this implies \\(Cov(Y_i, Y_j) = 0\\)\n\nOur estimand: \\(\\mu\\)\nOur estimator: the sample mean \\(\\hat{\\mu} = \\bar{Y} = \\frac{1}{n}\\sum_{i=1}^n Y_i\\)\nOur estimate: a particular realization of that estimator based on our observed sample (e.g. \\(0.4\\))"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#estimation-4",
-    "href": "slides/week1/week1_intro_and_review.html#estimation-4",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Estimation",
-    "text": "Estimation\n\nNote that our estimator is a random variable – it’s a function of \\(Y_i\\)s, which are random variables.\n\nTherefore it has an expectation \\(\\mathbb{E}[\\hat{\\mu}]\\) (assuming \\(Y_i\\) has an expectation)\nIt has a variance \\(Var(\\hat{\\mu})\\) (again, under regularity conditions)\nIt has a distribution (which we may or may not know)."
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#estimation-5",
-    "href": "slides/week1/week1_intro_and_review.html#estimation-5",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Estimation",
-    "text": "Estimation\n\nHow do we know if we’ve picked a good estimator? Will it be close to the truth? Will it be systematically higher or lower than the target?\nWe want to derive some of its properties\n\nBias: \\(\\mathbb{E}[\\hat{\\mu}] - \\mu\\)\nVariance: \\(Var(\\hat{\\mu})\\)\nConsistency: does \\(\\hat{\\mu}\\) converge in probability to \\(\\mu\\) as \\(n\\) goes to infinity?\nAsymptotic distribution: is the sampling distribution of \\(\\hat{\\mu}\\) well approximated by a known distribution?"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#unbiasedness",
-    "href": "slides/week1/week1_intro_and_review.html#unbiasedness",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Unbiasedness",
-    "text": "Unbiasedness\n\nIs the expectation of \\(\\hat{\\mu}\\) equal to \\(\\mu\\)?\n\\[\\mathbb{E}[\\hat{\\mu}] = \\mathbb{E}\\left[\\frac{1}{n}\\sum_{i=1}^n Y_i\\right] = \\frac{1}{n}\\mathbb{E}\\left[\\sum_{i=1}^n Y_i\\right]\\]\nNext we use linearity of expectations\n\\[\\frac{1}{n}\\mathbb{E}\\left[\\sum_{i=1}^n Y_i\\right] = \\frac{1}{n}\\sum_{i=1}^n \\mathbb{E}\\left[Y_i\\right]\\]\nFinally, under our i.i.d. assumption\n\\[\\frac{1}{n}\\sum_{i=1}^n \\mathbb{E}\\left[Y_i\\right] = \\frac{1}{n}\\sum_{i=1}^n \\mu = \\frac{n \\mu}{n} = \\mu\\]\nTherefore the bias is \\(\\text{Bias}(\\hat{\\mu}) = \\mathbb{E}[\\hat{\\mu}] - \\mu = 0\\)"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#variance-2",
-    "href": "slides/week1/week1_intro_and_review.html#variance-2",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Variance",
-    "text": "Variance\n\nWhat is the variance of \\(\\hat{\\mu}\\)? Again, start by pulling out the constant.\n\\[Var(\\hat{\\mu}) = Var\\left[\\frac{1}{n}\\sum_{i=1}^n Y_i\\right] = \\frac{1}{n^2}Var\\left[\\sum_{i=1}^n Y_i\\right]\\]\nWe can further simplify by using our i.i.d. assumption. The variance of a sum of independent random variables is the sum of the variances.\n\\[\\frac{1}{n^2}Var\\left[\\sum_{i=1}^n Y_i\\right] = \\frac{1}{n^2}\\sum_{i=1}^n Var\\left[Y_i\\right]\\]\nAnd by “identically distributed”, \\(Var(Y_i) = \\sigma^2\\) for all \\(i\\)\n\\[\\frac{1}{n^2}\\sum_{i=1}^n Var\\left[Y_i\\right] = \\frac{1}{n^2}\\sum_{i=1}^n \\sigma^2 = \\frac{n\\sigma^2}{n^2} = \\frac{\\sigma^2}{n}\\]\nTherefore, the variance is \\(\\frac{\\sigma^2}{n}\\)"
-  },
-  {
-    "objectID": "slides/week1/week1_intro_and_review.html#asymptotic-behavior",
-    "href": "slides/week1/week1_intro_and_review.html#asymptotic-behavior",
-    "title": "Week 1: Course Introduction and Review",
-    "section": "Asymptotic behavior",
-    "text": "Asymptotic behavior\n\nAs \\(n\\) gets large, what can we say about the estimator \\(\\hat{\\mu}\\)?\nFirst, we can show that it is consistent – it converges in probability to the true parameter \\(\\mu\\)\n\nUnbiasedness + a variance that goes to \\(0\\) as \\(n\\) gets large.\nSome estimators may be biased but have bias terms that go to \\(0\\) – if the variance also goes to \\(0\\), these are still consistent.\n\nSecond, we can say something about the distribution of \\(\\hat{\\mu}\\).\n\nRemember, we’ve only made assumptions about \\(\\mathbb{E}[Y_i]\\) and \\(Var(Y_i)\\) (that they exist). We have made no assumptions on the distribution of \\(Y_i\\). \\(Y_i\\) can be normal, Poisson, Bernoulli, or whatever!\nHowever, we know something about sums and means of random variables – they are well-approximated by a normal distribution. The Central Limit Theorem!\nSo in large samples, the sampling distribution of \\(\\hat{\\mu}\\) is close to normal. This lets us construct confidence intervals and do inference with this approximation and be confident that we won’t be far off."
+    "text": "Two cultures\n\nBreiman (2001) draws a distinction between two ways of using models:\n\nData modeling: assume a stochastic model generated the data; estimate and interpret its parameters.\nAlgorithmic modeling: treat the data-generating process as unknown; find a function that predicts well.\n\nThis course starts with the first and ends with the second.\n\nWeeks 2-9 are “data modeling” - we write down a DGP.\nWeeks 10-12 are “algorithmic” - we care about fit, not parameters.\nWeek 13 shows how to use “algorithmic” tools for nuisances when we want to learn about a low-dimensional quantity of interest (e.g. treatment effect)."
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#regression-review",
@@ -375,7 +242,7 @@
     "href": "slides/week1/week1_intro_and_review.html#regression-review-1",
     "title": "Week 1: Course Introduction and Review",
     "section": "Regression review",
-    "text": "Regression review\n\nRather than just estimating a population mean, we are more typically interested in some population conditional expectation \\(\\mathbb{E}[Y|\\mathbf{X}]\\)\n\n\\(Y_i\\): outcome/response/dependent variable\n\\(X_i\\): vector of regressors/independent variables\n\n“How does the expected value of \\(Y\\) differ across different values of \\(X\\)?”\nSuppose we observe \\(n\\) paired observations of \\(\\{Y_i, X_i\\}\\).\n\nHow do we construct a “good” estimator of \\(\\mathbb{E}[Y|\\mathbf{X}]\\)?\nWhat assumptions do we have to make to get…consistency…unbiasedness…efficiency?"
+    "text": "Regression review\n\nOur most common quantity of interest (or annoying nuisance function) in social science is a population conditional expectation \\(\\mathbb{E}[Y|\\mathbf{X}]\\)\n\n\\(Y_i\\): outcome/response/dependent variable\n\\(X_i\\): vector of regressors/independent variables\n\n“How does the expected value of \\(Y\\) differ across different values of \\(X\\)?”\nSuppose we observe \\(n\\) paired observations of \\(\\{Y_i, X_i\\}\\).\n\nHow do we construct a “good” estimator of \\(\\mathbb{E}[Y|\\mathbf{X}]\\)?\nWhat assumptions do we have to make to get…consistency…unbiasedness…efficiency?"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#regression-review-2",
@@ -389,7 +256,7 @@
     "href": "slides/week1/week1_intro_and_review.html#regression-review-3",
     "title": "Week 1: Course Introduction and Review",
     "section": "Regression review",
-    "text": "Regression review\n\nAssumption 1: Linearity\n\\[Y = \\mathbf{X}\\beta + \\epsilon\\]\nAssumption 2: Strict exogeneity of the errors\n\\[\\mathbb{E}[\\epsilon | \\mathbf{X}] = 0\\]\nThese two imply a linear CEF\n\\[\\mathbb{E}[Y|\\mathbf{X}] = \\mathbf{X}\\beta = \\beta_0 + \\beta_1X_{1} + \\beta_2X_{2} + \\dotsc + \\beta_kX_{k}\\]\nBest case: our CEF is truly linear (by luck, or because we have a saturated model)\nUsual case: we’re at least consistent for the best linear approximation to the CEF"
+    "text": "Regression review\n\nAssumption 1: Linearity\n\\[Y = \\mathbf{X}\\beta + \\epsilon\\]\nAssumption 2: Strict exogeneity of the errors\n\\[\\mathbb{E}[\\epsilon | \\mathbf{X}] = 0\\]\nThese two imply a linear CEF\n\\[\\mathbb{E}[Y|\\mathbf{X}] = \\mathbf{X}\\beta = \\beta_0 + \\beta_1X_{1} + \\beta_2X_{2} + \\dotsc + \\beta_kX_{k}\\]\nBest case: our CEF is truly linear (by luck, or because we have a saturated model)\nUsual case: Assumption 2 fails and the CEF is not linear\n\nEven then, OLS is consistent for the best linear approximation to the CEF"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#regression-review-4",
@@ -403,56 +270,63 @@
     "href": "slides/week1/week1_intro_and_review.html#regression-review-5",
     "title": "Week 1: Course Introduction and Review",
     "section": "Regression review",
-    "text": "Regression review\n\nUnder assumptions 1-3, our OLS estimator \\(\\hat{\\beta}\\) is unbiased and consistent for \\(\\beta\\)\nLet’s do a quick proof for unbiasedness\n\n\\[\\begin{align*}\\hat{\\beta} &= (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}Y)\\\\\n&= (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}(\\mathbf{X}\\beta + \\epsilon))\\\\\n&= (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\mathbf{X})\\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon)\\\\\n&= \\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon)\n\\end{align*}\\]\n\nThen we can obtain the conditional expectation \\(\\mathbb{E}[\\hat{\\beta} | \\mathbf{X}]\\)\n\n\\[\\begin{align*} \\mathbb{E}[\\hat{\\beta} | \\mathbf{X}] &= \\mathbb{E}\\bigg[\\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon) \\bigg| \\mathbf{X} \\bigg]\\\\\n&= \\mathbb{E}[\\beta | \\mathbf{X}] + \\mathbb{E}[(\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon) | \\mathbf{X}]\\\\\n&= \\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}\\mathbf{X}^{\\prime} \\mathbb{E}[\\epsilon | \\mathbf{X}]\\\\\n&= \\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}\\mathbf{X}^{\\prime}0\\\\\n&= \\beta\n\\end{align*}\\]"
+    "text": "Regression review\n\nUnder assumptions 1-3, our OLS estimator \\(\\hat{\\beta}\\) is unbiased for \\(\\beta\\)\nLet’s do a quick proof for unbiasedness\n\n\\[\\begin{align*}\\hat{\\beta} &= (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}Y)\\\\\n&= (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}(\\mathbf{X}\\beta + \\epsilon))\\\\\n&= (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\mathbf{X})\\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon)\\\\\n&= \\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon)\n\\end{align*}\\]\n\nThen we can obtain the conditional expectation \\(\\mathbb{E}[\\hat{\\beta} | \\mathbf{X}]\\)\n\n\\[\\begin{align*} \\mathbb{E}[\\hat{\\beta} | \\mathbf{X}] &= \\mathbb{E}\\bigg[\\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon) \\bigg| \\mathbf{X} \\bigg]\\\\\n&= \\mathbb{E}[\\beta | \\mathbf{X}] + \\mathbb{E}[(\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon) | \\mathbf{X}]\\\\\n&= \\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}\\mathbf{X}^{\\prime} \\mathbb{E}[\\epsilon | \\mathbf{X}]\\\\\n&= \\beta + (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}\\mathbf{X}^{\\prime}0\\\\\n&= \\beta\n\\end{align*}\\]"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#regression-review-6",
     "href": "slides/week1/week1_intro_and_review.html#regression-review-6",
     "title": "Week 1: Course Introduction and Review",
     "section": "Regression review",
-    "text": "Regression review\n\nLastly, by the law of total expectation\n\\[\\mathbb{E}[\\hat{\\beta}] = \\mathbb{E}[\\mathbb{E}[\\hat{\\beta}|\\mathbf{X}]]\\]\nTherefore\n\\[\\mathbb{E}[\\hat{\\beta}] = \\mathbb{E}[\\beta] = \\beta\\]\nConsistency requires us to show the convergence of \\((\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}(\\mathbf{X}^{\\prime}\\epsilon)\\) to \\(0\\) in probability as \\(n \\to \\infty\\).\n\nThis actually requires weaker assumptions: \\(\\mathbb{E}[\\mathbf{X}^{\\prime}\\epsilon] = 0\\), but not necessarily \\(\\mathbb{E}[\\epsilon | \\mathbf{X}] = 0\\).\n\nBut what have we not assumed?\n\nAnything about the distribution of the errors!"
+    "text": "Regression review\n\nLastly, by the law of total expectation\n\\[\\mathbb{E}[\\hat{\\beta}] = \\mathbb{E}[\\mathbb{E}[\\hat{\\beta}|\\mathbf{X}]]\\]\nTherefore\n\\[\\mathbb{E}[\\hat{\\beta}] = \\mathbb{E}[\\beta] = \\beta\\]"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#regression-review-7",
     "href": "slides/week1/week1_intro_and_review.html#regression-review-7",
     "title": "Week 1: Course Introduction and Review",
     "section": "Regression review",
-    "text": "Regression review\n\nAssumption 4 – Spherical errors\n\n\\[Var(\\epsilon | \\mathbf{X}) = \\begin{bmatrix}\n\\sigma^2 & 0 & \\cdots & 0\\\\\n0 & \\sigma^2 & \\cdots & 0\\\\\n\\vdots & \\vdots & \\ddots & \\vdots \\\\\n0 & 0 & \\cdots & \\sigma^2\n\\end{bmatrix} =  \\sigma^2 \\mathbf{I}\\]\n\nBenefits\n\nSimple, unbiased estimator for the variance of \\(\\hat{\\beta}\\)\nCompletes the Gauss-Markov assumptions \\(\\leadsto\\) OLS is BLUE (Best Linear Unbiased Estimator)\n\nDrawbacks\n\nBasically never true"
+    "text": "Regression review\n\nFor consistency, we just need to stabilize by \\(\\frac{1}{n}\\), since \\(\\mathbf{X}^{\\prime}\\mathbf{X}\\) diverges as \\(n\\) grows\n\\[\\hat{\\beta} - \\beta = \\left(\\frac{1}{n}\\mathbf{X}^{\\prime}\\mathbf{X}\\right)^{-1}\\left(\\frac{1}{n}\\mathbf{X}^{\\prime}\\epsilon\\right) \\overset{p}{\\to} \\mathbf{Q}^{-1} \\cdot 0 = 0\\]\nWe need \\(\\mathbf{Q} = \\mathbb{E}[X_iX_i^{\\prime}]\\) to be invertible – the population version of no perfect collinearity\nAnd we need \\(\\frac{1}{n}\\mathbf{X}^{\\prime}\\epsilon \\overset{p}{\\to} 0\\) – which requires only \\(\\mathbb{E}[X_i\\epsilon_i] = 0\\), weaker than the full \\(\\mathbb{E}[\\epsilon | \\mathbf{X}] = 0\\).\nNotice what we still have not assumed: anything about the shape of the error distribution."
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#regression-review-8",
     "href": "slides/week1/week1_intro_and_review.html#regression-review-8",
     "title": "Week 1: Course Introduction and Review",
     "section": "Regression review",
-    "text": "Regression review\n\nGood news! We can relax homoskedasticity (but still keep no correlation) and do inference on the variance of \\(\\hat{\\beta}\\)\n\\[Var(\\epsilon | \\mathbf{X}) = \\begin{bmatrix}\n\\sigma^2_1 & 0 & \\cdots & 0\\\\\n0 & \\sigma^2_2 & \\cdots & 0\\\\\n\\vdots & \\vdots & \\ddots & \\vdots \\\\\n0 & 0 & \\cdots & \\sigma^2_n\n\\end{bmatrix}\\]\n“Robust” standard errors using the Eicker-Huber-White “sandwich” estimator – consistent but not unbiased for the true sampling variance of \\(\\hat{\\beta}\\)\n\\[\\widehat{Var(\\hat{\\beta})} = (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1} \\mathbf{X}^{\\prime}\\hat{\\Sigma}\\mathbf{X}(\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}\\]\n\n\\(\\hat{\\Sigma}\\) is our estimate of the variance-covariance matrix, using the squared residuals on the diagonal\nExtensions to “clustered” standard errors allow arbitrary correlation within groups."
+    "text": "Regression review\n\nAssumption 4 – Spherical errors\n\\[Var(\\epsilon | \\mathbf{X}) = \\begin{bmatrix}\n\\sigma^2 & 0 & \\cdots & 0\\\\\n0 & \\sigma^2 & \\cdots & 0\\\\\n\\vdots & \\vdots & \\ddots & \\vdots \\\\\n0 & 0 & \\cdots & \\sigma^2\n\\end{bmatrix} =  \\sigma^2 \\mathbf{I}\\]\nBenefits\n\nSimple, unbiased estimator for the variance of \\(\\hat{\\beta}\\)\nCompletes the Gauss-Markov assumptions \\(\\leadsto\\) OLS is BLUE (Best Linear Unbiased Estimator)\n\nDrawbacks\n\nBasically never true"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#regression-review-9",
     "href": "slides/week1/week1_intro_and_review.html#regression-review-9",
     "title": "Week 1: Course Introduction and Review",
     "section": "Regression review",
-    "text": "Regression review\n\nAssumption 5 – Normality of the errors\n\\[\\epsilon | \\mathbf{X} \\sim \\mathcal{N}(0, \\sigma^2\\mathbf{I})\\]\nNot necessary even for the Gauss-Markov result\nNot needed to do asymptotic inference on \\(\\hat{\\beta}\\)\n\nWhy? Central Limit Theorem!\n\nBenefits?\n\nFinite-sample inference.\n\nAnd: this is the assumption that turns OLS into a likelihood model.\n\nWhich is exactly where we pick up next week."
+    "text": "Regression review\n\nWe can relax homoskedasticity (but still keep no correlation) and do inference on the variance of \\(\\hat{\\beta}\\)\n\\[Var(\\epsilon | \\mathbf{X}) = \\begin{bmatrix}\n\\sigma^2_1 & 0 & \\cdots & 0\\\\\n0 & \\sigma^2_2 & \\cdots & 0\\\\\n\\vdots & \\vdots & \\ddots & \\vdots \\\\\n0 & 0 & \\cdots & \\sigma^2_n\n\\end{bmatrix}\\]\n“Robust” standard errors using the Eicker-Huber-White “sandwich” estimator – consistent but not unbiased for the true sampling variance of \\(\\hat{\\beta}\\)\n\\[\\widehat{Var(\\hat{\\beta})} = (\\mathbf{X}^{\\prime}\\mathbf{X})^{-1} \\mathbf{X}^{\\prime}\\hat{\\Sigma}\\mathbf{X}(\\mathbf{X}^{\\prime}\\mathbf{X})^{-1}\\]\n\\(\\hat{\\Sigma}\\) is our estimate of the variance-covariance matrix, using the squared residuals on the diagonal\nExtensions to “clustered” standard errors allow arbitrary correlation within groups.\n\n“Block-diagonal” structure on \\(Var(\\epsilon | \\mathbf{X})\\)"
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#regression-review-10",
     "href": "slides/week1/week1_intro_and_review.html#regression-review-10",
     "title": "Week 1: Course Introduction and Review",
     "section": "Regression review",
-    "text": "Regression review\n\nWhat do we need for OLS to be consistent for the “best linear approximation” to the CEF?\n\nVery little!\n\nWhat do we need for OLS to be consistent and unbiased for the conditional expectation function?\n\nA truly linear CEF\nBut still no assumptions about the outcome distribution!\n\nWhat do we need to do inference on \\(\\hat{\\beta}\\)?\n\nWe almost never assume homoskedasticity, because “robust” SE estimators are ubiquitous.\nEven some forms of error correlation are permitted (“cluster”-robust SEs).\nSample sizes are usually large enough that the Central Limit Theorem makes a normal sampling distribution a reasonable approximation."
+    "text": "Regression review\n\nAssumption 5 – Normality of the errors\n\\[\\epsilon | \\mathbf{X} \\sim \\mathcal{N}(0, \\sigma^2\\mathbf{I})\\]\nNot necessary even for the Gauss-Markov result\nNot needed to do asymptotic inference on \\(\\hat{\\beta}\\)\n\nWhy? Central Limit Theorem!\n\nBenefits?\n\nFinite-sample inference.\n\nAnd: this is the assumption that turns OLS into a likelihood model.\n\nWhich is exactly where we pick up next week."
+  },
+  {
+    "objectID": "slides/week1/week1_intro_and_review.html#regression-review-11",
+    "href": "slides/week1/week1_intro_and_review.html#regression-review-11",
+    "title": "Week 1: Course Introduction and Review",
+    "section": "Regression review",
+    "text": "Regression review\n\nWhat do we need for OLS to be consistent for the “best linear approximation” to the CEF?\n\nVery little!\n\nWhat do we need for \\(\\mathbf{X}\\hat{\\beta}\\) to be consistent and unbiased for the conditional expectation function itself?\n\nA truly linear CEF\nBut still no assumptions about the outcome distribution!\n\nWhat do we need to do inference on \\(\\hat{\\beta}\\)?\n\nWe almost never assume homoskedasticity, because “robust” SE estimators are ubiquitous.\nEven some forms of error correlation are permitted (“cluster”-robust SEs).\nSample sizes are usually large enough that the Central Limit Theorem makes a normal sampling distribution a reasonable approximation."
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#next-week",
     "href": "slides/week1/week1_intro_and_review.html#next-week",
     "title": "Week 1: Course Introduction and Review",
     "section": "Next week",
-    "text": "Next week\n\nParametric models\n\nWhat are we buying and what are we paying when we assume a distribution for \\(Y\\)?\n\nThe likelihood function\n\nGiven the data, how relatively plausible is each candidate value of \\(\\theta\\)?\n\nMaximum likelihood estimation\n\nFinding the \\(\\hat{\\theta}\\) that maximizes the likelihood – analytically and numerically.\n\nReadings: Chapter 5 of Aronow and Miller (2019) and Chapter 6 of Evans and Rosenthal (2010)\nProblem Set 1 is assigned today and due Wednesday, September 23."
+    "text": "Next week\n\nParametric models\n\nWhat happens when we assume a distribution for \\(Y\\)?\n\nThe likelihood function\n\nGiven the data, how relatively plausible is each candidate value of \\(\\theta\\)?\n\nMaximum likelihood estimation\n\nFinding the \\(\\hat{\\theta}\\) that maximizes the likelihood – analytically and numerically.\n\nReadings: Chapter 5 of Aronow and Miller (2019) and Chapter 6 of Evans and Rosenthal (2010)\nProblem Set 1 is assigned today and due Wednesday, September 23."
   },
   {
     "objectID": "slides/week1/week1_intro_and_review.html#references",
     "href": "slides/week1/week1_intro_and_review.html#references",
     "title": "Week 1: Course Introduction and Review",
     "section": "References",
-    "text": "References\n\n\nAronow, P. M., and Benjamin T. Miller. 2019. Foundations of Agnostic Statistics. Cambridge: Cambridge University Press. https://doi.org/10.1017/9781316831762.\n\n\nBox, George E. P. 1976. “Science and Statistics.” Journal of the American Statistical Association 71 (356): 791–99. https://doi.org/10.1080/01621459.1976.10480949.\n\n\nBreiman, Leo. 2001. “Statistical Modeling: The Two Cultures.” Statistical Science 16 (3): 199–231. https://doi.org/10.1214/ss/1009213726.\n\n\nEvans, Michael J., and Jeffrey S. Rosenthal. 2010. Probability and Statistics: The Science of Uncertainty. 2nd ed. New York: W.H. Freeman. https://utstat.toronto.edu/mikevans/jeffrosenthal/.\n\n\nGelman, Andrew, John B. Carlin, Hal S. Stern, David B. Dunson, Aki Vehtari, and Donald B. Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton, FL: Chapman; Hall/CRC. http://www.stat.columbia.edu/~gelman/book/.\n\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press. https://avehtari.github.io/ROS-Examples/index.html.\n\n\nHealy, Kieran. 2025. Modern Plain Text Computing. https://mptc.io/.\n\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer. https://www.statlearning.com/.\n\n\nKing, Gary. 1995. “Replication, Replication.” PS: Political Science & Politics 28 (3): 444–52. https://doi.org/10.2307/420301.\n\n\nLundberg, Ian, Rebecca Johnson, and Brandon M. Stewart. 2021. “What Is Your Estimand? Defining the Target Quantity Connects Statistical Evidence to Theory.” American Sociological Review 86 (3): 532–65. https://doi.org/10.1177/00031224211004187.\n\n\nMcElreath, Richard. 2020. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd ed. Boca Raton, FL: Chapman; Hall/CRC. https://xcelab.net/rm/.\n\n\nShmueli, Galit. 2010. “To Explain or to Predict?” Statistical Science 25 (3): 289–310. https://doi.org/10.1214/10-STS330."
+    "text": "References\n\n\nAronow, P. M., and Benjamin T. Miller. 2019. Foundations of Agnostic Statistics. Cambridge: Cambridge University Press. https://doi.org/10.1017/9781316831762.\n\n\nBox, George E. P. 1976. “Science and Statistics.” Journal of the American Statistical Association 71 (356): 791–99. https://doi.org/10.1080/01621459.1976.10480949.\n\n\nBreiman, Leo. 2001. “Statistical Modeling: The Two Cultures.” Statistical Science 16 (3): 199–231. https://doi.org/10.1214/ss/1009213726.\n\n\nEvans, Michael J., and Jeffrey S. Rosenthal. 2010. Probability and Statistics: The Science of Uncertainty. 2nd ed. New York: W.H. Freeman. https://utstat.toronto.edu/mikevans/jeffrosenthal/.\n\n\nGelman, Andrew, John B. Carlin, Hal S. Stern, David B. Dunson, Aki Vehtari, and Donald B. Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton, FL: Chapman; Hall/CRC. http://www.stat.columbia.edu/~gelman/book/.\n\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press. https://avehtari.github.io/ROS-Examples/index.html.\n\n\nHealy, Kieran. 2025. Modern Plain Text Computing. https://mptc.io/.\n\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer. https://www.statlearning.com/.\n\n\nKing, Gary. 1995. “Replication, Replication.” PS: Political Science & Politics 28 (3): 444–52. https://doi.org/10.2307/420301.\n\n\nMcElreath, Richard. 2020. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd ed. Boca Raton, FL: Chapman; Hall/CRC. https://xcelab.net/rm/."
   },
   {
     "objectID": "resources.html",
