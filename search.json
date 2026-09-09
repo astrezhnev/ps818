@@ -410,7 +410,7 @@
     "href": "schedule.html#week-1-course-introduction-and-review",
     "title": "Schedule",
     "section": "Week 1: Course Introduction and Review",
-    "text": "Week 1: Course Introduction and Review\nWednesday, September 9\nTopics:\n\nWhat is a statistical model and what is it good for?\nReview of estimands, estimators and their properties\nReview of linear regression\n\nReadings:\n\nReview: Chapters 1-7; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\n\n\n\n\n\n\n\nProblem Set 1 assigned Wednesday, September 9 – due Wednesday, September 23."
+    "text": "Week 1: Course Introduction and Review\nWednesday, September 9\nTopics:\n\nWhat is a statistical model and what is it good for?\nReview of regression\n\nReadings:\n\nReview: Chapters 1-7; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\n\n\n\n\n\n\n\nProblem Set 1 assigned Wednesday, September 9 – due Wednesday, September 23."
   },
   {
     "objectID": "schedule.html#week-2-introduction-to-likelihood-inference",
