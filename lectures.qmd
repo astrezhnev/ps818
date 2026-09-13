@@ -22,7 +22,8 @@ Links become active as the materials for each week are posted.
 
 ### Week 2: Introduction to Likelihood Inference
 
-*To be posted*
+- [Week 2 Github Repository](https://github.com/astrezhnev/ps818/tree/main/slides/week2/)
+- [Week 2 `.html` slides](https://www.antonstrezhnev.com/ps818/slides/week2/week2_likelihood_inference.html)
 
 ### Week 3: Generalized Linear Models
 

@@ -1,0 +1,1128 @@
+---
+title: "Week 2: Introduction to Likelihood Inference"
+subtitle: "PS 818 - Data Analysis with Statistical Models"
+author:
+  - name: "Anton Strezhnev"
+    affiliation: "University of Wisconsin-Madison"
+    email: strezhnev@wisc.edu
+date: "September 14, 2026"
+date-format: "MMMM D, YYYY"
+editor: 
+  render-on-save: true
+format: 
+  revealjs:
+    theme: [default, custom.scss]
+    slide-number: true
+    overview: true
+    navigation-mode: vertical
+    progress: false
+    controls: true
+    link-external-newwindow: true
+    footer: "PS 818 - University of Wisconsin-Madison"
+    html-math-method:
+      method: mathjax
+      url: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+execute: 
+  cache: false
+embed-resources: true
+bibliography: ../ps818.bib
+link-citations: true
+
+---
+
+## Likelihood Inference {.title-slide}
+
+::: {style="display: none"}
+$$
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+$$
+:::
+
+```{r, echo = F, message=F, warnings=F}
+library(tidyverse)
+library(knitr)
+library(broom)
+options(digits=3)
+```
+
+## Previously
+
+::: {.incremental}
+
+- Linear regression
+  - "Agnostic" regression and the **Best Linear Predictor**
+  - "Classical" OLS regression theory
+- Key intuitions
+  - Regression as a **projection** of $Y$ into the column space of $\mathbf{X}$
+  - Frisch-Waugh-Lovell theorem
+- Throughout, we assumed as *little* as possible about the distribution of $Y$.
+
+:::
+
+## This week
+
+::: {.incremental}
+
+- What is a **statistical model**?
+- What is a **likelihood**?
+- Properties of the **maximum likelihood estimator**
+- How do we actually *compute* the MLE -- and its standard errors?
+  - This last part turns out to be much less automatic than it looks.
+
+:::
+
+# Statistical models
+
+## Defining a statistical model
+
+::: {.incremental}
+
+- In the regression setting we tried to make as few assumptions about the data-generating process as possible.
+  - Our goal is just to estimate and conduct inference on $E[Y|X]$.
+- But what if we wanted to make further probabilistic statements about other quantities beyond $\beta$?
+  - (e.g.) Can we provide a distribution for $Y_{n+1}$, the "next" observation given $X_{n+1}$?
+  - If we're willing to make more assumptions about the data-generating process, we can do a lot more!
+- **Statistical models** specify the data-generating process in terms of *systematic* and *stochastic* components.
+  - **Systematic** elements are functions of known constants and unknown *parameters*
+  - **Stochastic** elements are draws from probability distributions
+- We will be primarily working with *parametric* models
+  - The data are assumed to come from a particular family of probability distributions
+  - The "structure" of the model is fixed (the number of parameters does not grow with the size of the data).
+
+:::
+
+## The linear model
+
+::: {.incremental}
+
+- It is common to see the linear model written in its fully parametric form.
+- **Stochastic**:
+
+  $$y_i \sim \text{Normal}(\mu_i, \sigma^2)$$
+
+- **Systematic**:
+
+  $$\mu_i = x_i^{\prime}\beta$$
+
+- What's assumed to be known?
+  - $\mathbf{x}$
+- What's assumed to have a particular distribution?
+  - $y$
+- We are interested in estimating and conducting inference on the parameters: $\beta$ and (less importantly) $\sigma^2$.
+
+:::
+
+## General model notation
+
+::: {.incremental}
+
+- We can specify a broad set of models for $Y_i$ using this framework
+- **Stochastic**
+
+  $$Y_i \sim f(\theta_i, \alpha)$$
+
+- **Systematic**
+
+  $$\theta_i = g(X_i, \beta)$$
+
+- What are these quantities?
+  - $Y_i$ is a random variable
+  - $f()$ denotes the distribution of that random variable
+  - $\theta_i$ and $\alpha$ are parameters of that distribution
+  - $g()$ is some function 
+  - $X_i$ are observed, known constants (e.g. regressors)
+  - $\beta$ are parameters of interest 
+- We will spend some time with a particular class of models called "Generalized Linear Models" where the systematic component has the form
+
+  $$\theta_i = g(X_i^{\prime}\beta)$$
+
+:::
+
+## Types of distributions
+
+::: {.incremental}
+
+- **Normal**
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+norm_curve <- ggplot() + xlim(-5, 5) + geom_function(fun=dnorm) + theme_bw() + ylab("Density") + xlab("Value")
+norm_curve
+```
+
+- Continuous on an unbounded support $(-\infty, \infty)$
+- Two parameters: Mean $\mu$ and Variance $\sigma^2$
+
+  $$f_N(x;\mu, \sigma) = \frac{1}{\sigma\sqrt{2\pi}} \exp\left\{- \frac{1}{2}\left(\frac{x - \mu}{\sigma}\right)^2 \right\}$$
+
+:::
+
+## Types of distributions
+
+::: {.incremental}
+
+- **Poisson**
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+pois_curve <- data.frame(x=0:10) %>% ggplot(aes(x=x)) + xlim(0, 10) + geom_point(aes(y=dpois(x, lambda=1))) + theme_bw() + ylab("Probability") + xlab("Value")
+pois_curve
+```
+
+- Discrete, defined on the support of the natural numbers (positive integers + zero)
+- Single parameter: Mean and Variance $\lambda$ 
+
+  $$f(x; \lambda) = \frac{\lambda^x\exp\{-\lambda\}}{x!}$$
+
+:::
+
+## Types of distributions
+
+::: {.incremental}
+
+- **Binomial**
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+binom_curve <- data.frame(x=0:10) %>% ggplot(aes(x=x)) + xlim(0, 10) + geom_point(aes(y=dbinom(x, size=10, prob = .3))) + theme_bw() + ylab("Probability") + xlab("Value")
+binom_curve
+```
+
+- Discrete, defined on the support of integers from $\{0, 1, 2, \dotsc, n\}$ (models the sum of repeated i.i.d. coin flips)
+- Two parameters: $p$ probability of success in $n$ trials
+  - Special case where $n=1$ trial is typically called the "Bernoulli"
+  
+  $$f(x; p, n) = {n \choose x} p^x(1-p)^{n-x}$$
+
+:::
+
+# Likelihood inference
+
+## Learning about the unknown
+
+::: {.incremental}
+
+- Suppose that I want to learn about an unobserved parameter from a sample of observations.
+  - I *assume* a particular statistical model for the data
+  - **Example**: The linear model from earlier!
+- **Frequentist** approach
+  - Unobserved parameters are **fixed constants**
+  - Data are **random variables**
+- We want to construct an **estimator** that is a *function* of the data and which has desirable properties
+  - **Consistency**: As our sample size gets larger, the estimator converges (in probability) to the target parameter.
+  - **Asymptotic normality**: In large samples, the distribution of our estimator is normal (ideally with a variance we can estimate as well!)
+- Can we come up with a *generic* framework that yields a "good" estimator for a large class of statistical models?
+
+:::
+
+## The Likelihood Function
+
+::: {.incremental}
+
+- Consider data $\mathbf{y} = \{y_1, y_2, \dotsc, y_n\}$ which we assume comes from a known distribution with density $f(\mathbf{y} | \theta)$ with unknown parameter $\theta$
+  - $f()$ could be Bernoulli, Normal, Poisson, Gamma, Beta, etc... -- in this setting it is a *known* distribution
+  - $\theta$ is an *unknown* parameter that lies in some space $\Theta$ of possible values.
+- The **likelihood function** is a function of $\theta$ that is evaluated at the observed values of $\mathbf{y}$
+
+  $$\mathcal{L}(\theta| \mathbf{y}) = f(\mathbf{y} | \theta)$$
+
+- Given some *input* $\theta$, the likelihood function returns the density of the observed data evaluated at that value.
+- The likelihood function is **not** a probability density
+  - a pdf is a function that takes $x$ as an input
+  - a likelihood is a function that takes $\theta$ as an input
+  
+:::
+
+## The Likelihood Function
+
+::: {.incremental}
+
+- The likelihood function is **not** $f(\theta | \mathbf{y})$
+  - That statement doesn't even make sense in a frequentist framework -- parameters are constants
+- Even when we (later) move to a *Bayesian* framework, $f(\theta | \mathbf{y}) \neq f(\mathbf{y} | \theta)$
+- Remember Bayes' Rule:
+  
+  $$f(\theta | \mathbf{y}) = \frac{f(\mathbf{y} | \theta)}{f(\mathbf{y})} \times f(\theta)$$
+
+- Or alternatively, since $f(\mathbf{y})$ is just a normalizing constant, you'll see this written as:
+  
+  $$\underbrace{f(\theta | \mathbf{y})}_{\text{posterior}} \propto \underbrace{f(\mathbf{y}|\theta)}_{\text{likelihood}} \times \underbrace{f(\theta)}_{\text{prior}}$$
+
+:::
+
+## The Likelihood Function
+
+::: {.incremental}
+
+- We often make the assumption that our data are **independently and identically distributed**
+  - $y_i \underset{{\text{i.i.d}}}{\sim} f(y_i | \theta)$
+- This allows us to factor the likelihood 
+
+  $$\mathcal{L}(\theta|\mathbf{y}) = f(\mathbf{y} | \theta) = \prod_{i=1}^n f(y_i | \theta)$$
+
+- Since our eventual goal will be to find an *optimum* of the likelihood, we can apply any strictly increasing function to it, since that preserves the location of the maximum.
+  - The main one we'll apply is the **logarithm**
+  - Why? Because logs turn annoying-to-work-with products into easier-to-work-with sums!
+
+:::
+
+## Notation: sums vs. averages {.smaller}
+
+::: {.incremental}
+
+- We will need to be careful about *two* versions of the log-likelihood that differ by a factor of $n$. Let's name them separately now.
+- The **total** log-likelihood
+
+  $$\ell_n(\theta) = \sum_{i=1}^n \log f(y_i | \theta)$$
+
+- The **average** log-likelihood
+
+  $$\bar{\ell}_n(\theta) = \frac{1}{n}\ell_n(\theta) = \frac{1}{n}\sum_{i=1}^n \log f(y_i | \theta)$$
+
+- These have the *same* maximizer, so $\hat{\theta}$ is unambiguous. But their *second derivatives* differ by a factor of $n$, so the distinction matters a lot once we get to variances.
+  - Rule of thumb: **averages** for law-of-large-numbers arguments, **totals** for computing standard errors.
+- We suppress the dependence on $\mathbf{y}$ in the notation, but both are functions of the data.
+
+:::
+
+## Notation: score and Hessian {.smaller}
+
+::: {.incremental}
+
+- The **score** for a single observation is the gradient of its log-density with respect to $\theta$
+
+  $$s_i(\theta) = \frac{\partial}{\partial\theta} \log f(y_i | \theta)$$
+
+- For a $k$-dimensional $\theta$, $s_i(\theta)$ is a $k \times 1$ vector.
+- The **observation-level Hessian** is the matrix of second derivatives
+
+  $$H_i(\theta) = \frac{\partial^2}{\partial\theta\partial\theta^{\prime}} \log f(y_i | \theta)$$
+
+- Summing and averaging as before:
+
+  $$S_n(\theta) = \sum_{i=1}^n s_i(\theta) \qquad \bar{S}_n(\theta) = \frac{1}{n}\sum_{i=1}^n s_i(\theta)$$
+
+  $$H_n(\theta) = \sum_{i=1}^n H_i(\theta) \qquad \bar{H}_n(\theta) = \frac{1}{n}\sum_{i=1}^n H_i(\theta)$$
+
+- $S_n(\theta)$ is exactly the gradient of $\ell_n(\theta)$, and $H_n(\theta)$ its Hessian.
+
+:::
+
+## MLE
+
+::: {.incremental}
+
+- We want to come up with an estimator $\hat{\theta}$ for the parameter $\theta$
+  - $\hat{\theta}$ is a function of the data (like a sample mean or OLS coefficient)
+  - Is there a principled way to pick $\hat{\theta}$ that has provably "good" properties across a wide variety of models?
+- The Maximum Likelihood Estimator (MLE) $\hat{\theta}$ is defined as the value of $\theta$ that maximizes the log-likelihood
+
+  $$\hat{\theta} = \argmax_{\theta \in \Theta} \ \ell_n(\theta)$$
+
+- Under i.i.d. observations (and regularity conditions), the MLE has some desirable properties:
+  - **Consistent**: $\hat{\theta} \overset{p}{\to} \theta_0$, the true parameter
+  - **Asymptotically normal**: $\sqrt{n}(\hat{\theta} - \theta_0) \overset{d}{\to} \text{Normal}\big(0, \mathcal{I}(\theta_0)^{-1}\big)$
+  - **Asymptotically efficient**: its variance attains the Cramér-Rao lower bound
+
+:::
+
+## The score has mean zero {.smaller}
+
+::: {.incremental}
+
+- The key fact underlying everything that follows: **at the true parameter** $\theta_0$, the score has expectation zero.
+
+  $$\mathbb{E}_{\theta_0}\big[s_i(\theta_0)\big] = 0$$
+
+- Careful with the order of operations here. We differentiate *first*, then evaluate at $\theta_0$.
+  - Writing "$\frac{\partial}{\partial\theta}\mathbb{E}[\log f(y_i|\theta_0)]$" would be differentiating a **constant** -- that gets you $0$ for the wrong reason.
+- The actual argument: densities integrate to one *for every* $\theta$,
+
+  $$\int f(y|\theta) \, dy = 1 \quad \forall \ \theta \in \Theta$$
+
+- Differentiate both sides with respect to $\theta$ and exchange derivative and integral (a regularity condition!)
+
+  $$\int \frac{\partial}{\partial\theta} f(y|\theta) \, dy = 0$$
+
+:::
+
+## The score has mean zero {.smaller}
+
+::: {.incremental}
+
+- Now use the "log-derivative trick" -- multiply and divide by $f(y|\theta)$
+
+  $$\frac{\partial}{\partial\theta} f(y|\theta) = f(y|\theta) \times \frac{\partial}{\partial\theta} \log f(y|\theta)$$
+
+- Substituting back in,
+
+  $$\int \left[\frac{\partial}{\partial\theta} \log f(y|\theta)\right] f(y|\theta) \, dy = 0$$
+
+- The left-hand side is exactly an expectation taken under $f(\cdot|\theta)$
+
+  $$\mathbb{E}_{\theta}\big[s_i(\theta)\big] = 0 \quad \forall \ \theta$$
+
+- Evaluating at the true value $\theta_0$ gives the result. Note this holds at *every* $\theta$, provided the expectation is taken **under that same** $\theta$.
+  - The subscript on $\mathbb{E}_{\theta_0}$ is doing real work -- it says which distribution generates the data.
+
+:::
+
+## Consistency {.smaller}
+
+::: {.incremental}
+
+- By the weak law of large numbers, for each fixed $\theta$
+
+  $$\bar{\ell}_n(\theta) = \frac{1}{n} \sum_{i=1}^n \log f(y_i | \theta) \overset{p}{\rightarrow} \mathbb{E}_{\theta_0}[\log f(y_i | \theta)] \equiv \ell^{*}(\theta)$$
+
+- The MLE maximizes the left-hand side. Under a *uniform* version of this convergence (plus compactness of $\Theta$), the maximizer of the sample objective converges to the maximizer of the limiting objective $\ell^{*}(\theta)$.
+  - Pointwise convergence alone is not quite enough -- this is where "regularity conditions" earn their keep.
+- So we need: is $\theta_0$ the **maximizer** of $\ell^{*}(\theta)$?
+  - The mean-zero score result tells us $\theta_0$ is a **stationary point** of $\ell^{*}$, which is *not* the same thing.
+
+:::
+
+## Consistency: the information inequality {.smaller}
+
+::: {.incremental}
+
+- To get that $\theta_0$ is a maximizer, look at the difference in the limiting objective between $\theta_0$ and any other $\theta$
+
+  $$\ell^{*}(\theta) - \ell^{*}(\theta_0) = \mathbb{E}_{\theta_0}\left[\log \frac{f(y_i|\theta)}{f(y_i|\theta_0)}\right]$$
+
+- By **Jensen's inequality** ($\log$ is concave),
+
+  $$\mathbb{E}_{\theta_0}\left[\log \frac{f(y_i|\theta)}{f(y_i|\theta_0)}\right] \le \log \mathbb{E}_{\theta_0}\left[\frac{f(y_i|\theta)}{f(y_i|\theta_0)}\right] = \log \int f(y|\theta) \, dy = \log 1 = 0$$
+
+- So $\ell^{*}(\theta) \le \ell^{*}(\theta_0)$ for all $\theta$: the true parameter maximizes the limiting objective.
+  - That negative quantity is the **Kullback-Leibler divergence** from $f(\cdot|\theta_0)$ to $f(\cdot|\theta)$.
+  - Maximizing the likelihood is asymptotically the same as minimizing KL divergence to the truth.
+- Combined with the convergence result: $\hat{\theta} \overset{p}{\to} \theta_0$.
+
+:::
+
+## Consistency: conditions
+
+::: {.incremental}
+
+- Note a few important conditions for identification
+- **Identifiability**
+  - No "plateaus" in the log-likelihood.
+  - Two different values of $\theta$ can't both maximize the log-likelihood
+  
+  $$f(\mathbf{y}|\theta) \neq f(\mathbf{y} | \theta_0) \ \forall \ \theta \neq \theta_0$$ 
+  
+  - This is exactly what makes the Jensen inequality above **strict**.
+- **Fixed parameter space**
+  - The dimensionality of $\theta$ stays fixed and does not depend on $n$
+  - Violated (e.g.) in ideal point models (new legislators mean new ideal points)
+- $\theta_0$ is in the **interior** of the parameter space
+  - Otherwise the score need not be zero at the optimum.
+
+:::
+
+## Information {.smaller}
+
+::: {.incremental}
+
+- Having established consistency, we want the variance and asymptotic distribution of $\hat{\theta}$.
+  - To do this, we need a quantity called the **Fisher information**.
+- Define the **per-observation** information as the variance of the score **at the true parameter** $\theta_0$
+
+  $$\mathcal{I}(\theta_0) = \mathbb{E}_{\theta_0}\big[s_i(\theta_0) s_i(\theta_0)^{\prime}\big]$$
+
+- Because the score has mean zero at $\theta_0$, this second moment *is* the variance.
+  - For vector $\theta$ this is an **outer product**, giving a $k \times k$ matrix -- not a square.
+  - Careful: it is the variance of the score at $\theta_0$, **not** at the maximum $\hat{\theta}$, where the sample score is zero by construction.
+- Under some further regularity conditions (the **information matrix equality**) this equals the negative expected Hessian
+
+  $$\mathcal{I}(\theta_0) = -\mathbb{E}_{\theta_0}\big[H_i(\theta_0)\big]$$
+
+- **Intuitively**: captures the curvature of the log-likelihood around the truth. Sharper peak $\Rightarrow$ more information $\Rightarrow$ smaller variance.
+
+:::
+
+## Information {.smaller}
+
+::: {.incremental}
+
+- The **total** (sample) information for $n$ i.i.d. observations is
+
+  $$\mathcal{I}_n(\theta_0) = -\mathbb{E}_{\theta_0}\big[H_n(\theta_0)\big] = n \, \mathcal{I}(\theta_0)$$
+
+- Keeping these straight matters, because they appear in different places:
+  - $\mathcal{I}(\theta_0)$ -- per observation. Shows up in the asymptotic distribution of $\sqrt{n}(\hat{\theta} - \theta_0)$.
+  - $\mathcal{I}_n(\theta_0) = n\mathcal{I}(\theta_0)$ -- whole sample. Shows up in the standard errors you actually report.
+- Standard errors shrink at rate $\sqrt{n}$ precisely because $\mathcal{I}_n$ grows linearly in $n$.
+
+:::
+
+## Asymptotic distribution {.smaller}
+
+::: {.incremental}
+
+- We now show that
+
+  $$\sqrt{n}(\hat{\theta} - \theta_0) \overset{d}{\rightarrow} \text{Normal}\big(0, \mathcal{I}(\theta_0)^{-1}\big)$$
+
+- Take a first-order **Taylor expansion** of the average score around the **true parameter** $\theta_0$, evaluated at the estimator $\hat{\theta}$
+
+  $$\bar{S}_n(\hat{\theta}) = \bar{S}_n(\theta_0) + \bar{H}_n(\tilde{\theta})(\hat{\theta} - \theta_0)$$
+
+  - $\tilde{\theta}$ is a point on the segment between $\hat{\theta}$ and $\theta_0$ (mean value theorem).
+  - Since $\hat{\theta} \overset{p}{\to} \theta_0$, we also have $\tilde{\theta} \overset{p}{\to} \theta_0$, so we can replace $\bar{H}_n(\tilde{\theta})$ by $\bar{H}_n(\theta_0)$ in the limit.
+- The sample score is zero at the MLE (interior optimum), so $\bar{S}_n(\hat{\theta}) = 0$:
+
+  $$0 = \bar{S}_n(\theta_0) + \bar{H}_n(\theta_0)(\hat{\theta} - \theta_0) + o_p(1)$$
+
+- Rearranging and multiplying by $\sqrt{n}$
+
+  $$\sqrt{n}(\hat{\theta} - \theta_0) = \big[-\bar{H}_n(\theta_0)\big]^{-1}\big[\sqrt{n}\,\bar{S}_n(\theta_0)\big] + o_p(1)$$
+
+:::
+
+## Asymptotic distribution {.smaller}
+
+::: {.incremental}
+
+- **First**, by the law of large numbers applied to the *average* Hessian,
+
+  $$-\bar{H}_n(\theta_0) = -\frac{1}{n} \sum_{i=1}^n H_i(\theta_0) \overset{p}{\to}  -\mathbb{E}_{\theta_0}\big[H_i(\theta_0)\big] = \mathcal{I}(\theta_0)$$
+
+- **Second**, by the central limit theorem applied to the mean-zero scores,
+
+  $$\sqrt{n} \, \bar{S}_n(\theta_0) = \frac{1}{\sqrt{n}} \sum_{i=1}^n s_i(\theta_0) \overset{d}{\to} \text{Normal}\big(0, \, \text{Var}_{\theta_0}(s_i(\theta_0))\big) = \text{Normal}\big(0, \mathcal{I}(\theta_0)\big)$$
+
+  - Note the two different roles $\mathcal{I}(\theta_0)$ is playing: variance of the score, and negative expected Hessian. They coincide *only* under the information matrix equality.
+- **Lastly**, by Slutsky's theorem,
+
+  $$\sqrt{n}(\hat{\theta} - \theta_0) \overset{d}{\to} \text{Normal}\big(0, \mathcal{I}(\theta_0)^{-1}\mathcal{I}(\theta_0)\mathcal{I}(\theta_0)^{-1}\big) = \text{Normal}\big(0, \mathcal{I}(\theta_0)^{-1}\big)$$
+
+:::
+
+## Asymptotic distribution {.smaller}
+
+::: {.incremental}
+
+- In practice we state this as an approximation to the finite-sample distribution of $\hat{\theta}$ itself
+
+  $$\hat{\theta} \overset{a}{\sim} \text{Normal}\big(\theta_0, \ \mathcal{I}_n(\theta_0)^{-1}\big)$$
+
+  - The $\sqrt{n}$ has been absorbed: $\mathcal{I}_n^{-1} = \frac{1}{n}\mathcal{I}^{-1}$.
+  - $\overset{a}{\sim}$ means "asymptotically distributed as" -- this is *not* an exact finite-sample statement.
+- Standard errors are the square roots of the diagonal of $\mathcal{I}_n(\hat{\theta})^{-1}$.
+- Can another estimator do better asymptotically?
+  - It turns out the answer is **no**
+  - The MLE asymptotically attains the **Cramér-Rao lower bound**.
+
+:::
+
+## Cramér-Rao lower bound (CRLB)
+
+::: {.incremental}
+
+- An important result in statistics relates to the smallest possible variance that an **unbiased** estimator could reach
+  - That is, if we're not willing to accept more **bias**, how much **precision** can we squeeze out of the data?
+  - This ends up being related to the information!
+- The **Cramér-Rao lower bound** on the variance of any unbiased estimator $\hat{\theta}$ of $\theta$ is
+
+  $$\text{Var}(\hat{\theta}) \succeq \mathcal{I}_n(\theta)^{-1}$$
+
+- For vector $\theta$, "$\succeq$" means the difference $\text{Var}(\hat{\theta}) - \mathcal{I}_n(\theta)^{-1}$ is positive semi-definite.
+  - For scalar $\theta$ this reduces to the familiar $\text{Var}(\hat{\theta}) \ge 1/\mathcal{I}_n(\theta)$.
+- We'll show the scalar case.
+ 
+:::
+
+## Cramér-Rao lower bound (CRLB) {.smaller}
+
+::: {.incremental}
+
+- Consider what **unbiasedness** gets us. Note $\hat{\theta}(\mathbf{y})$ is a *function of the data*; $\theta$ is the constant we differentiate with respect to.
+
+  $$\mathbb{E}_{\theta}[\hat{\theta}(\mathbf{y}) - \theta] = \int(\hat{\theta}(\mathbf{y}) - \theta) f(\mathbf{y}| \theta)d\mathbf{y} = 0$$
+  
+- Since unbiasedness holds for every value of $\theta$, differentiating with respect to $\theta$ also gives zero
+
+  $$\frac{\partial}{\partial\theta} \int(\hat{\theta}(\mathbf{y}) - \theta) f(\mathbf{y} |\theta)d\mathbf{y} = 0$$
+  
+- Under the conditions that let us exchange differentiation and integration
+  
+  $$\int \frac{\partial}{\partial\theta} \bigg[(\hat{\theta}(\mathbf{y}) - \theta) f(\mathbf{y}| \theta)\bigg]d\mathbf{y} = 0$$
+
+:::
+  
+## Cramér-Rao lower bound (CRLB) {.smaller}
+
+::: {.incremental}
+
+- Product rule -- the $-1$ comes from $\frac{\partial}{\partial\theta}(\hat{\theta}(\mathbf{y}) - \theta)$, since $\hat{\theta}(\mathbf{y})$ does not depend on $\theta$
+  
+  $$\int  (\hat{\theta}(\mathbf{y}) - \theta) \frac{\partial}{\partial\theta} f(\mathbf{y}| \theta) \, d\mathbf{y} - \int  f(\mathbf{y}| \theta)d\mathbf{y} = 0$$
+
+- PDFs integrate to 1 over their support
+
+  $$\int  (\hat{\theta}(\mathbf{y}) - \theta) \frac{\partial}{\partial\theta} f(\mathbf{y}| \theta) \, d\mathbf{y} = 1$$
+  
+- Apply the same log-derivative trick as before
+
+  $$\frac{\partial}{\partial \theta} f(\mathbf{y}| \theta) = f(\mathbf{y}| \theta) \frac{\partial}{\partial \theta} \log  f(\mathbf{y}|\theta) = f(\mathbf{y}|\theta) \, S_n(\theta)$$
+
+:::
+  
+## Cramér-Rao lower bound (CRLB) {.smaller}
+
+::: {.incremental}
+
+- Plugging back in,
+
+  $$\int  (\hat{\theta}(\mathbf{y}) - \theta) \, S_n(\theta) \, f(\mathbf{y}| \theta)d\mathbf{y} = 1$$
+
+- By the "law of the unconscious statistician" this is just an expectation
+
+  $$\mathbb{E}_{\theta}\big[(\hat{\theta}(\mathbf{y}) - \theta) \, S_n(\theta)\big] = 1$$
+
+- The **Cauchy-Schwarz inequality** for expectations says that for random variables $U$ and $V$
+
+  $$\big|\mathbb{E}[UV]\big|^2 \le \mathbb{E}[U^2]\,\mathbb{E}[V^2]$$
+  
+- Apply it with $U = \hat{\theta}(\mathbf{y}) - \theta$ and $V = S_n(\theta)$
+
+  $$1 = \big|\mathbb{E}_\theta[U V]\big|^2 \le \mathbb{E}_{\theta}\big[(\hat{\theta}(\mathbf{y}) - \theta)^2\big] \times \mathbb{E}_{\theta}\big[S_n(\theta)^2\big]$$
+
+:::
+
+## Cramér-Rao lower bound (CRLB) {.smaller}
+
+::: {.incremental}
+
+- Identify the two pieces:
+  - $\mathbb{E}_{\theta}[(\hat{\theta}(\mathbf{y}) - \theta)^2]$ is the **mean squared error**. Because we assumed $\hat{\theta}$ is *unbiased*, MSE $=$ $\text{Var}(\hat{\theta})$.
+  - $\mathbb{E}_{\theta}[S_n(\theta)^2]$ is the **total information** $\mathcal{I}_n(\theta)$ -- again using that the score has mean zero.
+- So
+
+  $$\text{Var}(\hat{\theta}) \times \mathcal{I}_n(\theta) \ge 1 \quad \Longrightarrow \quad \text{Var}(\hat{\theta}) \ge \frac{1}{\mathcal{I}_n(\theta)}$$
+
+- Comparing to the asymptotic variance of the MLE:
+
+  $$\text{avar}(\hat{\theta}_{MLE}) = \mathcal{I}_n(\theta_0)^{-1}$$
+
+- The MLE attains the bound **asymptotically**. It is not generally unbiased or efficient in finite samples.
+
+:::
+
+# The Normal model
+
+## Deriving the log-likelihood {.smaller}
+
+::: {.incremental}
+
+- Let's consider the classical **normal regression** model with homoskedastic errors
+
+   $$y_i \sim \text{Normal}(\mu_i, \sigma^2), \qquad \mu_i = x_i^{\prime}\beta$$
+
+- Under i.i.d. the joint density factors, and logs turn the product into a sum
+
+  $$\ell_n(\beta, \sigma^2) = \log \prod_{i=1}^n f(y_i| \beta, \sigma^2) = \sum_{i=1}^n \log f(y_i| \beta, \sigma^2)$$
+
+- Plug in the Normal density for each observation
+
+  $$\ell_n(\beta, \sigma^2) = \sum_{i=1}^n \log \bigg[\frac{1}{\sigma\sqrt{2\pi}} \exp\left\{- \frac{1}{2}\left(\frac{y_i - x_i^\prime\beta}{\sigma}\right)^2 \right\}\bigg]$$
+  
+- Properties of logs -- note $\log(\sigma\sqrt{2\pi}) = \log\sigma + \tfrac{1}{2}\log(2\pi)$
+
+  $$\ell_n(\beta, \sigma^2) = \sum_{i=1}^n \left[-\log(\sigma) - \tfrac{1}{2}\log(2\pi) -\frac{1}{2}\bigg(\frac{y_i - x_i^\prime\beta}{\sigma}\bigg)^2\right]$$
+  
+:::
+
+## Deriving the log-likelihood {.smaller}
+
+::: {.incremental}
+
+- The $\tfrac{1}{2}\log(2\pi)$ term is an additive constant -- it does not depend on $\beta$ or $\sigma$, so it cannot change the location of the maximum. Drop it.
+
+  $$\ell_n(\beta, \sigma^2) \overset{c}{=}  -\frac{1}{2\sigma^2} \sum_{i=1}^n (y_i - x_i^\prime\beta)^2 -n\log(\sigma)$$
+
+  - "$\overset{c}{=}$" reads "equal up to an additive constant."
+- And the corresponding **average** log-likelihood, which is what the LLN arguments applied to
+
+  $$\bar{\ell}_n(\beta, \sigma^2) \overset{c}{=}  \frac{1}{n} \sum_{i=1}^n  \bigg[-\frac{1}{2\sigma^2} (y_i - x_i^\prime\beta)^2 - \log(\sigma)\bigg]$$
+
+- What's familiar here?
+  - For **fixed** $\sigma$, maximizing $\ell_n$ over $\beta$ is the same as *minimizing* the sum of squared residuals.
+  - So the MLE for $\beta$ *is* the OLS estimator. The normality assumption buys us $\sigma$ and the full distribution, not a different $\hat{\beta}$.
+
+:::
+
+## Deriving the score {.smaller}
+
+::: {.incremental}
+
+- We will need the analytic score later, so let's derive it. Reparameterize $\sigma = \exp(\eta)$ so that the optimizer can range over all of $\mathbb{R}$ and we never have to worry about $\sigma \le 0$.
+- The per-observation log-density (up to a constant), with $r_i = y_i - x_i^\prime\beta$:
+
+  $$\log f(y_i|\beta, \eta) \overset{c}{=} -\frac{r_i^2}{2\exp(2\eta)} - \eta$$
+
+- Differentiating with respect to $\beta$ (chain rule, $\partial r_i / \partial\beta = -x_i$):
+
+  $$\frac{\partial}{\partial\beta} \log f(y_i|\beta,\eta) = \frac{x_i \, r_i}{\sigma^2}$$
+
+- Differentiating with respect to $\eta$:
+
+  $$\frac{\partial}{\partial\eta} \log f(y_i|\beta,\eta) = \frac{r_i^2}{\sigma^2} - 1$$
+
+- Setting the sum of the first to zero gives the OLS normal equations $\mathbf{X}^\prime\mathbf{r} = 0$; the second gives $\hat{\sigma}^2 = \frac{1}{n}\sum_i r_i^2$.
+
+:::
+
+## Deriving the Hessian {.smaller}
+
+::: {.incremental}
+
+- Differentiating once more gives the blocks of $H_n$:
+
+  $$\frac{\partial^2 \ell_n}{\partial\beta\partial\beta^\prime} = -\frac{\mathbf{X}^\prime\mathbf{X}}{\sigma^2}, \qquad \frac{\partial^2 \ell_n}{\partial\beta \, \partial\eta} = -\frac{2\mathbf{X}^\prime\mathbf{r}}{\sigma^2}, \qquad \frac{\partial^2 \ell_n}{\partial\eta^2} = -\frac{2\sum_i r_i^2}{\sigma^2}$$
+
+- **Evaluated at the MLE**, two convenient simplifications appear:
+  - $\mathbf{X}^\prime\mathbf{r} = 0$, so the cross-derivative block is exactly **zero** -- $\hat\beta$ and $\hat\eta$ are orthogonal.
+  - $\sum_i r_i^2 = n\hat\sigma^2$, so the $\eta\eta$ entry is exactly $-2n$.
+- So the exact Hessian at the MLE is block diagonal:
+
+  $$H_n(\hat{\theta}) = \begin{bmatrix} -\mathbf{X}^\prime\mathbf{X}/\hat\sigma^2 & 0 \\ 0 & -2n \end{bmatrix}$$
+
+- Which gives us closed-form standard errors to check our numerical work against:
+
+  $$\widehat{\text{Var}}(\hat\beta) = \hat\sigma^2(\mathbf{X}^\prime\mathbf{X})^{-1}, \qquad \widehat{\text{SE}}(\hat\eta) = \frac{1}{\sqrt{2n}}$$
+
+- Keep these -- we are about to see software get them badly wrong.
+
+:::
+
+## Fitting the model {.smaller}
+
+- 2016 presidential returns by county: Clinton two-party vote share against percent non-Hispanic white.
+
+```{r, message=F, warning=F}
+election <- read_csv("data/prez_election_2016_vote.csv")
+election$voteshare <- 100*(election$candidatevotes/election$totalvotes)
+election <- election %>% filter(!is.na(voteshare) & !is.na(pctWhiteNH))
+nrow(election)
+```
+
+- Write a function returning the log-likelihood **evaluated at each observation** (an $N$-vector, not a scalar -- `maxLik` and `sandwich` both want this).
+
+```{r, echo=T}
+norm_loglik <- function(pars, Y, X){
+  beta <- pars[-length(pars)]
+  sigma <- exp(pars[length(pars)])  # pars[k+1] is log(sigma)
+  -(1/(2*sigma^2))*(Y - X%*%beta)^2 - log(sigma)
+}
+```
+
+```{r, echo=T, message=F}
+library(maxLik)
+X_matrix <- model.matrix(voteshare ~ pctWhiteNH, data=election)
+Y_vec <- election$voteshare
+start_vals <- c(0, 0, 3)   # beta0, beta1, log(sigma); exp(3) ~ 20 is a plausible guess
+```
+
+## Fitting the model {.smaller}
+
+- `maxLik` takes a function whose first argument is the parameter vector. We give it *only* the log-likelihood, so every derivative it needs is computed **numerically**.
+
+```{r, echo=T}
+mle_numeric <- maxLik(norm_loglik, start = start_vals, method = "NR",
+                      Y = Y_vec, X = X_matrix)
+round(coef(mle_numeric), 5)
+```
+
+- Compare the point estimates to OLS:
+
+```{r, echo=T}
+ols_est <- lm(voteshare ~ pctWhiteNH, data=election)
+round(coef(ols_est), 5)
+```
+
+::: {.fragment}
+- The coefficients agree to four decimal places. **Looks like we're done.**
+:::
+
+## ...but check the standard errors {.smaller}
+
+```{r, echo=T, warning=F}
+vcov_numeric <- solve(-maxLik::hessian(mle_numeric))
+se_numeric <- sqrt(diag(vcov_numeric))
+```
+
+```{r, echo=T}
+comparison <- data.frame(
+  term      = c("(Intercept)", "pctWhiteNH"),
+  se_maxLik = se_numeric[1:2],
+  se_ols    = summary(ols_est)$coefficients[,2]
+)
+comparison$pct_error <- 100*(comparison$se_maxLik - comparison$se_ols)/comparison$se_ols
+comparison
+```
+
+```{r, echo=F}
+pct_slope <- abs(round(comparison$pct_error[2]))
+```
+
+::: {.fragment}
+- These should be **identical** -- we proved above that $\widehat{\text{Var}}(\hat\beta) = \hat\sigma^2(\mathbf{X}^\prime\mathbf{X})^{-1}$.
+- Instead the slope standard error is off by about **`r pct_slope`%**. Every $t$-statistic from this fit is wrong by a comparable margin.
+- Nothing warned us. `maxLik` reported successful convergence to the right coefficients.
+:::
+
+## Worse: the answer is not even stable {.smaller}
+
+- Refit from several *nearby* starting values. Only the starting guess for $\log\sigma$ changes.
+
+```{r, echo=T, warning=F}
+se_from_start <- function(ls0, grad=NULL){
+  fit <- maxLik(norm_loglik, grad=grad, start=c(0, 0, ls0), method="NR",
+                Y=Y_vec, X=X_matrix)
+  se <- suppressWarnings(sqrt(diag(solve(-maxLik::hessian(fit)))))
+  c(beta1_hat = coef(fit)[2], SE_beta1 = se[2])
+}
+starts <- c(2.0, 2.303, exp(1), 2.708, 3.0)
+round(t(sapply(starts, se_from_start)), 6)
+```
+
+::: {.fragment}
+- The **point estimate** is rock solid -- identical to six decimals every time.
+- The **standard error** swings wildly, and in some runs the Hessian is not even negative definite, so the variance comes back negative and the SE is `NaN`.
+- The truth (from OLS) is `r round(summary(ols_est)$coefficients[2,2], 6)`.
+- A quantity that changes when you nudge an irrelevant starting value is not being computed -- it is being guessed.
+:::
+## Where do derivatives come from? {.smaller}
+
+::: {.incremental}
+
+- Three ways to get the gradient and Hessian a maximizer needs:
+- **1. Finite differences** ("numerical differentiation")
+  - $\frac{\partial f}{\partial\theta_j} \approx \frac{f(\theta + h e_j) - f(\theta - h e_j)}{2h}$
+  - Needs only the ability to *evaluate* $f$. This is what `maxLik` does by default.
+  - **Approximate**, and the error depends delicately on the step size $h$.
+- **2. Symbolic differentiation**
+  - Apply calculus rules to the *expression* for $f$ to get an expression for $f^\prime$. What `Deriv::Deriv` or Mathematica does.
+  - **Exact**, but expressions can blow up in size ("expression swell").
+- **3. Automatic differentiation (AD)**
+  - Decompose the *program* computing $f$ into elementary operations, apply the chain rule to each, accumulate numerically.
+  - **Exact to machine precision** (no step size!), and costs a small constant multiple of evaluating $f$.
+  - This is what powers Stan, TMB, JAX, and PyTorch. It's why modern Bayesian software can use gradients so freely.
+
+:::
+
+## Why finite differences hurt {.smaller}
+
+::: {.incremental}
+
+- Finite differencing trades off two error sources:
+  - **Truncation error** from the Taylor remainder, shrinking like $h^2$ for a central difference. Wants $h$ **large**.
+  - **Roundoff error** from *catastrophic cancellation*: subtracting two nearly-equal floating point numbers destroys significant digits. Grows like $\epsilon/h$. Wants $h$ **small**.
+- With machine epsilon $\epsilon \approx 2.2\times10^{-16}$, the best you can do for a first derivative is roughly
+
+  $$h^{*} \sim \epsilon^{1/3} \approx 6\times 10^{-6}, \qquad \text{error} \sim \epsilon^{2/3} \approx 4\times 10^{-11}$$
+
+- For a **second** derivative it is much worse -- about $\epsilon^{1/2} \approx 10^{-8}$ relative error, and that is the *optimistic* case.
+- Now recall what `maxLik` did: it had no gradient, so it built the Hessian by finite-differencing a function that was **itself** finite-differenced.
+  - Two levels of cancellation stacked on top of each other.
+  - The lost precision then gets **amplified** by the matrix inversion $\text{solve}(-H)$.
+
+:::
+
+## Supplying the analytic gradient {.smaller}
+
+- We derived the score by hand a few slides ago. Let's just hand it to the optimizer. It returns an $N \times (k+1)$ matrix -- one gradient row per observation.
+
+```{r, echo=T}
+norm_grad <- function(pars, Y, X){
+  beta <- pars[-length(pars)]
+  sigma <- exp(pars[length(pars)])
+  r <- as.vector(Y - X%*%beta)
+  cbind(X * (r/sigma^2),        # d/d beta
+        (r^2/sigma^2) - 1)      # d/d log(sigma)
+}
+```
+
+- We could equally have had the machine derive this for us symbolically:
+
+```{r, echo=T, message=F}
+library(Deriv)
+Deriv(function(b0, b1, ls, y, x) -(1/(2*exp(ls)^2))*(y - b0 - b1*x)^2 - ls,
+      c("b0","b1","ls"))
+```
+
+::: {.fragment}
+- Same expressions we derived by hand. There is rarely a good excuse for not having the gradient.
+:::
+
+## Analytic gradient: the standard errors {.smaller}
+
+```{r, echo=T}
+mle_analytic <- maxLik(norm_loglik, grad = norm_grad, start = start_vals,
+                       method = "NR", Y = Y_vec, X = X_matrix)
+se_analytic <- sqrt(diag(solve(-maxLik::hessian(mle_analytic))))
+```
+
+```{r, echo=T}
+data.frame(
+  term        = c("(Intercept)", "pctWhiteNH"),
+  numeric     = se_numeric[1:2],
+  analytic    = se_analytic[1:2],
+  ols_truth   = summary(ols_est)$coefficients[,2]
+)
+```
+
+::: {.fragment}
+- Supplying the gradient recovers the OLS standard errors essentially exactly.
+- `maxLik` is *still* finite-differencing to get the Hessian -- but now it differences the **exact** gradient. One level of differencing instead of two, and that is the whole difference.
+:::
+
+## And now it is stable {.smaller}
+
+- Rerun the starting-value sweep, this time passing the gradient:
+
+```{r, echo=T, warning=F}
+round(t(sapply(starts, se_from_start, grad = norm_grad)), 6)
+```
+
+::: {.fragment}
+- The same answer from every start, matching OLS to six decimals.
+- Note we did not change the model, the data, the optimizer, or the convergence criterion. We changed only *how the derivatives were obtained*.
+:::
+
+## Look at the Hessians {.smaller}
+
+```{r, echo=T}
+round(maxLik::hessian(mle_numeric), 4)
+```
+
+```{r, echo=T}
+round(maxLik::hessian(mle_analytic), 4)
+```
+
+::: {.fragment}
+- We *proved* the $\beta$--$\eta$ cross-derivatives are exactly zero at the MLE, and that the $\eta\eta$ entry is exactly $-2n = `r -2*nrow(election)`$.
+- The analytic version gets both right. The fully numerical one puts visible garbage in the off-diagonal corner and misses $-2n$.
+- Those small absolute errors sit in the corner of a matrix we are about to **invert** -- which is where they get amplified into the standard errors.
+:::
+
+## It is not just the standard errors {.smaller}
+
+- Numerical derivatives can break the **optimizer** too, not merely the variance estimate. Start from $\log\sigma = 0$ instead:
+
+```{r, echo=T}
+bad_start <- c(0, 0, 0)
+mle_bad_numeric  <- maxLik(norm_loglik, start = bad_start, method = "NR",
+                           Y = Y_vec, X = X_matrix)
+mle_bad_analytic <- maxLik(norm_loglik, grad = norm_grad, start = bad_start,
+                           method = "NR", Y = Y_vec, X = X_matrix)
+```
+
+```{r, echo=T}
+rbind(numeric  = c(coef(mle_bad_numeric),  iterations = mle_bad_numeric$iterations),
+      analytic = c(coef(mle_bad_analytic), iterations = mle_bad_analytic$iterations))
+```
+
+::: {.fragment}
+- The numerical version wanders to $\hat\beta_0 \approx -1834$ after hitting the iteration cap. The analytic version converges in a handful of steps.
+- A "converged" flag from an optimizer is **not** evidence that you found the maximum.
+:::
+
+## The real culprit: scaling {.smaller}
+
+::: {.incremental}
+
+- Why is this problem so fragile in the first place? Look at what we are asking the optimizer to work with.
+
+```{r, echo=T}
+c(kappa_X = kappa(crossprod(X_matrix)),
+  sd_Y = sd(election$voteshare), sd_X = sd(election$pctWhiteNH),
+  mean_X = mean(election$pctWhiteNH))
+```
+
+- `pctWhiteNH` averages about 83 and never comes near zero, so the intercept column and the covariate column are nearly collinear.
+  - The condition number of $\mathbf{X}^\prime\mathbf{X}$ is over $10^5$.
+- Meanwhile the parameters live on wildly different scales: $\beta_0 \approx 68$, $\beta_1 \approx -0.46$, $\eta \approx 2.5$.
+- A single step size $h$ cannot be simultaneously appropriate for a parameter of size $68$ and one of size $0.46$.
+  - Finite differencing is **not scale-invariant**. The exact gradient is.
+- Conditioning is what converts small derivative errors into large errors in $H^{-1}$.
+
+:::
+
+## Standardizing $Y$ and $X$ {.smaller}
+
+- Put everything on a common scale: mean zero, unit standard deviation.
+
+```{r, echo=T}
+election$voteshare_z  <- (election$voteshare  - mean(election$voteshare))/sd(election$voteshare)
+election$pctWhiteNH_z <- (election$pctWhiteNH - mean(election$pctWhiteNH))/sd(election$pctWhiteNH)
+X_z <- model.matrix(voteshare_z ~ pctWhiteNH_z, data=election)
+Y_z <- election$voteshare_z
+c(kappa_raw = kappa(crossprod(X_matrix)), kappa_std = kappa(crossprod(X_z)))
+```
+
+::: {.fragment}
+- Centering makes the intercept column orthogonal to the covariate; scaling equalizes the units. The condition number drops from $10^5$ to essentially $1$.
+:::
+
+```{r, echo=T}
+mle_z_numeric  <- maxLik(norm_loglik, start = start_vals, method="NR", Y = Y_z, X = X_z)
+mle_z_analytic <- maxLik(norm_loglik, grad = norm_grad, start = start_vals,
+                         method="NR", Y = Y_z, X = X_z)
+```
+
+## The discrepancy disappears {.smaller}
+
+```{r, echo=T}
+se_z_numeric  <- sqrt(diag(solve(-maxLik::hessian(mle_z_numeric))))
+se_z_analytic <- sqrt(diag(solve(-maxLik::hessian(mle_z_analytic))))
+data.frame(
+  term     = c("(Intercept)", "pctWhiteNH", "log(sigma)"),
+  numeric  = se_z_numeric,
+  analytic = se_z_analytic,
+  pct_diff = 100*(se_z_numeric - se_z_analytic)/se_z_analytic
+)
+```
+
+::: {.fragment}
+- Agreement to about one part in $10^5$, versus errors of tens of percent on the raw scale.
+- The badly-behaved starting value is no longer a problem either:
+
+```{r, echo=T}
+coef(maxLik(norm_loglik, start = c(0,0,0), method="NR", Y = Y_z, X = X_z))
+```
+:::
+
+## Getting back to interpretable units {.smaller}
+
+- Standardizing is a computational device, not a change of model. Undo it afterwards:
+
+  $$\hat\beta_1^{raw} = \hat\beta_1^{z} \times \frac{s_Y}{s_X}, \qquad \widehat{\text{SE}}(\hat\beta_1^{raw}) = \widehat{\text{SE}}(\hat\beta_1^{z}) \times \frac{s_Y}{s_X}$$
+
+```{r, echo=T}
+scale_ratio <- sd(election$voteshare)/sd(election$pctWhiteNH)
+data.frame(
+  quantity   = c("slope", "SE(slope)"),
+  from_z     = c(coef(mle_z_analytic)[2]*scale_ratio, se_z_analytic[2]*scale_ratio),
+  ols_truth  = summary(ols_est)$coefficients[2,1:2]
+)
+```
+
+::: {.fragment}
+- Exact recovery, and we never had to invert a badly conditioned matrix along the way.
+:::
+
+## What to take away {.smaller}
+
+::: {.incremental}
+
+- **Point estimates are the easy part.** The optimizer can land on the right $\hat\theta$ and still hand you standard errors that are 25% wrong, because those come from a *second* derivative.
+- **Supply the gradient whenever you can.** By hand, symbolically, or via AD. It is the single highest-return thing you can do for a custom likelihood.
+- **Scale your variables.** Center and standardize before optimizing. Reparameterize bounded parameters ($\sigma = e^\eta$) so the optimizer works on $\mathbb{R}$.
+- **Always check against something you know.** Here OLS and the closed-form $1/\sqrt{2n}$ gave us ground truth. For a genuinely novel model, simulate data with known parameters.
+- **Convergence flags are not correctness.** Check the gradient at the optimum is near zero, and that the Hessian is negative definite and sensibly conditioned.
+- This is exactly why Stan, TMB, and friends invest so heavily in automatic differentiation -- it removes an entire category of silent failure.
+
+:::
+
+# "Robust" standard errors
+
+## Relaxing the information matrix equality {.smaller}
+
+::: {.incremental}
+
+- Return to the asymptotic variance derivation. Before Slutsky, we had the **sandwich**
+
+  $$\text{avar}\big(\sqrt{n}(\hat{\theta}-\theta_0)\big) = \underbrace{\big[-\mathbb{E}_{\theta_0}[H_i(\theta_0)]\big]^{-1}}_{\text{bread}} \underbrace{\text{Var}_{\theta_0}\big(s_i(\theta_0)\big)}_{\text{meat}} \underbrace{\big[-\mathbb{E}_{\theta_0}[H_i(\theta_0)]\big]^{-1}}_{\text{bread}}$$
+
+- Previously we used the information matrix equality -- meat $=$ bread$^{-1}$ $= \mathcal{I}(\theta_0)$ -- to collapse this to $\mathcal{I}(\theta_0)^{-1}$.
+- That equality holds **only if the model is correctly specified**. If it isn't, the two differ, and only the sandwich is consistent.
+- Estimate each piece separately with sample analogues, using the **totals** so the $n$'s land in the right place:
+
+  $$\widehat{\text{Var}}(\hat{\theta}) = \bigg[-\sum_{i=1}^n H_i(\hat\theta)\bigg]^{-1}\bigg[\sum_{i=1}^n s_i(\hat{\theta})  s_i(\hat{\theta})^{\prime}\bigg]\bigg[-\sum_{i=1}^n H_i(\hat\theta)\bigg]^{-1}$$
+
+- Consistent under misspecification of the outcome distribution, but finite-sample properties can be poor -- usually *undercoverage* in small samples, so a correction like $\frac{n}{n-k}$ is common.
+
+:::
+
+## Implementing the sandwich {.smaller}
+
+- `sandwich::estfun` returns the per-observation gradient -- which is exactly why we wrote `norm_loglik` to return an $N$-vector.
+
+```{r, echo = T}
+grad_mat <- sandwich::estfun(mle_analytic)
+dim(grad_mat)
+round(colSums(grad_mat), 6)   # should be ~0 at the MLE
+```
+
+- Assembling the three pieces:
+
+```{r, echo=T}
+bread_inv <- solve(-maxLik::hessian(mle_analytic))
+meat      <- t(grad_mat) %*% grad_mat
+robust_vcov <- bread_inv %*% meat %*% bread_inv
+n <- nrow(election); k <- ncol(X_matrix)
+```
+
+```{r, echo=T}
+data.frame(
+  term       = c("(Intercept)", "pctWhiteNH", "log(sigma)"),
+  classical  = sqrt(diag(solve(-maxLik::hessian(mle_analytic)))),
+  robust     = sqrt(diag(robust_vcov)),
+  robust_cor = sqrt(diag(robust_vcov) * n/(n-k))
+)
+```
+
+## Interpreting the gap {.smaller}
+
+- Compare against the heteroskedasticity-robust OLS standard errors:
+
+```{r, echo=T, message=F}
+library(estimatr)
+tidy(lm_robust(voteshare ~ pctWhiteNH, data=election, se_type="HC0"))[,c("term","estimate","std.error")]
+```
+
+::: {.incremental}
+
+- The robust standard errors are noticeably larger than the classical ones here.
+- That gap is diagnostic: it says the constant-variance assumption in $y_i \sim \text{Normal}(x_i^\prime\beta, \sigma^2)$ is doing real work, and doing it badly.
+  - Small counties have far more variable vote shares than large ones.
+- **Note the ordering of concerns.** The sandwich fixes *misspecification*. It does nothing about the numerical problem from earlier -- it uses the same Hessian, so a bad Hessian corrupts the bread on both sides.
+  - Get the derivatives right *first*, then worry about robustness.
+
+:::
+
+## Conclusion {.smaller}
+
+- **Statistical models**
+  - Describe the data-generating process in terms of *systematic* and *stochastic* components
+  - In a parametric model, we assume the data $\mathbf{y}$ come from a known *distribution* with unknown parameters $\theta$
+- **Likelihood**
+  - A function of $\theta$ evaluated at the observed data $\mathbf{y}$, equal to $f(\mathbf{y}|\theta)$
+  - How *relatively* plausible are my observed results in a world where the true DGP parameter were $\theta$?
+  - Not $f(\theta|\mathbf{y})$. That quantity only makes sense in the Bayesian context and requires a prior $f(\theta)$
+- **Maximum Likelihood Estimator**
+  - A *technique* for constructing a good estimator whenever we can write down a well-behaved likelihood
+  - Consistency, asymptotic normality, asymptotic efficiency -- all **asymptotic** properties
+- **Computation is part of the method**
+  - Curvature gives us our standard errors, so how accurately we compute second derivatives is a statistical question, not just a numerical one.
+
+## Next week
+
+::: {.incremental}
+
+- **Properties of maximum likelihood estimators**
+  - Invariance, the delta method, likelihood ratio / Wald / score tests
+- **Generalized linear models**
+  - Link functions and the exponential family
+- **Binary outcome models**
+  - Logit and probit as likelihood models
+- **Readings:** Chapter 5 of @aronow2019foundations and Chapter 6 of @evans2010probability
+
+:::
+
+## References {.refs-slide}
+
+::: {#refs}
+:::
