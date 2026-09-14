@@ -793,22 +793,21 @@ round(t(sapply(starts, se_from_start)), 6)
 - The truth (from OLS) is `r round(summary(ols_est)$coefficients[2,2], 6)`.
 - A quantity that changes when you nudge an irrelevant starting value is not being computed -- it is being guessed.
 :::
+
 ## Where do derivatives come from? {.smaller}
 
 ::: {.incremental}
 
-- Three ways to get the gradient and Hessian a maximizer needs:
-- **1. Finite differences** ("numerical differentiation")
+- An optimizer needs a gradient and a Hessian. It can get them two ways.
+- **Finite differences** ("numerical differentiation")
   - $\frac{\partial f}{\partial\theta_j} \approx \frac{f(\theta + h e_j) - f(\theta - h e_j)}{2h}$
-  - Needs only the ability to *evaluate* $f$. This is what `maxLik` does by default.
-  - **Approximate**, and the error depends delicately on the step size $h$.
-- **2. Symbolic differentiation**
-  - Apply calculus rules to the *expression* for $f$ to get an expression for $f^\prime$. What `Deriv::Deriv` or Mathematica does.
-  - **Exact**, but expressions can blow up in size ("expression swell").
-- **3. Automatic differentiation (AD)**
-  - Decompose the *program* computing $f$ into elementary operations, apply the chain rule to each, accumulate numerically.
-  - **Exact to machine precision** (no step size!), and costs a small constant multiple of evaluating $f$.
-  - This is what powers Stan, TMB, JAX, and PyTorch. It's why modern Bayesian software can use gradients so freely.
+  - Needs only the ability to *evaluate* $f$, so it works on any likelihood you can write down. This is `maxLik`'s default, and it is why the fit above ran without complaint.
+  - **Approximate**, and the error depends delicately on a step size $h$ that the software picks for you.
+- **Exact derivatives**
+  - Do the calculus yourself and hand the optimizer a function that returns the score.
+  - **Exact** up to floating point, with no step size to get wrong.
+  - We already did this work: the score is three slides back.
+- For a linear model there is no excuse for the first option. The derivatives are a couple of lines of algebra.
 
 :::
 
@@ -844,16 +843,8 @@ norm_grad <- function(pars, Y, X){
 }
 ```
 
-- We could equally have had the machine derive this for us symbolically:
-
-```{r, echo=T, message=F}
-library(Deriv)
-Deriv(function(b0, b1, ls, y, x) -(1/(2*exp(ls)^2))*(y - b0 - b1*x)^2 - ls,
-      c("b0","b1","ls"))
-```
-
 ::: {.fragment}
-- Same expressions we derived by hand. There is rarely a good excuse for not having the gradient.
+- That is the whole cost of doing it properly: five lines, transcribed directly from the score we derived by hand.
 :::
 
 ## Analytic gradient: the standard errors {.smaller}
@@ -1017,12 +1008,11 @@ data.frame(
 
 ::: {.incremental}
 
-- **Point estimates are the easy part.** The optimizer can land on the right $\hat\theta$ and still hand you standard errors that are 25% wrong, because those come from a *second* derivative.
-- **Supply the gradient whenever you can.** By hand, symbolically, or via AD. It is the single highest-return thing you can do for a custom likelihood.
+- **Point estimates are the easy part.** The optimizer can land on the right $\hat\theta$ and still hand you standard errors that are `r pct_slope`% wrong, because those come from a *second* derivative.
+- **Derive the gradient and supply it.** It is the single highest-return thing you can do for a custom likelihood, and for anything in the linear-model family it is a few lines of algebra.
 - **Scale your variables.** Center and standardize before optimizing. Reparameterize bounded parameters ($\sigma = e^\eta$) so the optimizer works on $\mathbb{R}$.
 - **Always check against something you know.** Here OLS and the closed-form $1/\sqrt{2n}$ gave us ground truth. For a genuinely novel model, simulate data with known parameters.
 - **Convergence flags are not correctness.** Check the gradient at the optimum is near zero, and that the Hessian is negative definite and sensibly conditioned.
-- This is exactly why Stan, TMB, and friends invest so heavily in automatic differentiation -- it removes an entire category of silent failure.
 
 :::
 
