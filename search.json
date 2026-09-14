@@ -77,6 +77,559 @@
     "text": "Acknowledgments\nThis course is indebted to the many wonderful and generous scholars who have developed statistical methods curricula in political science departments throughout the world and who have made their course materials available to the public. This course in particular has been heavily inspired by Gov 2001 and Gov 2003 at Harvard University as well as Quant III at MIT. In particular, I thank Matthew Blackwell, Brandon Stewart, Erin Hartman, Molly Roberts, Kosuke Imai, Teppei Yamamoto, Jens Hainmueller, Adam Glynn, Gary King, Justin Grimmer, and In Song Kim whose lecture notes and syllabi have been immensely valuable in the creation of this course.\nLastly, thanks to Andrew Heiss and Matt Blackwell for their Quarto website templates, which I have extensively borrowed from in designing this course site."
   },
   {
+    "objectID": "slides/week2/week2_likelihood_inference.html#likelihood-inference",
+    "href": "slides/week2/week2_likelihood_inference.html#likelihood-inference",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Likelihood Inference",
+    "text": "Likelihood Inference\n\n\\[\n\\DeclareMathOperator*{\\argmin}{arg\\,min}\n\\DeclareMathOperator*{\\argmax}{arg\\,max}\n\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#previously",
+    "href": "slides/week2/week2_likelihood_inference.html#previously",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Previously",
+    "text": "Previously\n\nLinear regression\n\n“Agnostic” regression and the Best Linear Predictor\n“Classical” OLS regression theory\n\nKey intuitions\n\nRegression as a projection of \\(Y\\) into the column space of \\(\\mathbf{X}\\)\nFrisch-Waugh-Lovell theorem\n\nThroughout, we assumed as little as possible about the distribution of \\(Y\\)."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#this-week",
+    "href": "slides/week2/week2_likelihood_inference.html#this-week",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "This week",
+    "text": "This week\n\nWhat is a statistical model?\nWhat is a likelihood?\nProperties of the maximum likelihood estimator\nHow do we actually compute the MLE – and its standard errors?\n\nThis last part turns out to be much less automatic than it looks."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#defining-a-statistical-model",
+    "href": "slides/week2/week2_likelihood_inference.html#defining-a-statistical-model",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Defining a statistical model",
+    "text": "Defining a statistical model\n\nIn the regression setting we tried to make as few assumptions about the data-generating process as possible.\n\nOur goal is just to estimate and conduct inference on \\(E[Y|X]\\).\n\nBut what if we wanted to make further probabilistic statements about other quantities beyond \\(\\beta\\)?\n\n(e.g.) Can we provide a distribution for \\(Y_{n+1}\\), the “next” observation given \\(X_{n+1}\\)?\nIf we’re willing to make more assumptions about the data-generating process, we can do a lot more!\n\nStatistical models specify the data-generating process in terms of systematic and stochastic components.\n\nSystematic elements are functions of known constants and unknown parameters\nStochastic elements are draws from probability distributions\n\nWe will be primarily working with parametric models\n\nThe data are assumed to come from a particular family of probability distributions\nThe “structure” of the model is fixed (the number of parameters does not grow with the size of the data)."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#the-linear-model",
+    "href": "slides/week2/week2_likelihood_inference.html#the-linear-model",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "The linear model",
+    "text": "The linear model\n\nIt is common to see the linear model written in its fully parametric form.\nStochastic:\n\\[y_i \\sim \\text{Normal}(\\mu_i, \\sigma^2)\\]\nSystematic:\n\\[\\mu_i = x_i^{\\prime}\\beta\\]\nWhat’s assumed to be known?\n\n\\(\\mathbf{x}\\)\n\nWhat’s assumed to have a particular distribution?\n\n\\(y\\)\n\nWe are interested in estimating and conducting inference on the parameters: \\(\\beta\\) and (less importantly) \\(\\sigma^2\\)."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#general-model-notation",
+    "href": "slides/week2/week2_likelihood_inference.html#general-model-notation",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "General model notation",
+    "text": "General model notation\n\nWe can specify a broad set of models for \\(Y_i\\) using this framework\nStochastic\n\\[Y_i \\sim f(\\theta_i, \\alpha)\\]\nSystematic\n\\[\\theta_i = g(X_i, \\beta)\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#general-model-notation-1",
+    "href": "slides/week2/week2_likelihood_inference.html#general-model-notation-1",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "General model notation",
+    "text": "General model notation\n\nWhat are these quantities?\n\n\\(Y_i\\) is a random variable\n\\(f()\\) denotes the distribution of that random variable\n\\(\\theta_i\\) and \\(\\alpha\\) are parameters of that distribution\n\\(g()\\) is some function\n\\(X_i\\) are observed, known constants (e.g. regressors)\n\\(\\beta\\) are parameters of interest\n\nLater, we will spend some time with a particular class of models called “Generalized Linear Models” where the systematic component has the form\n\\[\\theta_i = g(X_i^{\\prime}\\beta)\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#types-of-distributions",
+    "href": "slides/week2/week2_likelihood_inference.html#types-of-distributions",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Types of distributions",
+    "text": "Types of distributions\n\nNormal\n\n\n\nContinuous on an unbounded support \\((-\\infty, \\infty)\\)\nTwo parameters: Mean \\(\\mu\\) and Variance \\(\\sigma^2\\)\n\\[f_N(x;\\mu, \\sigma) = \\frac{1}{\\sigma\\sqrt{2\\pi}} \\exp\\left\\{- \\frac{1}{2}\\left(\\frac{x - \\mu}{\\sigma}\\right)^2 \\right\\}\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#types-of-distributions-1",
+    "href": "slides/week2/week2_likelihood_inference.html#types-of-distributions-1",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Types of distributions",
+    "text": "Types of distributions\n\nPoisson\n\n\n\nDiscrete, defined on the support of the natural numbers (positive integers + zero)\nSingle parameter: Mean and Variance \\(\\lambda\\)\n\\[f(x; \\lambda) = \\frac{\\lambda^x\\exp\\{-\\lambda\\}}{x!}\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#types-of-distributions-2",
+    "href": "slides/week2/week2_likelihood_inference.html#types-of-distributions-2",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Types of distributions",
+    "text": "Types of distributions\n\nBinomial\n\n\n\nDiscrete, defined on the support of integers from \\(\\{0, 1, 2, \\dotsc, n\\}\\) (models the sum of repeated i.i.d. coin flips)\nTwo parameters: \\(p\\) probability of success in \\(n\\) trials\n\nSpecial case where \\(n=1\\) trial is typically called the “Bernoulli”\n\n\\[f(x; p, n) = {n \\choose x} p^x(1-p)^{n-x}\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#learning-about-the-unknown",
+    "href": "slides/week2/week2_likelihood_inference.html#learning-about-the-unknown",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Learning about the unknown",
+    "text": "Learning about the unknown\n\nSuppose that I want to learn about an unobserved parameter from a sample of observations.\n\nI assume a particular statistical model for the data\nExample: The linear model from earlier!\n\nFrequentist approach\n\nUnobserved parameters are fixed constants\nData are random variables\n\nWe want to construct an estimator that is a function of the data and which has desirable properties\n\nConsistency: As our sample size gets larger, the estimator converges (in probability) to the target parameter.\nAsymptotic normality: In large samples, the distribution of our estimator is normal (ideally with a variance we can estimate as well!)\n\nCan we come up with a generic framework that yields a “good” estimator for a large class of statistical models?"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#the-likelihood-function",
+    "href": "slides/week2/week2_likelihood_inference.html#the-likelihood-function",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "The Likelihood Function",
+    "text": "The Likelihood Function\n\nConsider data \\(\\mathbf{y} = \\{y_1, y_2, \\dotsc, y_n\\}\\) which we assume comes from a known distribution with density \\(f(\\mathbf{y} | \\theta)\\) with unknown parameter \\(\\theta\\)\n\n\\(f()\\) could be Bernoulli, Normal, Poisson, Gamma, Beta, etc… – in this setting it is a known distribution\n\\(\\theta\\) is an unknown parameter that lies in some space \\(\\Theta\\) of possible values.\n\nThe likelihood function is a function of \\(\\theta\\) that is evaluated at the observed values of \\(\\mathbf{y}\\)\n\\[\\mathcal{L}(\\theta| \\mathbf{y}) = f(\\mathbf{y} | \\theta)\\]\nGiven some input \\(\\theta\\), the likelihood function returns the density of the observed data evaluated at that value.\nThe likelihood function is not a probability density\n\na pdf is a function that takes \\(x\\) as an input\na likelihood is a function that takes \\(\\theta\\) as an input"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#the-likelihood-function-1",
+    "href": "slides/week2/week2_likelihood_inference.html#the-likelihood-function-1",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "The Likelihood Function",
+    "text": "The Likelihood Function\n\nThe likelihood function is not \\(f(\\theta | \\mathbf{y})\\)\n\nThat statement doesn’t even make sense in a frequentist framework – parameters are constants\n\nEven when we (later) move to a Bayesian framework, \\(f(\\theta | \\mathbf{y}) \\neq f(\\mathbf{y} | \\theta)\\)\nRemember Bayes’ Rule:\n\\[f(\\theta | \\mathbf{y}) = \\frac{f(\\mathbf{y} | \\theta)}{f(\\mathbf{y})} \\times f(\\theta)\\]\nOr alternatively, since \\(f(\\mathbf{y})\\) is just a normalizing constant, you’ll see this written as:\n\\[\\underbrace{f(\\theta | \\mathbf{y})}_{\\text{posterior}} \\propto \\underbrace{f(\\mathbf{y}|\\theta)}_{\\text{likelihood}} \\times \\underbrace{f(\\theta)}_{\\text{prior}}\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#the-likelihood-function-2",
+    "href": "slides/week2/week2_likelihood_inference.html#the-likelihood-function-2",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "The Likelihood Function",
+    "text": "The Likelihood Function\n\nWe often make the assumption that our data are independently and identically distributed\n\n\\(y_i \\underset{{\\text{i.i.d}}}{\\sim} f(y_i | \\theta)\\)\n\nThis allows us to factor the likelihood\n\\[\\mathcal{L}(\\theta|\\mathbf{y}) = f(\\mathbf{y} | \\theta) = \\prod_{i=1}^n f(y_i | \\theta)\\]\nSince our eventual goal will be to find an optimum of the likelihood, we can apply any strictly increasing function to it, since that preserves the location of the maximum.\n\nThe main one we’ll apply is the logarithm\nWhy? Because logs turn annoying-to-work-with products into easier-to-work-with sums!"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#notation-sums-vs.-averages",
+    "href": "slides/week2/week2_likelihood_inference.html#notation-sums-vs.-averages",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Notation: sums vs. averages",
+    "text": "Notation: sums vs. averages\n\nFor theory reasons, you’ll see two forms of the log-likelihood\nThe total log-likelihood\n\\[\\ell_n(\\theta) = \\sum_{i=1}^n \\log f(y_i | \\theta)\\]\nThe average log-likelihood\n\\[\\bar{\\ell}_n(\\theta) = \\frac{1}{n}\\ell_n(\\theta) = \\frac{1}{n}\\sum_{i=1}^n \\log f(y_i | \\theta)\\]\nThese have the same maximizer\n\nBut the average lets us make law-of-large-numbers arguments - this will matter later on!"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#notation-score-and-hessian",
+    "href": "slides/week2/week2_likelihood_inference.html#notation-score-and-hessian",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Notation: Score and Hessian",
+    "text": "Notation: Score and Hessian\n\nThe score for a single observation is the gradient of its log-density with respect to \\(\\theta\\)\n\\[s_i(\\theta) = \\frac{\\partial}{\\partial\\theta} \\log f(y_i | \\theta)\\]\nFor a \\(k\\)-dimensional \\(\\theta\\), \\(s_i(\\theta)\\) is a \\(k \\times 1\\) vector.\nThe Hessian for a single observation is the matrix of second derivatives\n\\[H_i(\\theta) = \\frac{\\partial^2}{\\partial\\theta\\partial\\theta^{\\prime}} \\log f(y_i | \\theta)\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#notation-score-and-hessian-1",
+    "href": "slides/week2/week2_likelihood_inference.html#notation-score-and-hessian-1",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Notation: Score and Hessian",
+    "text": "Notation: Score and Hessian\n\nSumming and averaging as before:\n\\[S_n(\\theta) = \\sum_{i=1}^n s_i(\\theta) \\qquad \\bar{S}_n(\\theta) = \\frac{1}{n}\\sum_{i=1}^n s_i(\\theta)\\]\n\\[H_n(\\theta) = \\sum_{i=1}^n H_i(\\theta) \\qquad \\bar{H}_n(\\theta) = \\frac{1}{n}\\sum_{i=1}^n H_i(\\theta)\\]\n\\(S_n(\\theta)\\) is exactly the gradient of \\(\\ell_n(\\theta)\\), and \\(H_n(\\theta)\\) its Hessian."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#mle",
+    "href": "slides/week2/week2_likelihood_inference.html#mle",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "MLE",
+    "text": "MLE\n\nWe want to come up with an estimator \\(\\hat{\\theta}\\) for the parameter \\(\\theta\\)\n\n\\(\\hat{\\theta}\\) is a function of the data (like a sample mean or OLS coefficient)\nIs there a principled way to pick \\(\\hat{\\theta}\\) that has provably “good” properties across a wide variety of models?\n\nThe Maximum Likelihood Estimator (MLE) \\(\\hat{\\theta}\\) is defined as the value of \\(\\theta\\) that maximizes the log-likelihood\n\\[\\hat{\\theta} = \\argmax_{\\theta \\in \\Theta} \\ \\ell_n(\\theta)\\]\nUnder i.i.d. observations (and regularity conditions), the MLE has some desirable properties:\n\nConsistent: \\(\\hat{\\theta} \\overset{p}{\\to} \\theta_0\\), the true parameter\nAsymptotically normal: \\(\\sqrt{n}(\\hat{\\theta} - \\theta_0) \\overset{d}{\\to} \\text{Normal}\\big(0, \\mathcal{I}(\\theta_0)^{-1}\\big)\\)\nAsymptotically efficient: its variance attains the Cramér-Rao lower bound"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#the-score-has-mean-zero",
+    "href": "slides/week2/week2_likelihood_inference.html#the-score-has-mean-zero",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "The score has mean zero",
+    "text": "The score has mean zero\n\nFirst, we’ll start with some properties of the score.\nOne property that comes up frequently: evaluated at the parameter that generated the data, the score has mean zero\n\\[\\mathbb{E}_{\\theta}\\big[s_i(\\theta)\\big] = 0\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#the-score-has-mean-zero-1",
+    "href": "slides/week2/week2_likelihood_inference.html#the-score-has-mean-zero-1",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "The score has mean zero",
+    "text": "The score has mean zero\n\nStart from the definition of the score\n\\[\\mathbb{E}_{\\theta}\\big[s_i(\\theta)\\big] = \\int \\left[\\frac{\\partial}{\\partial\\theta} \\log f(y|\\theta)\\right] f(y|\\theta) \\, dy\\]\nApply the chain rule to \\(\\log f\\), then cancel \\(f(y|\\theta)\\)\n\\[= \\int \\frac{\\partial}{\\partial\\theta} f(y|\\theta) \\, dy\\]\nSwap the derivative and the integral (regularity condition - we assume we’re able to do this)\n\\[= \\frac{\\partial}{\\partial\\theta} \\int f(y|\\theta) \\, dy\\]\nThe density integrates to one\n\\[= \\frac{\\partial}{\\partial\\theta} \\, 1 \\; = \\; 0\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#consistency",
+    "href": "slides/week2/week2_likelihood_inference.html#consistency",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Consistency",
+    "text": "Consistency\n\nBy the weak law of large numbers, for each \\(\\theta\\)\n\\[\\bar{\\ell}_n(\\theta) = \\frac{1}{n} \\sum_{i=1}^n \\log f(y_i | \\theta) \\overset{p}{\\rightarrow} \\mathbb{E}_{\\theta_0}[\\log f(y_i | \\theta)] \\equiv \\ell^{*}(\\theta)\\]\nThe MLE maximizes the left-hand side, so (under regularity conditions) \\(\\hat{\\theta}\\) converges to whatever maximizes the right-hand side \\(\\ell^{*}(\\theta)\\).\nWe can show that the true parameter \\(\\theta_0\\) maximizes \\(\\ell^{*}(\\theta)\\)"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#consistency-1",
+    "href": "slides/week2/week2_likelihood_inference.html#consistency-1",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Consistency",
+    "text": "Consistency\n\nConsider the difference in the expected log-likelihood at \\(\\theta_0\\) compared to any other \\(\\theta\\)\n\\[\\ell^{*}(\\theta) - \\ell^{*}(\\theta_0) = \\mathbb{E}_{\\theta_0}\\left[\\log \\frac{f(y_i|\\theta)}{f(y_i|\\theta_0)}\\right]\\]\nBy Jensen’s inequality (\\(\\log\\) is concave),\n\\[\\mathbb{E}_{\\theta_0}\\left[\\log \\frac{f(y_i|\\theta)}{f(y_i|\\theta_0)}\\right] \\le \\log \\mathbb{E}_{\\theta_0}\\left[\\frac{f(y_i|\\theta)}{f(y_i|\\theta_0)}\\right] = \\log \\int f(y|\\theta) \\, dy = \\log 1 = 0\\]\nSo \\(\\ell^{*}(\\theta) \\le \\ell^{*}(\\theta_0)\\) for all \\(\\theta\\)\nTherefore the MLE is consistent: \\(\\hat{\\theta} \\overset{p}{\\to} \\theta_0\\)."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#consistency-2",
+    "href": "slides/week2/week2_likelihood_inference.html#consistency-2",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Consistency",
+    "text": "Consistency\n\nNote a few important conditions for identification\nIdentifiability\n\nNo “plateaus” in the log-likelihood.\nTwo different values of \\(\\theta\\) can’t both maximize the log-likelihood\n\n\\[f(\\cdot\\,|\\theta) \\neq f(\\cdot\\,| \\theta_0) \\ \\forall \\ \\theta \\neq \\theta_0\\]\n\nThis is exactly what makes the Jensen inequality above strict.\n\nFixed parameter space\n\nThe dimensionality of \\(\\theta\\) stays fixed and does not depend on \\(n\\)\nViolated (e.g.) in ideal point models (new legislators mean new ideal points)\n\n\\(\\theta_0\\) is in the interior of the parameter space\n\nOtherwise the score need not be zero at the optimum."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#information",
+    "href": "slides/week2/week2_likelihood_inference.html#information",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Information",
+    "text": "Information\n\nAfter consistency, we want the variance and asymptotic distribution of \\(\\hat{\\theta}\\).\n\nTo do this, we need a quantity called the Fisher information.\n\nDefine the per-observation information as the variance of the score at the true parameter \\(\\theta_0\\)\n\\[\\mathcal{I}(\\theta_0) = \\mathbb{E}_{\\theta_0}\\big[s_i(\\theta_0) s_i(\\theta_0)^{\\prime}\\big]\\]\nUnder some further regularity conditions this equals the negative expected Hessian\n\\[\\mathcal{I}(\\theta_0) = -\\mathbb{E}_{\\theta_0}\\big[H_i(\\theta_0)\\big]\\]\nIntuitively: captures the curvature of the log-likelihood around the truth.\n\nSharper peak \\(\\Rightarrow\\) more information \\(\\Rightarrow\\) smaller variance."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#information-1",
+    "href": "slides/week2/week2_likelihood_inference.html#information-1",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Information",
+    "text": "Information\n\nThe total (sample) information for \\(n\\) i.i.d. observations is\n\\[\\mathcal{I}_n(\\theta_0) = -\\mathbb{E}_{\\theta_0}\\big[H_n(\\theta_0)\\big] = n \\, \\mathcal{I}(\\theta_0)\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#asymptotic-distribution",
+    "href": "slides/week2/week2_likelihood_inference.html#asymptotic-distribution",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Asymptotic distribution",
+    "text": "Asymptotic distribution\n\nWe now show that\n\\[\\sqrt{n}(\\hat{\\theta} - \\theta_0) \\overset{d}{\\rightarrow} \\text{Normal}\\big(0, \\mathcal{I}(\\theta_0)^{-1}\\big)\\]\nOur first step is to take a first-order Taylor approximation of the score around the true parameter \\(\\theta_0\\), written as a function of our estimator \\(\\hat{\\theta}\\)\n\\[\\bar{S}_n(\\hat{\\theta}) \\approx \\bar{S}_n(\\theta_0) + \\bar{H}_n(\\theta_0)(\\hat{\\theta} - \\theta_0)\\]\nUsing the fact that the score is zero at the MLE\n\\[0 = \\bar{S}_n(\\theta_0) + \\bar{H}_n(\\theta_0)(\\hat{\\theta} - \\theta_0)\\]\nRearranging gives\n\\[(\\hat{\\theta} - \\theta_0) = \\big[-\\bar{H}_n(\\theta_0)\\big]^{-1}\\bar{S}_n(\\theta_0)\\]\nMultiplying by \\(\\sqrt{n}\\)\n\\[\\sqrt{n}(\\hat{\\theta} - \\theta_0) = \\big[-\\bar{H}_n(\\theta_0)\\big]^{-1}\\big[\\sqrt{n}\\,\\bar{S}_n(\\theta_0)\\big]\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#asymptotic-distribution-1",
+    "href": "slides/week2/week2_likelihood_inference.html#asymptotic-distribution-1",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Asymptotic distribution",
+    "text": "Asymptotic distribution\n\nFirst, by the law of large numbers applied to the average Hessian,\n\\[-\\bar{H}_n(\\theta_0) = -\\frac{1}{n} \\sum_{i=1}^n H_i(\\theta_0) \\overset{p}{\\to}  -\\mathbb{E}_{\\theta_0}\\big[H_i(\\theta_0)\\big] = \\mathcal{I}(\\theta_0)\\]\nSecond, by the central limit theorem applied to the mean-zero scores,\n\\[\\sqrt{n} \\, \\bar{S}_n(\\theta_0) = \\frac{1}{\\sqrt{n}} \\sum_{i=1}^n s_i(\\theta_0) \\overset{d}{\\to} \\text{Normal}\\big(0, \\, \\text{Var}_{\\theta_0}(s_i(\\theta_0))\\big) = \\text{Normal}\\big(0, \\mathcal{I}(\\theta_0)\\big)\\]\nLastly, by Slutsky’s theorem,\n\\[\\sqrt{n}(\\hat{\\theta} - \\theta_0) \\overset{d}{\\to} \\text{Normal}\\big(0, \\mathcal{I}(\\theta_0)^{-1}\\mathcal{I}(\\theta_0)\\mathcal{I}(\\theta_0)^{-1}\\big) = \\text{Normal}\\big(0, \\mathcal{I}(\\theta_0)^{-1}\\big)\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#asymptotic-distribution-2",
+    "href": "slides/week2/week2_likelihood_inference.html#asymptotic-distribution-2",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Asymptotic distribution",
+    "text": "Asymptotic distribution\n\nSo our large-sample approximation for the distribution of the MLE is\n\\[\\hat{\\theta} \\overset{a}{\\sim} \\text{Normal}\\big(\\theta_0, \\ \\mathcal{I}_n(\\theta_0)^{-1}\\big)\\]\nStandard errors are the square roots of the diagonal of \\(\\mathcal{I}_n(\\hat{\\theta})^{-1}\\).\nCan another estimator do better asymptotically?\n\nIt turns out the answer is no\nThe MLE asymptotically attains the Cramér-Rao lower bound."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#cramér-rao-lower-bound-crlb",
+    "href": "slides/week2/week2_likelihood_inference.html#cramér-rao-lower-bound-crlb",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Cramér-Rao lower bound (CRLB)",
+    "text": "Cramér-Rao lower bound (CRLB)\n\nAn important result in statistics relates to the smallest possible variance that an unbiased estimator could reach\n\nThat is, if we’re not willing to accept more bias, how much precision can we get out of the data?\nThis ends up being related to the information!\n\nThe Cramér-Rao lower bound on the variance of any unbiased estimator \\(\\hat{\\theta}\\) of \\(\\theta\\) is\n\\[\\text{Var}(\\hat{\\theta}) \\succeq \\mathcal{I}_n(\\theta)^{-1}\\]\nWe’ll focus the proof on the scalar case\n\nFor vector \\(\\theta\\), “\\(\\succeq\\)” means the difference \\(\\text{Var}(\\hat{\\theta}) - \\mathcal{I}_n(\\theta)^{-1}\\) is positive semi-definite."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#cramér-rao-lower-bound-crlb-1",
+    "href": "slides/week2/week2_likelihood_inference.html#cramér-rao-lower-bound-crlb-1",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Cramér-Rao lower bound (CRLB)",
+    "text": "Cramér-Rao lower bound (CRLB)\n\nUnder unbiasedness\n\\[\\mathbb{E}_{\\theta}[\\hat{\\theta}(\\mathbf{y}) - \\theta] = \\int(\\hat{\\theta}(\\mathbf{y}) - \\theta) f(\\mathbf{y}| \\theta)d\\mathbf{y} = 0\\]\nSince unbiasedness holds for every value of \\(\\theta\\), differentiating with respect to \\(\\theta\\) also gives zero\n\\[\\frac{\\partial}{\\partial\\theta} \\int(\\hat{\\theta}(\\mathbf{y}) - \\theta) f(\\mathbf{y} |\\theta)d\\mathbf{y} = 0\\]\nUnder the regularity conditions that let us exchange differentiation and integration\n\\[\\int \\frac{\\partial}{\\partial\\theta} \\bigg[(\\hat{\\theta}(\\mathbf{y}) - \\theta) f(\\mathbf{y}| \\theta)\\bigg]d\\mathbf{y} = 0\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#cramér-rao-lower-bound-crlb-2",
+    "href": "slides/week2/week2_likelihood_inference.html#cramér-rao-lower-bound-crlb-2",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Cramér-Rao lower bound (CRLB)",
+    "text": "Cramér-Rao lower bound (CRLB)\n\nProduct rule\n\\[\\int  (\\hat{\\theta}(\\mathbf{y}) - \\theta) \\frac{\\partial}{\\partial\\theta} f(\\mathbf{y}| \\theta) \\, d\\mathbf{y} - \\int  f(\\mathbf{y}| \\theta)d\\mathbf{y} = 0\\]\nPDFs integrate to 1 over their support\n\\[\\int  (\\hat{\\theta}(\\mathbf{y}) - \\theta) \\frac{\\partial}{\\partial\\theta} f(\\mathbf{y}| \\theta) \\, d\\mathbf{y} = 1\\]\nThe same chain rule identity as before\n\\[\\frac{\\partial}{\\partial \\theta} f(\\mathbf{y}| \\theta) = f(\\mathbf{y}| \\theta) \\frac{\\partial}{\\partial \\theta} \\log  f(\\mathbf{y}|\\theta) = f(\\mathbf{y}|\\theta) \\, S_n(\\theta)\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#cramér-rao-lower-bound-crlb-3",
+    "href": "slides/week2/week2_likelihood_inference.html#cramér-rao-lower-bound-crlb-3",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Cramér-Rao lower bound (CRLB)",
+    "text": "Cramér-Rao lower bound (CRLB)\n\nPlugging back in,\n\\[\\int  (\\hat{\\theta}(\\mathbf{y}) - \\theta) \\, S_n(\\theta) \\, f(\\mathbf{y}| \\theta)d\\mathbf{y} = 1\\]\nBy the “law of the unconscious statistician” this is just an expectation\n\\[\\mathbb{E}_{\\theta}\\big[(\\hat{\\theta}(\\mathbf{y}) - \\theta) \\, S_n(\\theta)\\big] = 1\\]\nThe Cauchy-Schwarz inequality for expectations says that for random variables \\(U\\) and \\(V\\)\n\\[\\big|\\mathbb{E}[UV]\\big|^2 \\le \\mathbb{E}[U^2]\\,\\mathbb{E}[V^2]\\]\nApply it with \\(U = \\hat{\\theta}(\\mathbf{y}) - \\theta\\) and \\(V = S_n(\\theta)\\)\n\\[1 = \\big|\\mathbb{E}_\\theta[U V]\\big|^2 \\le \\mathbb{E}_{\\theta}\\big[(\\hat{\\theta}(\\mathbf{y}) - \\theta)^2\\big] \\times \\mathbb{E}_{\\theta}\\big[S_n(\\theta)^2\\big]\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#cramér-rao-lower-bound-crlb-4",
+    "href": "slides/week2/week2_likelihood_inference.html#cramér-rao-lower-bound-crlb-4",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Cramér-Rao lower bound (CRLB)",
+    "text": "Cramér-Rao lower bound (CRLB)\n\nWhat are the pieces here?\n\n\\(\\mathbb{E}_{\\theta}[(\\hat{\\theta}(\\mathbf{y}) - \\theta)^2]\\) is the mean squared error. Because we assumed \\(\\hat{\\theta}\\) is unbiased, MSE is the variance.\n\\(\\mathbb{E}_{\\theta}[S_n(\\theta)^2]\\) is the total information \\(\\mathcal{I}_n(\\theta)\\)\n\nSo\n\\[\\text{Var}(\\hat{\\theta}) \\times \\mathcal{I}_n(\\theta) \\ge 1 \\quad \\Longrightarrow \\quad \\text{Var}(\\hat{\\theta}) \\ge \\frac{1}{\\mathcal{I}_n(\\theta)}\\]\nComparing to the asymptotic variance of the MLE:\n\\[\\text{avar}(\\hat{\\theta}_{MLE}) = \\mathcal{I}_n(\\theta_0)^{-1}\\]\nThe MLE attains the bound asymptotically."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#deriving-the-log-likelihood",
+    "href": "slides/week2/week2_likelihood_inference.html#deriving-the-log-likelihood",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Deriving the log-likelihood",
+    "text": "Deriving the log-likelihood\n\nLet’s consider the classical normal regression model with homoskedastic errors\n\\[y_i \\sim \\text{Normal}(\\mu_i, \\sigma^2), \\qquad \\mu_i = x_i^{\\prime}\\beta\\]\nUnder i.i.d. the joint density factors, and logs turn the product into a sum\n\\[\\ell_n(\\beta, \\sigma^2) = \\log \\prod_{i=1}^n f(y_i| \\beta, \\sigma^2) = \\sum_{i=1}^n \\log f(y_i| \\beta, \\sigma^2)\\]\nPlug in the Normal density for each observation\n\\[\\ell_n(\\beta, \\sigma^2) = \\sum_{i=1}^n \\log \\bigg[\\frac{1}{\\sigma\\sqrt{2\\pi}} \\exp\\left\\{- \\frac{1}{2}\\left(\\frac{y_i - x_i^\\prime\\beta}{\\sigma}\\right)^2 \\right\\}\\bigg]\\]\nProperties of logs – note \\(\\log(\\sigma\\sqrt{2\\pi}) = \\log\\sigma + \\tfrac{1}{2}\\log(2\\pi)\\)\n\\[\\ell_n(\\beta, \\sigma^2) = \\sum_{i=1}^n \\left[-\\log(\\sigma) - \\tfrac{1}{2}\\log(2\\pi) -\\frac{1}{2}\\bigg(\\frac{y_i - x_i^\\prime\\beta}{\\sigma}\\bigg)^2\\right]\\]"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#deriving-the-log-likelihood-1",
+    "href": "slides/week2/week2_likelihood_inference.html#deriving-the-log-likelihood-1",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Deriving the log-likelihood",
+    "text": "Deriving the log-likelihood\n\nThe \\(\\tfrac{1}{2}\\log(2\\pi)\\) term does not depend on \\(\\beta\\) or \\(\\sigma\\), so it cannot change the location of the maximum. Ignoring it,\n\\[\\ell_n(\\beta, \\sigma^2) =  -\\frac{1}{2\\sigma^2} \\sum_{i=1}^n (y_i - x_i^\\prime\\beta)^2 -n\\log(\\sigma)\\]\nAnd the corresponding average log-likelihood\n\\[\\bar{\\ell}_n(\\beta, \\sigma^2) =  \\frac{1}{n} \\sum_{i=1}^n  \\bigg[-\\frac{1}{2\\sigma^2} (y_i - x_i^\\prime\\beta)^2 - \\log(\\sigma)\\bigg]\\]\nWhat’s familiar here?\n\nFor fixed \\(\\sigma\\), maximizing \\(\\ell_n\\) over \\(\\beta\\) is the same as minimizing the sum of squared residuals.\nSo the MLE for \\(\\beta\\) is the OLS estimator!"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#deriving-the-score",
+    "href": "slides/week2/week2_likelihood_inference.html#deriving-the-score",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Deriving the score",
+    "text": "Deriving the score\n\nLet’s derive the score. The per-observation log-density, again ignoring the constant, with residuals \\(e_i = y_i - x_i^\\prime\\beta\\):\n\\[\\log f(y_i|\\beta, \\sigma) = -\\frac{e_i^2}{2\\sigma^2} - \\log(\\sigma)\\]\nDifferentiating with respect to \\(\\beta\\) (chain rule, \\(\\partial e_i / \\partial\\beta = -x_i\\)):\n\\[\\frac{\\partial}{\\partial\\beta} \\log f(y_i|\\beta,\\sigma) = \\frac{x_i \\, e_i}{\\sigma^2}\\]\nDifferentiating with respect to \\(\\sigma\\):\n\\[\\frac{\\partial}{\\partial\\sigma} \\log f(y_i|\\beta,\\sigma) = \\frac{e_i^2}{\\sigma^3} - \\frac{1}{\\sigma}\\]\nSetting the sum of the first to zero gives the OLS normal equations \\(\\mathbf{X}^\\prime\\mathbf{e} = 0\\)\n\nThe second gives \\(\\hat{\\sigma}^2 = \\frac{1}{n}\\sum_i e_i^2\\). Note the MLE is not the unbiased estimator of the \\(\\sigma^2\\)"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#deriving-the-hessian",
+    "href": "slides/week2/week2_likelihood_inference.html#deriving-the-hessian",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Deriving the Hessian",
+    "text": "Deriving the Hessian\n\nDifferentiating once more gives the blocks of \\(H_n\\):\n\\[\\frac{\\partial^2 \\ell_n}{\\partial\\beta\\partial\\beta^\\prime} = -\\frac{\\mathbf{X}^\\prime\\mathbf{X}}{\\sigma^2}, \\qquad \\frac{\\partial^2 \\ell_n}{\\partial\\beta \\, \\partial\\sigma} = -\\frac{2\\mathbf{X}^\\prime\\mathbf{e}}{\\sigma^3}, \\qquad \\frac{\\partial^2 \\ell_n}{\\partial\\sigma^2} = \\frac{n}{\\sigma^2} - \\frac{3\\sum_i e_i^2}{\\sigma^4}\\]\nEvaluated at the MLE\n\n\\(\\mathbf{X}^\\prime\\mathbf{e} = 0\\), so the cross-derivative is exactly zero – \\(\\hat\\beta\\) and \\(\\hat\\sigma\\) are orthogonal.\n\\(\\sum_i e_i^2 = n\\hat\\sigma^2\\), so the \\(\\sigma\\sigma\\) entry collapses to \\(-2n/\\hat\\sigma^2\\).\n\nSo the exact Hessian at the MLE is block diagonal:\n\\[H_n(\\hat{\\theta}) = \\begin{bmatrix} -\\mathbf{X}^\\prime\\mathbf{X}/\\hat\\sigma^2 & 0 \\\\ 0 & -2n/\\hat\\sigma^2 \\end{bmatrix}\\]\nWhich gives us closed-form standard errors\n\\[\\widehat{\\text{Var}}(\\hat\\beta) = \\hat\\sigma^2(\\mathbf{X}^\\prime\\mathbf{X})^{-1}\\]\nOur familiar regression variance-covariance matrix for \\(\\hat{\\beta}\\)!"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#fitting-the-model",
+    "href": "slides/week2/week2_likelihood_inference.html#fitting-the-model",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Fitting the model",
+    "text": "Fitting the model\n\nHow does Clinton’s 2016 county-level vote share vary by the share of residents who are non-Hispanic white?\n\n\n\n[1] 3114\n\n\n\nFor optimization we reparameterize \\(\\sigma = \\exp(\\eta)\\), so the optimizer can range over all of \\(\\mathbb{R}\\) and never has to worry about \\(\\sigma \\le 0\\).\nWrite a function returning the log-likelihood evaluated at each observation\n\n\nnorm_loglik &lt;- function(pars, Y, X){\n  beta &lt;- pars[-length(pars)]\n  sigma &lt;- exp(pars[length(pars)])  # pars[k+1] is log(sigma)\n  -(1/(2*sigma^2))*(Y - X%*%beta)^2 - log(sigma)\n}\n\n\nlibrary(maxLik)\nX_matrix &lt;- model.matrix(voteshare ~ pctWhiteNH, data=election)\nY_vec &lt;- election$voteshare\nstart_vals &lt;- c(0, 0, 3)   # beta0, beta1, log(sigma)"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#fitting-the-model-1",
+    "href": "slides/week2/week2_likelihood_inference.html#fitting-the-model-1",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Fitting the model",
+    "text": "Fitting the model\n\nWe’ll use a numerical optimizer implemented in R\n\nThe maxLik package is a nice wrapper for the various optimizers built in to R\n\nThe main routine, maxLik, takes a function whose first argument is the parameter vector.\n\nWe’ll first give it only the log-likelihood, so every derivative it needs is computed numerically.\n\n\n\nmle_numeric &lt;- maxLik(norm_loglik, start = start_vals, method = \"NR\",\n                      Y = Y_vec, X = X_matrix)\nround(coef(mle_numeric), 5)\n\n[1] 67.799 -0.462  2.505\n\n\n\nCompare the point estimates to OLS:\n\n\nols_est &lt;- lm(voteshare ~ pctWhiteNH, data=election)\nround(coef(ols_est), 5)\n\n(Intercept)  pctWhiteNH \n     67.808      -0.462"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#standard-errors",
+    "href": "slides/week2/week2_likelihood_inference.html#standard-errors",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Standard errors",
+    "text": "Standard errors\n\nvcov_numeric &lt;- solve(-maxLik::hessian(mle_numeric))\nse_numeric &lt;- sqrt(diag(vcov_numeric))\n\n\ncomparison &lt;- data.frame(\n  term      = c(\"(Intercept)\", \"pctWhiteNH\"),\n  se_maxLik = se_numeric[1:2],\n  se_ols    = summary(ols_est)$coefficients[,2]\n)\ncomparison$pct_error &lt;- 100*(comparison$se_maxLik - comparison$se_ols)/comparison$se_ols\ncomparison\n\n                   term se_maxLik se_ols pct_error\n(Intercept) (Intercept)   0.49869 0.9059     -44.9\npctWhiteNH   pctWhiteNH   0.00657 0.0112     -41.3\n\n\n\n\nThese should be similar (aside from degrees of freedom correction in lm)\nInstead the slope standard error is off by about 41%."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#the-answer-isnt-stable",
+    "href": "slides/week2/week2_likelihood_inference.html#the-answer-isnt-stable",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "The answer isn’t stable!",
+    "text": "The answer isn’t stable!\n\nTry some different starting values (vary \\(\\log\\sigma\\)’s initial point)\n\n\nse_from_start &lt;- function(ls0, grad=NULL){\n  fit &lt;- maxLik(norm_loglik, grad=grad, start=c(0, 0, ls0), method=\"NR\",\n                Y=Y_vec, X=X_matrix)\n  se &lt;- suppressWarnings(sqrt(diag(solve(-maxLik::hessian(fit)))))\n  c(beta1_hat = coef(fit)[2], SE_beta1 = se[2])\n}\nstarts &lt;- c(2.0, 2.303, exp(1), 2.708, 3.0)\nround(t(sapply(starts, se_from_start)), 6)\n\n     beta1_hat SE_beta1\n[1,]    -0.462  0.00844\n[2,]    -0.462  0.00845\n[3,]    -0.462  0.00845\n[4,]    -0.462      NaN\n[5,]    -0.462  0.00657\n\n\n\n\nThe standard error swings wildly, and in some runs the negative Hessian is not even positive definite\nThe truth (from OLS) is 0.011."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#numerical-vs.-analytical-derivatives",
+    "href": "slides/week2/week2_likelihood_inference.html#numerical-vs.-analytical-derivatives",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Numerical vs. analytical derivatives",
+    "text": "Numerical vs. analytical derivatives\n\nThe Newton-Raphson algorithm uses the gradient and the Hessian to find the optimum iteratively.\nIt can get them two ways:\nFinite differences (“numerical differentiation”)\n\n\\(\\frac{\\partial f}{\\partial\\theta_j} \\approx \\frac{f(\\theta + h e_j) - f(\\theta - h e_j)}{2h}\\)\nNeeds only the ability to evaluate \\(f\\), so it works with just the likelihood as input.\nApproximate, the error depends on software-selected \\(h\\).\n\nExact derivatives\n\nJust do the calculus and pass the optimizer a function that returns the score.\nWe’ve already done this for the linear model!"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#including-the-analytic-gradient",
+    "href": "slides/week2/week2_likelihood_inference.html#including-the-analytic-gradient",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Including the analytic gradient",
+    "text": "Including the analytic gradient\n\nWe derived the score earlier. Write this as a function that returns an \\(N \\times (k+1)\\) matrix – one gradient row per observation.\n\n\nnorm_grad &lt;- function(pars, Y, X){\n  beta &lt;- pars[-length(pars)]\n  sigma &lt;- exp(pars[length(pars)])\n  e &lt;- as.vector(Y - X%*%beta)\n  cbind(X * (e/sigma^2),        # d/d beta\n        (e^2/sigma^2) - 1)      # d/d log(sigma)\n}"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#analytic-gradient-the-standard-errors",
+    "href": "slides/week2/week2_likelihood_inference.html#analytic-gradient-the-standard-errors",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Analytic gradient: the standard errors",
+    "text": "Analytic gradient: the standard errors\n\nmle_analytic &lt;- maxLik(norm_loglik, grad = norm_grad, start = start_vals,\n                       method = \"NR\", Y = Y_vec, X = X_matrix)\nse_analytic &lt;- sqrt(diag(solve(-maxLik::hessian(mle_analytic))))\n\n\ndata.frame(\n  term        = c(\"(Intercept)\", \"pctWhiteNH\"),\n  numeric     = se_numeric[1:2],\n  analytic    = se_analytic[1:2],\n  ols_truth   = summary(ols_est)$coefficients[,2]\n)\n\n                   term numeric analytic ols_truth\n(Intercept) (Intercept) 0.49869   0.9056    0.9059\npctWhiteNH   pctWhiteNH 0.00657   0.0112    0.0112\n\n\n\n\nSupplying the gradient recovers the OLS standard errors essentially exactly.\nmaxLik is still finite-differencing to get the Hessian – but now it differences the exact gradient - less room for numerical error."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#and-now-it-is-stable",
+    "href": "slides/week2/week2_likelihood_inference.html#and-now-it-is-stable",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "And now it is stable",
+    "text": "And now it is stable\n\nAcross different starting values\n\n\nround(t(sapply(starts, se_from_start, grad = norm_grad)), 6)\n\n     beta1_hat SE_beta1\n[1,]    -0.462   0.0112\n[2,]    -0.462   0.0112\n[3,]    -0.462   0.0112\n[4,]    -0.462   0.0112\n[5,]    -0.462   0.0112\n\n\n\n\nThe same answer from every start."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#the-problem-scaling-the-inputs",
+    "href": "slides/week2/week2_likelihood_inference.html#the-problem-scaling-the-inputs",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "The problem: scaling the inputs",
+    "text": "The problem: scaling the inputs\n\nWhy is this problem so fragile? Look at the data!\n\n\nc(kappa_X = kappa(crossprod(X_matrix)),\n  sd_Y = sd(election$voteshare), sd_X = sd(election$pctWhiteNH),\n  mean_X = mean(election$pctWhiteNH))\n\n kappa_X     sd_Y     sd_X   mean_X \n113092.6     15.2     19.6     78.6"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#standardizing-y-and-x",
+    "href": "slides/week2/week2_likelihood_inference.html#standardizing-y-and-x",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Standardizing \\(Y\\) and \\(X\\)",
+    "text": "Standardizing \\(Y\\) and \\(X\\)\n\nPut everything on a common scale: mean zero, unit standard deviation.\n\n\nelection$voteshare_z  &lt;- (election$voteshare  - mean(election$voteshare))/sd(election$voteshare)\nelection$pctWhiteNH_z &lt;- (election$pctWhiteNH - mean(election$pctWhiteNH))/sd(election$pctWhiteNH)\nX_z &lt;- model.matrix(voteshare_z ~ pctWhiteNH_z, data=election)\nY_z &lt;- election$voteshare_z\nc(kappa_raw = kappa(crossprod(X_matrix)), kappa_std = kappa(crossprod(X_z)))\n\nkappa_raw kappa_std \n   113093         1 \n\n\n\nmle_z_numeric  &lt;- maxLik(norm_loglik, start = start_vals, method=\"NR\", Y = Y_z, X = X_z)\nmle_z_analytic &lt;- maxLik(norm_loglik, grad = norm_grad, start = start_vals,\n                         method=\"NR\", Y = Y_z, X = X_z)"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#the-discrepancy-disappears",
+    "href": "slides/week2/week2_likelihood_inference.html#the-discrepancy-disappears",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "The discrepancy disappears",
+    "text": "The discrepancy disappears\n\nse_z_numeric  &lt;- sqrt(diag(solve(-maxLik::hessian(mle_z_numeric))))\nse_z_analytic &lt;- sqrt(diag(solve(-maxLik::hessian(mle_z_analytic))))\ndata.frame(\n  term     = c(\"(Intercept)\", \"pctWhiteNH\", \"log(sigma)\"),\n  numeric  = se_z_numeric,\n  analytic = se_z_analytic,\n  pct_diff = 100*(se_z_numeric - se_z_analytic)/se_z_analytic\n)\n\n         term numeric analytic  pct_diff\n1 (Intercept)  0.0144   0.0144 -0.000879\n2  pctWhiteNH  0.0144   0.0144 -0.001603\n3  log(sigma)  0.0127   0.0127  0.001887"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#getting-back-to-interpretable-units",
+    "href": "slides/week2/week2_likelihood_inference.html#getting-back-to-interpretable-units",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Getting back to interpretable units",
+    "text": "Getting back to interpretable units\n\nTo get back to the units of interest, undo the re-scaling:\n\\[\\hat\\beta_1^{raw} = \\hat\\beta_1^{z} \\times \\frac{s_Y}{s_X}, \\qquad \\widehat{\\text{SE}}(\\hat\\beta_1^{raw}) = \\widehat{\\text{SE}}(\\hat\\beta_1^{z}) \\times \\frac{s_Y}{s_X}\\]\n\n\nscale_ratio &lt;- sd(election$voteshare)/sd(election$pctWhiteNH)\ndata.frame(\n  quantity   = c(\"slope\", \"SE(slope)\"),\n  from_z     = c(coef(mle_z_analytic)[2]*scale_ratio, se_z_analytic[2]*scale_ratio),\n  ols_truth  = summary(ols_est)$coefficients[2,1:2]\n)\n\n            quantity  from_z ols_truth\nEstimate       slope -0.4617   -0.4617\nStd. Error SE(slope)  0.0112    0.0112"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#relaxing-the-information-matrix-equality",
+    "href": "slides/week2/week2_likelihood_inference.html#relaxing-the-information-matrix-equality",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Relaxing the information matrix equality",
+    "text": "Relaxing the information matrix equality\n\nReturn to the asymptotic variance derivation. We had the sandwich\n\\[\\text{avar}\\big(\\sqrt{n}(\\hat{\\theta}-\\theta_0)\\big) = \\underbrace{\\big[-\\mathbb{E}_{\\theta_0}[H_i(\\theta_0)]\\big]^{-1}}_{\\text{bread}} \\underbrace{\\text{Var}_{\\theta_0}\\big(s_i(\\theta_0)\\big)}_{\\text{meat}} \\underbrace{\\big[-\\mathbb{E}_{\\theta_0}[H_i(\\theta_0)]\\big]^{-1}}_{\\text{bread}}\\]\nPreviously we used the information matrix equality – meat \\(=\\) bread\\(^{-1}\\) \\(= \\mathcal{I}(\\theta_0)\\) – to collapse this to \\(\\mathcal{I}(\\theta_0)^{-1}\\).\n\nThat equality holds only if the model is correctly specified. If it isn’t, the two differ, and only the sandwich is consistent.\n\nInstead, we can estimate each piece separately with sample analogues, using the totals so the \\(n\\)’s land in the right place:\n\\[\\widehat{\\text{Var}}(\\hat{\\theta}) = \\bigg[-\\sum_{i=1}^n H_i(\\hat\\theta)\\bigg]^{-1}\\bigg[\\sum_{i=1}^n s_i(\\hat{\\theta})  s_i(\\hat{\\theta})^{\\prime}\\bigg]\\bigg[-\\sum_{i=1}^n H_i(\\hat\\theta)\\bigg]^{-1}\\]\nConsistent under misspecification of the outcome distribution, but finite-sample properties can be poor – usually undercoverage in small samples, so a correction like \\(\\frac{n}{n-k}\\) is common."
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#implementing-the-sandwich",
+    "href": "slides/week2/week2_likelihood_inference.html#implementing-the-sandwich",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Implementing the sandwich",
+    "text": "Implementing the sandwich\n\nsandwich::estfun returns the per-observation gradient\n\n\ngrad_mat &lt;- sandwich::estfun(mle_analytic)\ndim(grad_mat)\n\n[1] 3114    3\n\nround(colSums(grad_mat), 6)   # should be ~0 at the MLE\n\n[1] -1.0e-06 -5.1e-05  3.1e-05\n\n\n\nAssembling the three pieces:\n\n\nbread_inv &lt;- solve(-maxLik::hessian(mle_analytic))\nmeat      &lt;- t(grad_mat) %*% grad_mat\nrobust_vcov &lt;- bread_inv %*% meat %*% bread_inv\nn &lt;- nrow(election); k &lt;- ncol(X_matrix)\n\n\ndata.frame(\n  term       = c(\"(Intercept)\", \"pctWhiteNH\", \"log(sigma)\"),\n  classical  = sqrt(diag(solve(-maxLik::hessian(mle_analytic)))),\n  robust     = sqrt(diag(robust_vcov)),\n  robust_hc1 = sqrt(diag(robust_vcov) * n/(n-k))\n)\n\n         term classical robust robust_hc1\n1 (Intercept)    0.9056 1.0348     1.0351\n2  pctWhiteNH    0.0112 0.0122     0.0122\n3  log(sigma)    0.0127 0.0138     0.0139"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#conclusion",
+    "href": "slides/week2/week2_likelihood_inference.html#conclusion",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Conclusion",
+    "text": "Conclusion\n\nStatistical models\n\nDescribe the data-generating process in terms of systematic and stochastic components\nIn a parametric model, we assume the data \\(\\mathbf{y}\\) come from a known distribution with unknown parameters \\(\\theta\\)\n\nLikelihood\n\nA function of \\(\\theta\\) evaluated at the observed data \\(\\mathbf{y}\\), equal to \\(f(\\mathbf{y}|\\theta)\\)\nHow relatively plausible are my observed results in a world where the true DGP parameter were \\(\\theta\\)?\nNot \\(f(\\theta|\\mathbf{y})\\). That quantity only makes sense in the Bayesian context and requires a prior \\(f(\\theta)\\)\n\nMaximum Likelihood Estimator\n\nA technique for constructing a good estimator whenever we can write down a well-behaved likelihood\nConsistency, asymptotic normality, asymptotic efficiency – all large sample properties"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#next-week",
+    "href": "slides/week2/week2_likelihood_inference.html#next-week",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "Next week",
+    "text": "Next week\n\nMore on maximum likelihood estimators\n\nInvariance, the delta method, likelihood ratio / Wald / score tests\n\nHow do optimizers work\n\nNewton’s method, gradient ascent/descent\n\nGeneralized linear models\n\nLink functions and the exponential family\n\nBinary outcome models\n\nLogit and probit as likelihood models\n\nReadings: Chapters 13-14 of Gelman, Hill, and Vehtari (2020)"
+  },
+  {
+    "objectID": "slides/week2/week2_likelihood_inference.html#references",
+    "href": "slides/week2/week2_likelihood_inference.html#references",
+    "title": "Week 2: Introduction to Likelihood Inference",
+    "section": "References",
+    "text": "References\n\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press. https://avehtari.github.io/ROS-Examples/index.html."
+  },
+  {
+    "objectID": "schedule.html",
+    "href": "schedule.html",
+    "title": "Schedule",
+    "section": "",
+    "text": "A schedule of topics and readings is provided below. Each week will cover a single topic or group of topics. You should treat the readings as a reference and as a more detailed exposition of the topics discussed in lecture. Consult the readings when you want to know more or want a slightly different approach to explaining a particular topic.\nMonday lectures will typically introduce the core theory for the week’s topic while Wednesday lectures will go into greater detail and work through applications. You should make sure to review the readings prior to that week’s lectures with an aim towards completing them before Wednesday’s lecture.\nAll hyperlinks to papers are either to the published version of the paper (if published) or to the working paper. You should use your university library access to obtain the full version if the article is not open access. Likewise, textbook readings will be to the free/open version of the book (if available) or to the UW-Madison university library eBook."
+  },
+  {
+    "objectID": "schedule.html#week-1-course-introduction-and-review",
+    "href": "schedule.html#week-1-course-introduction-and-review",
+    "title": "Schedule",
+    "section": "Week 1: Course Introduction and Review",
+    "text": "Week 1: Course Introduction and Review\nWednesday, September 9\nTopics:\n\nWhat is a statistical model and what is it good for?\nReview of regression\n\nReadings:\n\nReview: Chapters 1-7; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\n\n\n\n\n\n\n\nProblem Set 1 assigned Wednesday, September 9 – due Wednesday, September 23."
+  },
+  {
+    "objectID": "schedule.html#week-2-introduction-to-likelihood-inference",
+    "href": "schedule.html#week-2-introduction-to-likelihood-inference",
+    "title": "Schedule",
+    "section": "Week 2: Introduction to Likelihood Inference",
+    "text": "Week 2: Introduction to Likelihood Inference\nMonday, September 14 & Wednesday, September 16\nTopics:\n\nWhat is a “parametric” model?\nThe likelihood function\nMaximum likelihood estimation\n\nReadings:\n\nChapter 5 (“Parametric Models”); Aronow, P. M. and Benjamin T. Miller. 2019. Foundations of Agnostic Statistics. Cambridge: Cambridge University Press.\nChapter 6 (“Likelihood Inference”); Evans, Michael J., and Jeffrey S. Rosenthal. 2010. Probability and Statistics: The Science of Uncertainty, 2nd ed. New York: W.H. Freeman."
+  },
+  {
+    "objectID": "schedule.html#week-3-generalized-linear-models",
+    "href": "schedule.html#week-3-generalized-linear-models",
+    "title": "Schedule",
+    "section": "Week 3: Generalized Linear Models",
+    "text": "Week 3: Generalized Linear Models\nMonday, September 21 & Wednesday, September 23\nTopics:\n\nProperties of maximum likelihood estimators\nThe generalized linear model framework\nBinary outcome models\n\nReadings:\n\nChapters 13-14; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\n\n\n\n\n\n\n\nProblem Set 1 due Wednesday, September 23. Problem Set 2 assigned Wednesday, September 23 – due Wednesday, October 7."
+  },
+  {
+    "objectID": "schedule.html#week-4-more-likelihood-models",
+    "href": "schedule.html#week-4-more-likelihood-models",
+    "title": "Schedule",
+    "section": "Week 4: More Likelihood Models",
+    "text": "Week 4: More Likelihood Models\nMonday, September 28 & Wednesday, September 30\nTopics:\n\nDuration models (parametric, semi-parametric (Cox) and non-parametric approaches)\nEvent count models (Poisson regression and quasi-MLE methods)\n\nReadings:\n\nChapter 15; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\nClark, T. G., M. J. Bradburn, S. B. Love, and D. G. Altman. 2003. “Survival Analysis Part I: Basic Concepts and First Analyses.” British Journal of Cancer 89 (2): 232-238.\nStensrud, Mats J., and Miguel A. Hernán. 2020. “Why Test for Proportional Hazards?” JAMA 323 (14): 1401-1402.\nChapter 8; Wooldridge, Jeffrey M. 1999. “Quasi-Likelihood Methods for Count Data.” In Handbook of Applied Econometrics, vol. 2, 352-406."
+  },
+  {
+    "objectID": "schedule.html#week-5-bayesian-inference",
+    "href": "schedule.html#week-5-bayesian-inference",
+    "title": "Schedule",
+    "section": "Week 5: Bayesian Inference",
+    "text": "Week 5: Bayesian Inference\nMonday, October 5\nTopics:\n\nPrinciples of posterior inference\nHow to write a Bayesian model\nQuantities of interest: posterior mode, posterior mean, credible intervals\n\nReadings:\n\nChapter 9; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\nChapters 10-11; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton: Chapman and Hall/CRC.\n\n\n\n\n\n\n\nProblem Set 2 due Wednesday, October 7. Problem Set 3 assigned Wednesday, October 7 – due Wednesday, October 21.\n\n\n\n\n\n\n\n\n\n\nMidterm 1 In-Class, Wednesday, October 7th"
+  },
+  {
+    "objectID": "schedule.html#week-6-estimating-bayesian-models",
+    "href": "schedule.html#week-6-estimating-bayesian-models",
+    "title": "Schedule",
+    "section": "Week 6: Estimating Bayesian Models",
+    "text": "Week 6: Estimating Bayesian Models\nMonday, October 12 & Wednesday, October 14\nTopics:\n\nAnalytically tractable solutions through conjugate priors\nMarkov Chain Monte Carlo methods\nIntroduction to MCMC in Stan\n\nReadings:\n\nChapters 3 and 9; McElreath, Richard. 2020. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd ed. Boca Raton: Chapman and Hall/CRC."
+  },
+  {
+    "objectID": "schedule.html#week-7-multilevel-regression-models",
+    "href": "schedule.html#week-7-multilevel-regression-models",
+    "title": "Schedule",
+    "section": "Week 7: Multilevel Regression Models",
+    "text": "Week 7: Multilevel Regression Models\nMonday, October 19 & Wednesday, October 21\nTopics:\n\nPartial pooling through priors\nMethods for model validation\nMultilevel regression and post-stratification (MRP)\n\nReadings:\n\nChapter 11 and Appendix A; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\nChapter 15; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton: Chapman and Hall/CRC.\nPark, David K., Andrew Gelman, and Joseph Bafumi. 2004. “Bayesian Multilevel Estimation with Poststratification: State-Level Estimates from National Polls.” Political Analysis 12 (4): 375-385.\n\n\n\n\n\n\n\nProblem Set 3 due Wednesday, October 21. Problem Set 4 assigned Wednesday, October 21 – due Wednesday, November 4.\n\n\n\n\n\n\n\n\n\nReplication project memo due Wednesday, October 21"
+  },
+  {
+    "objectID": "schedule.html#week-8-mixture-models-and-the-em-algorithm",
+    "href": "schedule.html#week-8-mixture-models-and-the-em-algorithm",
+    "title": "Schedule",
+    "section": "Week 8: Mixture Models and the EM Algorithm",
+    "text": "Week 8: Mixture Models and the EM Algorithm\nMonday, October 26 & Wednesday, October 28\nTopics:\n\nExploratory data analysis and clustering models\nMLE and MAP estimation via the “Expectation-Maximization” algorithm\n\nReadings:\n\nChapters 13 and 22; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton: Chapman and Hall/CRC."
+  },
+  {
+    "objectID": "schedule.html#week-9-item-response-theory-and-ideal-point-models",
+    "href": "schedule.html#week-9-item-response-theory-and-ideal-point-models",
+    "title": "Schedule",
+    "section": "Week 9: Item Response Theory and Ideal Point Models",
+    "text": "Week 9: Item Response Theory and Ideal Point Models\nMonday, November 2\nTopics:\n\nLatent trait models\n“Ideal point” models in legislative voting\n\nReadings:\n\nMartin, Andrew D., and Kevin M. Quinn. 2002. “Dynamic Ideal Point Estimation via Markov Chain Monte Carlo for the U.S. Supreme Court, 1953-1999.” Political Analysis 10 (2): 134-153.\nClinton, Joshua, Simon Jackman, and Douglas Rivers. 2004. “The Statistical Analysis of Roll Call Data.” American Political Science Review 98 (2): 355-370.\nImai, Kosuke, James Lo, and Jonathan Olmsted. 2016. “Fast Estimation of Ideal Points with Massive Data.” American Political Science Review 110 (4): 631-656.\n\n\n\n\n\n\n\nProblem Set 4 due Wednesday, November 4.\n\n\n\n\n\n\n\n\n\nMidterm 2 In-Class, Wednesday, November 4th"
+  },
+  {
+    "objectID": "schedule.html#week-10-regularization-and-model-selection",
+    "href": "schedule.html#week-10-regularization-and-model-selection",
+    "title": "Schedule",
+    "section": "Week 10: Regularization and Model Selection",
+    "text": "Week 10: Regularization and Model Selection\nMonday, November 9 & Wednesday, November 11\nTopics:\n\nVariable selection and penalized regression (Ridge, LASSO)\nCross-fitting and out-of-sample validation\n\nReadings:\n\nChapters 6-7; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer."
+  },
+  {
+    "objectID": "schedule.html#week-11-flexible-regression-trees-and-forests",
+    "href": "schedule.html#week-11-flexible-regression-trees-and-forests",
+    "title": "Schedule",
+    "section": "Week 11: Flexible Regression – Trees and Forests",
+    "text": "Week 11: Flexible Regression – Trees and Forests\nMonday, November 16 & Wednesday, November 18\nTopics:\n\nRegression trees\nAggregation via sums of trees + regularization via BART\nBagging, boosting, random forests\n\nReadings:\n\nChapter 8; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer.\nChapters 9-10 and 15; Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2009. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd ed. New York: Springer.\nHill, Jennifer, Antonio Linero, and Jared Murray. 2020. “Bayesian Additive Regression Trees: A Review and Look Forward.” Annual Review of Statistics and Its Application 7: 251-278."
+  },
+  {
+    "objectID": "schedule.html#week-12-flexible-regression-kernels-and-gaussian-processes",
+    "href": "schedule.html#week-12-flexible-regression-kernels-and-gaussian-processes",
+    "title": "Schedule",
+    "section": "Week 12: Flexible Regression – Kernels and Gaussian Processes",
+    "text": "Week 12: Flexible Regression – Kernels and Gaussian Processes\nMonday, November 23\n\n\n\n\n\n\nThanksgiving recess runs November 26-29. Class meets as usual on Monday this week. Wednesday is cancelled.\n\n\n\nTopics:\n\nInfinite dimensional function spaces\nKernel ridge regression\nGaussian process regression\n\nReadings:\n\nHainmueller, Jens, and Chad Hazlett. 2014. “Kernel Regularized Least Squares: Reducing Misspecification Bias with a Flexible and Interpretable Machine Learning Approach.” Political Analysis 22 (2): 143-168.\nChapters 2 and 4; Rasmussen, Carl Edward, and Christopher K. I. Williams. 2006. Gaussian Processes for Machine Learning. Cambridge, MA: MIT Press."
+  },
+  {
+    "objectID": "schedule.html#week-13-causal-inference-with-flexible-regression",
+    "href": "schedule.html#week-13-causal-inference-with-flexible-regression",
+    "title": "Schedule",
+    "section": "Week 13: Causal Inference with Flexible Regression",
+    "text": "Week 13: Causal Inference with Flexible Regression\nMonday, November 30 & Wednesday, December 2\nTopics:\n\nEfficient semiparametric estimation of statistical functionals\nInfluence functions\n“Doubly-robust”/“Neyman-orthogonal” estimators\n\nReadings:\n\nFisher, Aaron, and Edward H. Kennedy. 2021. “Visually Communicating and Teaching Intuition for Influence Functions.” The American Statistician 75 (2): 162-172.\nKennedy, Edward H. 2024. “Semiparametric Doubly Robust Targeted Double Machine Learning: A Review.” In Handbook of Statistical Methods for Precision Medicine, 207-236.\n\n\n\n\n\n\n\n\nPoster Session Friday, December 4th"
+  },
+  {
+    "objectID": "schedule.html#week-14-working-with-big-datasets",
+    "href": "schedule.html#week-14-working-with-big-datasets",
+    "title": "Schedule",
+    "section": "Week 14: Working with “Big” Datasets",
+    "text": "Week 14: Working with “Big” Datasets\nMonday, December 7 & Wednesday, December 9\nTopics:\n\nEstimation with out-of-memory data\nStochastic gradient descent\nLossless compression in regression\n\nReadings:\n\nToulis, Panos, and Edoardo M. Airoldi. 2015. “Scalable Estimation Strategies Based on Stochastic Approximations: Classical Results and New Insights.” Statistics and Computing 25 (4): 781-795.\nWong, Jeffrey, Eskil Forsell, Randall A. Lewis, Tobias Mao, and Matthew Wardrop. 2021. “You Only Compress Once: Optimal Data Compression for Estimating Linear Models.” arXiv preprint arXiv:2102.11297."
+  },
+  {
+    "objectID": "lectures.html",
+    "href": "lectures.html",
+    "title": "Lectures",
+    "section": "",
+    "text": "Lecture slides are available as self-contained .html files made with RevealJS from a Quarto .qmd file. You can choose to print these to a PDF document by using the “PDF Export Mode” in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the .qmd file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday’s lectures.\nLinks become active as the materials for each week are posted.\n\n\n\n\nWeek 1 Github Repository\nWeek 1 .html slides\n\n\n\n\n\nWeek 2 Github Repository\nWeek 2 .html slides\n\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted"
+  },
+  {
+    "objectID": "lectures.html#lecture-slides",
+    "href": "lectures.html#lecture-slides",
+    "title": "Lectures",
+    "section": "",
+    "text": "Lecture slides are available as self-contained .html files made with RevealJS from a Quarto .qmd file. You can choose to print these to a PDF document by using the “PDF Export Mode” in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the .qmd file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday’s lectures.\nLinks become active as the materials for each week are posted.\n\n\n\n\nWeek 1 Github Repository\nWeek 1 .html slides\n\n\n\n\n\nWeek 2 Github Repository\nWeek 2 .html slides\n\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted"
+  },
+  {
+    "objectID": "assignments.html",
+    "href": "assignments.html",
+    "title": "Assignments",
+    "section": "",
+    "text": "Assignment\nAssigned\nDue\n\n\n\n\nProblem Set 1\nSept 9 (Week 1)\nSept 23 (Week 3)\n\n\nProblem Set 2\nSept 23 (Week 3)\nOct 7 (Week 5)\n\n\nMidterm 1\n–\nIn class, Oct 7 (Week 5)\n\n\nProblem Set 3\nOct 7 (Week 5)\nOct 21 (Week 7)\n\n\nReplication project memo\n–\nOct 21 (Week 7)\n\n\nProblem Set 4\nOct 21 (Week 7)\nNov 4 (Week 9)\n\n\nMidterm 2\n–\nIn class, Nov 4 (Week 9)\n\n\nReplication poster\n–\nMEAD poster session, Fri Dec 4\n\n\n\nAll problem sets are assigned and due on Wednesdays. The replication project memo is ungraded; see the Syllabus for what it should contain."
+  },
+  {
+    "objectID": "assignments.html#schedule",
+    "href": "assignments.html#schedule",
+    "title": "Assignments",
+    "section": "",
+    "text": "Assignment\nAssigned\nDue\n\n\n\n\nProblem Set 1\nSept 9 (Week 1)\nSept 23 (Week 3)\n\n\nProblem Set 2\nSept 23 (Week 3)\nOct 7 (Week 5)\n\n\nMidterm 1\n–\nIn class, Oct 7 (Week 5)\n\n\nProblem Set 3\nOct 7 (Week 5)\nOct 21 (Week 7)\n\n\nReplication project memo\n–\nOct 21 (Week 7)\n\n\nProblem Set 4\nOct 21 (Week 7)\nNov 4 (Week 9)\n\n\nMidterm 2\n–\nIn class, Nov 4 (Week 9)\n\n\nReplication poster\n–\nMEAD poster session, Fri Dec 4\n\n\n\nAll problem sets are assigned and due on Wednesdays. The replication project memo is ungraded; see the Syllabus for what it should contain."
+  },
+  {
+    "objectID": "assignments.html#problem-sets",
+    "href": "assignments.html#problem-sets",
+    "title": "Assignments",
+    "section": "Problem Sets",
+    "text": "Problem Sets\nProblem sets are distributed as .qmd files along with their rendered .html form. You should edit the provided .qmd file and render to .html when submitting the assignment. Additional files (e.g. datasets) are located in sub-folders. For convenience, all the combined files are also distributed as a .zip compressed archive.\nSubmit both your rendered .html file and the .qmd source that produced it on Gradescope, saved as Yourlastname_Yourfirstinitial_psetN.html and Yourlastname_Yourfirstinitial_psetN.qmd.\nLinks become active as each problem set is assigned.\n\nProblem Set 1\nAssigned Wednesday, September 9 – due Wednesday, September 23\n\nProblem Set 1 .html\nProblem Set 1 Github Repository\nProblem Set 1 .zip archive\n\n\n\nProblem Set 2\nAssigned Wednesday, September 23 – due Wednesday, October 7\nTo be posted\n\n\nProblem Set 3\nAssigned Wednesday, October 7 – due Wednesday, October 21\nTo be posted\n\n\nProblem Set 4\nAssigned Wednesday, October 21 – due Wednesday, November 4\nTo be posted"
+  },
+  {
+    "objectID": "assignments.html#exams",
+    "href": "assignments.html#exams",
+    "title": "Assignments",
+    "section": "Exams",
+    "text": "Exams\nBoth exams are in person, closed-book, pen-and-paper examinations involving both theory questions and practical interpretation of sample code and results. Together they are worth 40% of the course grade. There is no final exam during the university exam period.\n\nMidterm 1: in class on Wednesday, October 7, covering material through Week 4.\nMidterm 2: in class on Wednesday, November 4, covering material from Weeks 5-8."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "PoliSci 818",
+    "section": "",
+    "text": "Data Analysis with Statistical Models\nLikelihood, Bayesian and Machine Learning methods for description and prediction\nPoliSci 818 • Fall 2026University of Wisconsin-Madison\n\n\n\n\n\n\n\nInstructor\n\n   Anton Strezhnev\n   North Hall 322D\n   strezhnev@wisc.edu\n\n\n\nCourse details\n\n   Mondays & Wednesdays\n   9/9/2026 - 12/9/2026\n   9:30am - 10:45am\n   Sterling Hall 1339\n\n\n\nContacting me\nSlack is the best way to get in touch with me. My dedicated office hours are 9AM-11AM on Tuesdays if you want to meet in-person. I am also generally in my office on weekdays during normal hours and my door is open, so you are welcome to drop in. You can also feel free to contact me to confirm availability or to schedule a virtual meeting via Zoom."
+  },
+  {
+    "objectID": "resources.html",
+    "href": "resources.html",
+    "title": "Resources",
+    "section": "",
+    "text": "These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. Regression and Other Stories. Cambridge University Press, 2020.\n\nFree online version and examples\n\nGelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. Bayesian Data Analysis. 3rd Edition. Chapman and Hall/CRC, 2013.\n\nFree PDF available\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. An Introduction to Statistical Learning. Springer, 2013.\n\nFree PDF available\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd Edition. Springer, 2009.\n\nFree PDF available\n\nMcElreath, Richard. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd Edition. Chapman and Hall/CRC, 2020.\n\nUW-Madison library eBook\nCourse materials and lectures\n\nAronow, P. M., and Benjamin T. Miller. Foundations of Agnostic Statistics. Cambridge University Press, 2019.\n\nUW-Madison library eBook\n\nEvans, Michael J., and Jeffrey S. Rosenthal. Probability and Statistics: The Science of Uncertainty. 2nd Edition. W.H. Freeman, 2010.\n\nFree PDF available\n\nRasmussen, Carl Edward, and Christopher K. I. Williams. Gaussian Processes for Machine Learning. MIT Press, 2006.\n\nFree PDF available"
+  },
+  {
+    "objectID": "resources.html#textbooks",
+    "href": "resources.html#textbooks",
+    "title": "Resources",
+    "section": "",
+    "text": "These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. Regression and Other Stories. Cambridge University Press, 2020.\n\nFree online version and examples\n\nGelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. Bayesian Data Analysis. 3rd Edition. Chapman and Hall/CRC, 2013.\n\nFree PDF available\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. An Introduction to Statistical Learning. Springer, 2013.\n\nFree PDF available\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd Edition. Springer, 2009.\n\nFree PDF available\n\nMcElreath, Richard. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd Edition. Chapman and Hall/CRC, 2020.\n\nUW-Madison library eBook\nCourse materials and lectures\n\nAronow, P. M., and Benjamin T. Miller. Foundations of Agnostic Statistics. Cambridge University Press, 2019.\n\nUW-Madison library eBook\n\nEvans, Michael J., and Jeffrey S. Rosenthal. Probability and Statistics: The Science of Uncertainty. 2nd Edition. W.H. Freeman, 2010.\n\nFree PDF available\n\nRasmussen, Carl Edward, and Christopher K. I. Williams. Gaussian Processes for Machine Learning. MIT Press, 2006.\n\nFree PDF available"
+  },
+  {
+    "objectID": "resources.html#software",
+    "href": "resources.html#software",
+    "title": "Resources",
+    "section": "Software",
+    "text": "Software\n\nR and RStudio\nThis course uses R for all programming assignments. You are welcome to use the RStudio Interactive Development Environment (IDE) to write code and edit the assignment write-up. Due to the extensive integration of Quarto into Posit-developed IDEs, I encourage using either RStudio or the more recent Positron IDE.\n\nR: Download from https://www.r-project.org\nRStudio: Download from https://posit.co/download/rstudio-desktop/\nPositron: Download from https://positron.posit.co/\n\n\nRecommended Guides for R Programming\n\nR For Data Science Available at https://r4ds.hadley.nz/\nData Visualization: A Practical Introduction Available at https://socviz.co/\n\n\n\n\nStan\nWe will use Stan for specifying and estimating Bayesian models. Stan is written in C++ but has bindings for a variety of programming languages. In this course we will use two interfaces to Stan from R: RStan and brms. Running Stan locally requires a working C++ toolchain – consult the installation guide for the specific requirements of your operating system.\n\nInstallation guide: https://mc-stan.org/install/\nStan user’s guide: https://mc-stan.org/docs/stan-users-guide/\nbrms: https://paulbuerkner.com/brms/\n\n\n\nQuarto and Markdown\nThe assignments are distributed as .qmd Quarto files. Quarto is the successor to R Markdown and lets you present your analysis, code, figures and written discussion all in a single document. It uses Markdown syntax for formatting text and supports embedded R code chunks that execute when you render the document.\nTo complete assignments, you will edit the provided .qmd file, adding your code and written responses, then render it to an HTML file for submission. Both your .html output and .qmd file will be submitted via Gradescope.\n\nQuarto: Download from https://quarto.org/docs/get-started/\nQuarto Guide: https://quarto.org/docs/guide/\nMarkdown Basics: https://quarto.org/docs/authoring/markdown-basics.html\nNote also the chapter on Quarto in R For Data Science"
+  },
+  {
     "objectID": "slides/week1/week1_intro_and_review.html#welcome",
     "href": "slides/week1/week1_intro_and_review.html#welcome",
     "title": "Week 1: Course Introduction and Review",
@@ -327,181 +880,6 @@
     "title": "Week 1: Course Introduction and Review",
     "section": "References",
     "text": "References\n\n\nAronow, P. M., and Benjamin T. Miller. 2019. Foundations of Agnostic Statistics. Cambridge: Cambridge University Press. https://doi.org/10.1017/9781316831762.\n\n\nBox, George E. P. 1976. “Science and Statistics.” Journal of the American Statistical Association 71 (356): 791–99. https://doi.org/10.1080/01621459.1976.10480949.\n\n\nBreiman, Leo. 2001. “Statistical Modeling: The Two Cultures.” Statistical Science 16 (3): 199–231. https://doi.org/10.1214/ss/1009213726.\n\n\nEvans, Michael J., and Jeffrey S. Rosenthal. 2010. Probability and Statistics: The Science of Uncertainty. 2nd ed. New York: W.H. Freeman. https://utstat.toronto.edu/mikevans/jeffrosenthal/.\n\n\nGelman, Andrew, John B. Carlin, Hal S. Stern, David B. Dunson, Aki Vehtari, and Donald B. Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton, FL: Chapman; Hall/CRC. http://www.stat.columbia.edu/~gelman/book/.\n\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press. https://avehtari.github.io/ROS-Examples/index.html.\n\n\nHealy, Kieran. 2025. Modern Plain Text Computing. https://mptc.io/.\n\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer. https://www.statlearning.com/.\n\n\nKing, Gary. 1995. “Replication, Replication.” PS: Political Science & Politics 28 (3): 444–52. https://doi.org/10.2307/420301.\n\n\nMcElreath, Richard. 2020. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd ed. Boca Raton, FL: Chapman; Hall/CRC. https://xcelab.net/rm/."
-  },
-  {
-    "objectID": "resources.html",
-    "href": "resources.html",
-    "title": "Resources",
-    "section": "",
-    "text": "These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. Regression and Other Stories. Cambridge University Press, 2020.\n\nFree online version and examples\n\nGelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. Bayesian Data Analysis. 3rd Edition. Chapman and Hall/CRC, 2013.\n\nFree PDF available\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. An Introduction to Statistical Learning. Springer, 2013.\n\nFree PDF available\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd Edition. Springer, 2009.\n\nFree PDF available\n\nMcElreath, Richard. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd Edition. Chapman and Hall/CRC, 2020.\n\nUW-Madison library eBook\nCourse materials and lectures\n\nAronow, P. M., and Benjamin T. Miller. Foundations of Agnostic Statistics. Cambridge University Press, 2019.\n\nUW-Madison library eBook\n\nEvans, Michael J., and Jeffrey S. Rosenthal. Probability and Statistics: The Science of Uncertainty. 2nd Edition. W.H. Freeman, 2010.\n\nFree PDF available\n\nRasmussen, Carl Edward, and Christopher K. I. Williams. Gaussian Processes for Machine Learning. MIT Press, 2006.\n\nFree PDF available"
-  },
-  {
-    "objectID": "resources.html#textbooks",
-    "href": "resources.html#textbooks",
-    "title": "Resources",
-    "section": "",
-    "text": "These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. Regression and Other Stories. Cambridge University Press, 2020.\n\nFree online version and examples\n\nGelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. Bayesian Data Analysis. 3rd Edition. Chapman and Hall/CRC, 2013.\n\nFree PDF available\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. An Introduction to Statistical Learning. Springer, 2013.\n\nFree PDF available\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd Edition. Springer, 2009.\n\nFree PDF available\n\nMcElreath, Richard. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd Edition. Chapman and Hall/CRC, 2020.\n\nUW-Madison library eBook\nCourse materials and lectures\n\nAronow, P. M., and Benjamin T. Miller. Foundations of Agnostic Statistics. Cambridge University Press, 2019.\n\nUW-Madison library eBook\n\nEvans, Michael J., and Jeffrey S. Rosenthal. Probability and Statistics: The Science of Uncertainty. 2nd Edition. W.H. Freeman, 2010.\n\nFree PDF available\n\nRasmussen, Carl Edward, and Christopher K. I. Williams. Gaussian Processes for Machine Learning. MIT Press, 2006.\n\nFree PDF available"
-  },
-  {
-    "objectID": "resources.html#software",
-    "href": "resources.html#software",
-    "title": "Resources",
-    "section": "Software",
-    "text": "Software\n\nR and RStudio\nThis course uses R for all programming assignments. You are welcome to use the RStudio Interactive Development Environment (IDE) to write code and edit the assignment write-up. Due to the extensive integration of Quarto into Posit-developed IDEs, I encourage using either RStudio or the more recent Positron IDE.\n\nR: Download from https://www.r-project.org\nRStudio: Download from https://posit.co/download/rstudio-desktop/\nPositron: Download from https://positron.posit.co/\n\n\nRecommended Guides for R Programming\n\nR For Data Science Available at https://r4ds.hadley.nz/\nData Visualization: A Practical Introduction Available at https://socviz.co/\n\n\n\n\nStan\nWe will use Stan for specifying and estimating Bayesian models. Stan is written in C++ but has bindings for a variety of programming languages. In this course we will use two interfaces to Stan from R: RStan and brms. Running Stan locally requires a working C++ toolchain – consult the installation guide for the specific requirements of your operating system.\n\nInstallation guide: https://mc-stan.org/install/\nStan user’s guide: https://mc-stan.org/docs/stan-users-guide/\nbrms: https://paulbuerkner.com/brms/\n\n\n\nQuarto and Markdown\nThe assignments are distributed as .qmd Quarto files. Quarto is the successor to R Markdown and lets you present your analysis, code, figures and written discussion all in a single document. It uses Markdown syntax for formatting text and supports embedded R code chunks that execute when you render the document.\nTo complete assignments, you will edit the provided .qmd file, adding your code and written responses, then render it to an HTML file for submission. Both your .html output and .qmd file will be submitted via Gradescope.\n\nQuarto: Download from https://quarto.org/docs/get-started/\nQuarto Guide: https://quarto.org/docs/guide/\nMarkdown Basics: https://quarto.org/docs/authoring/markdown-basics.html\nNote also the chapter on Quarto in R For Data Science"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "PoliSci 818",
-    "section": "",
-    "text": "Data Analysis with Statistical Models\nLikelihood, Bayesian and Machine Learning methods for description and prediction\nPoliSci 818 • Fall 2026University of Wisconsin-Madison\n\n\n\n\n\n\n\nInstructor\n\n   Anton Strezhnev\n   North Hall 322D\n   strezhnev@wisc.edu\n\n\n\nCourse details\n\n   Mondays & Wednesdays\n   9/9/2026 - 12/9/2026\n   9:30am - 10:45am\n   Sterling Hall 1339\n\n\n\nContacting me\nSlack is the best way to get in touch with me. My dedicated office hours are 9AM-11AM on Tuesdays if you want to meet in-person. I am also generally in my office on weekdays during normal hours and my door is open, so you are welcome to drop in. You can also feel free to contact me to confirm availability or to schedule a virtual meeting via Zoom."
-  },
-  {
-    "objectID": "assignments.html",
-    "href": "assignments.html",
-    "title": "Assignments",
-    "section": "",
-    "text": "Assignment\nAssigned\nDue\n\n\n\n\nProblem Set 1\nSept 9 (Week 1)\nSept 23 (Week 3)\n\n\nProblem Set 2\nSept 23 (Week 3)\nOct 7 (Week 5)\n\n\nMidterm 1\n–\nIn class, Oct 7 (Week 5)\n\n\nProblem Set 3\nOct 7 (Week 5)\nOct 21 (Week 7)\n\n\nReplication project memo\n–\nOct 21 (Week 7)\n\n\nProblem Set 4\nOct 21 (Week 7)\nNov 4 (Week 9)\n\n\nMidterm 2\n–\nIn class, Nov 4 (Week 9)\n\n\nReplication poster\n–\nMEAD poster session, Fri Dec 4\n\n\n\nAll problem sets are assigned and due on Wednesdays. The replication project memo is ungraded; see the Syllabus for what it should contain."
-  },
-  {
-    "objectID": "assignments.html#schedule",
-    "href": "assignments.html#schedule",
-    "title": "Assignments",
-    "section": "",
-    "text": "Assignment\nAssigned\nDue\n\n\n\n\nProblem Set 1\nSept 9 (Week 1)\nSept 23 (Week 3)\n\n\nProblem Set 2\nSept 23 (Week 3)\nOct 7 (Week 5)\n\n\nMidterm 1\n–\nIn class, Oct 7 (Week 5)\n\n\nProblem Set 3\nOct 7 (Week 5)\nOct 21 (Week 7)\n\n\nReplication project memo\n–\nOct 21 (Week 7)\n\n\nProblem Set 4\nOct 21 (Week 7)\nNov 4 (Week 9)\n\n\nMidterm 2\n–\nIn class, Nov 4 (Week 9)\n\n\nReplication poster\n–\nMEAD poster session, Fri Dec 4\n\n\n\nAll problem sets are assigned and due on Wednesdays. The replication project memo is ungraded; see the Syllabus for what it should contain."
-  },
-  {
-    "objectID": "assignments.html#problem-sets",
-    "href": "assignments.html#problem-sets",
-    "title": "Assignments",
-    "section": "Problem Sets",
-    "text": "Problem Sets\nProblem sets are distributed as .qmd files along with their rendered .html form. You should edit the provided .qmd file and render to .html when submitting the assignment. Additional files (e.g. datasets) are located in sub-folders. For convenience, all the combined files are also distributed as a .zip compressed archive.\nSubmit both your rendered .html file and the .qmd source that produced it on Gradescope, saved as Yourlastname_Yourfirstinitial_psetN.html and Yourlastname_Yourfirstinitial_psetN.qmd.\nLinks become active as each problem set is assigned.\n\nProblem Set 1\nAssigned Wednesday, September 9 – due Wednesday, September 23\n\nProblem Set 1 .html\nProblem Set 1 Github Repository\nProblem Set 1 .zip archive\n\n\n\nProblem Set 2\nAssigned Wednesday, September 23 – due Wednesday, October 7\nTo be posted\n\n\nProblem Set 3\nAssigned Wednesday, October 7 – due Wednesday, October 21\nTo be posted\n\n\nProblem Set 4\nAssigned Wednesday, October 21 – due Wednesday, November 4\nTo be posted"
-  },
-  {
-    "objectID": "assignments.html#exams",
-    "href": "assignments.html#exams",
-    "title": "Assignments",
-    "section": "Exams",
-    "text": "Exams\nBoth exams are in person, closed-book, pen-and-paper examinations involving both theory questions and practical interpretation of sample code and results. Together they are worth 40% of the course grade. There is no final exam during the university exam period.\n\nMidterm 1: in class on Wednesday, October 7, covering material through Week 4.\nMidterm 2: in class on Wednesday, November 4, covering material from Weeks 5-8."
-  },
-  {
-    "objectID": "lectures.html",
-    "href": "lectures.html",
-    "title": "Lectures",
-    "section": "",
-    "text": "Lecture slides are available as self-contained .html files made with RevealJS from a Quarto .qmd file. You can choose to print these to a PDF document by using the “PDF Export Mode” in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the .qmd file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday’s lectures.\nLinks become active as the materials for each week are posted.\n\n\n\n\nWeek 1 Github Repository\nWeek 1 .html slides\n\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted"
-  },
-  {
-    "objectID": "lectures.html#lecture-slides",
-    "href": "lectures.html#lecture-slides",
-    "title": "Lectures",
-    "section": "",
-    "text": "Lecture slides are available as self-contained .html files made with RevealJS from a Quarto .qmd file. You can choose to print these to a PDF document by using the “PDF Export Mode” in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the .qmd file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday’s lectures.\nLinks become active as the materials for each week are posted.\n\n\n\n\nWeek 1 Github Repository\nWeek 1 .html slides\n\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted"
-  },
-  {
-    "objectID": "schedule.html",
-    "href": "schedule.html",
-    "title": "Schedule",
-    "section": "",
-    "text": "A schedule of topics and readings is provided below. Each week will cover a single topic or group of topics. You should treat the readings as a reference and as a more detailed exposition of the topics discussed in lecture. Consult the readings when you want to know more or want a slightly different approach to explaining a particular topic.\nMonday lectures will typically introduce the core theory for the week’s topic while Wednesday lectures will go into greater detail and work through applications. You should make sure to review the readings prior to that week’s lectures with an aim towards completing them before Wednesday’s lecture.\nAll hyperlinks to papers are either to the published version of the paper (if published) or to the working paper. You should use your university library access to obtain the full version if the article is not open access. Likewise, textbook readings will be to the free/open version of the book (if available) or to the UW-Madison university library eBook."
-  },
-  {
-    "objectID": "schedule.html#week-1-course-introduction-and-review",
-    "href": "schedule.html#week-1-course-introduction-and-review",
-    "title": "Schedule",
-    "section": "Week 1: Course Introduction and Review",
-    "text": "Week 1: Course Introduction and Review\nWednesday, September 9\nTopics:\n\nWhat is a statistical model and what is it good for?\nReview of regression\n\nReadings:\n\nReview: Chapters 1-7; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\n\n\n\n\n\n\n\nProblem Set 1 assigned Wednesday, September 9 – due Wednesday, September 23."
-  },
-  {
-    "objectID": "schedule.html#week-2-introduction-to-likelihood-inference",
-    "href": "schedule.html#week-2-introduction-to-likelihood-inference",
-    "title": "Schedule",
-    "section": "Week 2: Introduction to Likelihood Inference",
-    "text": "Week 2: Introduction to Likelihood Inference\nMonday, September 14 & Wednesday, September 16\nTopics:\n\nWhat is a “parametric” model?\nThe likelihood function\nMaximum likelihood estimation\n\nReadings:\n\nChapter 5 (“Parametric Models”); Aronow, P. M. and Benjamin T. Miller. 2019. Foundations of Agnostic Statistics. Cambridge: Cambridge University Press.\nChapter 6 (“Likelihood Inference”); Evans, Michael J., and Jeffrey S. Rosenthal. 2010. Probability and Statistics: The Science of Uncertainty, 2nd ed. New York: W.H. Freeman."
-  },
-  {
-    "objectID": "schedule.html#week-3-generalized-linear-models",
-    "href": "schedule.html#week-3-generalized-linear-models",
-    "title": "Schedule",
-    "section": "Week 3: Generalized Linear Models",
-    "text": "Week 3: Generalized Linear Models\nMonday, September 21 & Wednesday, September 23\nTopics:\n\nProperties of maximum likelihood estimators\nThe generalized linear model framework\nBinary outcome models\n\nReadings:\n\nChapters 13-14; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\n\n\n\n\n\n\n\nProblem Set 1 due Wednesday, September 23. Problem Set 2 assigned Wednesday, September 23 – due Wednesday, October 7."
-  },
-  {
-    "objectID": "schedule.html#week-4-more-likelihood-models",
-    "href": "schedule.html#week-4-more-likelihood-models",
-    "title": "Schedule",
-    "section": "Week 4: More Likelihood Models",
-    "text": "Week 4: More Likelihood Models\nMonday, September 28 & Wednesday, September 30\nTopics:\n\nDuration models (parametric, semi-parametric (Cox) and non-parametric approaches)\nEvent count models (Poisson regression and quasi-MLE methods)\n\nReadings:\n\nChapter 15; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\nClark, T. G., M. J. Bradburn, S. B. Love, and D. G. Altman. 2003. “Survival Analysis Part I: Basic Concepts and First Analyses.” British Journal of Cancer 89 (2): 232-238.\nStensrud, Mats J., and Miguel A. Hernán. 2020. “Why Test for Proportional Hazards?” JAMA 323 (14): 1401-1402.\nChapter 8; Wooldridge, Jeffrey M. 1999. “Quasi-Likelihood Methods for Count Data.” In Handbook of Applied Econometrics, vol. 2, 352-406."
-  },
-  {
-    "objectID": "schedule.html#week-5-bayesian-inference",
-    "href": "schedule.html#week-5-bayesian-inference",
-    "title": "Schedule",
-    "section": "Week 5: Bayesian Inference",
-    "text": "Week 5: Bayesian Inference\nMonday, October 5\nTopics:\n\nPrinciples of posterior inference\nHow to write a Bayesian model\nQuantities of interest: posterior mode, posterior mean, credible intervals\n\nReadings:\n\nChapter 9; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\nChapters 10-11; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton: Chapman and Hall/CRC.\n\n\n\n\n\n\n\nProblem Set 2 due Wednesday, October 7. Problem Set 3 assigned Wednesday, October 7 – due Wednesday, October 21.\n\n\n\n\n\n\n\n\n\n\nMidterm 1 In-Class, Wednesday, October 7th"
-  },
-  {
-    "objectID": "schedule.html#week-6-estimating-bayesian-models",
-    "href": "schedule.html#week-6-estimating-bayesian-models",
-    "title": "Schedule",
-    "section": "Week 6: Estimating Bayesian Models",
-    "text": "Week 6: Estimating Bayesian Models\nMonday, October 12 & Wednesday, October 14\nTopics:\n\nAnalytically tractable solutions through conjugate priors\nMarkov Chain Monte Carlo methods\nIntroduction to MCMC in Stan\n\nReadings:\n\nChapters 3 and 9; McElreath, Richard. 2020. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd ed. Boca Raton: Chapman and Hall/CRC."
-  },
-  {
-    "objectID": "schedule.html#week-7-multilevel-regression-models",
-    "href": "schedule.html#week-7-multilevel-regression-models",
-    "title": "Schedule",
-    "section": "Week 7: Multilevel Regression Models",
-    "text": "Week 7: Multilevel Regression Models\nMonday, October 19 & Wednesday, October 21\nTopics:\n\nPartial pooling through priors\nMethods for model validation\nMultilevel regression and post-stratification (MRP)\n\nReadings:\n\nChapter 11 and Appendix A; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\nChapter 15; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton: Chapman and Hall/CRC.\nPark, David K., Andrew Gelman, and Joseph Bafumi. 2004. “Bayesian Multilevel Estimation with Poststratification: State-Level Estimates from National Polls.” Political Analysis 12 (4): 375-385.\n\n\n\n\n\n\n\nProblem Set 3 due Wednesday, October 21. Problem Set 4 assigned Wednesday, October 21 – due Wednesday, November 4.\n\n\n\n\n\n\n\n\n\nReplication project memo due Wednesday, October 21"
-  },
-  {
-    "objectID": "schedule.html#week-8-mixture-models-and-the-em-algorithm",
-    "href": "schedule.html#week-8-mixture-models-and-the-em-algorithm",
-    "title": "Schedule",
-    "section": "Week 8: Mixture Models and the EM Algorithm",
-    "text": "Week 8: Mixture Models and the EM Algorithm\nMonday, October 26 & Wednesday, October 28\nTopics:\n\nExploratory data analysis and clustering models\nMLE and MAP estimation via the “Expectation-Maximization” algorithm\n\nReadings:\n\nChapters 13 and 22; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton: Chapman and Hall/CRC."
-  },
-  {
-    "objectID": "schedule.html#week-9-item-response-theory-and-ideal-point-models",
-    "href": "schedule.html#week-9-item-response-theory-and-ideal-point-models",
-    "title": "Schedule",
-    "section": "Week 9: Item Response Theory and Ideal Point Models",
-    "text": "Week 9: Item Response Theory and Ideal Point Models\nMonday, November 2\nTopics:\n\nLatent trait models\n“Ideal point” models in legislative voting\n\nReadings:\n\nMartin, Andrew D., and Kevin M. Quinn. 2002. “Dynamic Ideal Point Estimation via Markov Chain Monte Carlo for the U.S. Supreme Court, 1953-1999.” Political Analysis 10 (2): 134-153.\nClinton, Joshua, Simon Jackman, and Douglas Rivers. 2004. “The Statistical Analysis of Roll Call Data.” American Political Science Review 98 (2): 355-370.\nImai, Kosuke, James Lo, and Jonathan Olmsted. 2016. “Fast Estimation of Ideal Points with Massive Data.” American Political Science Review 110 (4): 631-656.\n\n\n\n\n\n\n\nProblem Set 4 due Wednesday, November 4.\n\n\n\n\n\n\n\n\n\nMidterm 2 In-Class, Wednesday, November 4th"
-  },
-  {
-    "objectID": "schedule.html#week-10-regularization-and-model-selection",
-    "href": "schedule.html#week-10-regularization-and-model-selection",
-    "title": "Schedule",
-    "section": "Week 10: Regularization and Model Selection",
-    "text": "Week 10: Regularization and Model Selection\nMonday, November 9 & Wednesday, November 11\nTopics:\n\nVariable selection and penalized regression (Ridge, LASSO)\nCross-fitting and out-of-sample validation\n\nReadings:\n\nChapters 6-7; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer."
-  },
-  {
-    "objectID": "schedule.html#week-11-flexible-regression-trees-and-forests",
-    "href": "schedule.html#week-11-flexible-regression-trees-and-forests",
-    "title": "Schedule",
-    "section": "Week 11: Flexible Regression – Trees and Forests",
-    "text": "Week 11: Flexible Regression – Trees and Forests\nMonday, November 16 & Wednesday, November 18\nTopics:\n\nRegression trees\nAggregation via sums of trees + regularization via BART\nBagging, boosting, random forests\n\nReadings:\n\nChapter 8; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer.\nChapters 9-10 and 15; Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2009. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd ed. New York: Springer.\nHill, Jennifer, Antonio Linero, and Jared Murray. 2020. “Bayesian Additive Regression Trees: A Review and Look Forward.” Annual Review of Statistics and Its Application 7: 251-278."
-  },
-  {
-    "objectID": "schedule.html#week-12-flexible-regression-kernels-and-gaussian-processes",
-    "href": "schedule.html#week-12-flexible-regression-kernels-and-gaussian-processes",
-    "title": "Schedule",
-    "section": "Week 12: Flexible Regression – Kernels and Gaussian Processes",
-    "text": "Week 12: Flexible Regression – Kernels and Gaussian Processes\nMonday, November 23\n\n\n\n\n\n\nThanksgiving recess runs November 26-29. Class meets as usual on Monday this week. Wednesday is cancelled.\n\n\n\nTopics:\n\nInfinite dimensional function spaces\nKernel ridge regression\nGaussian process regression\n\nReadings:\n\nHainmueller, Jens, and Chad Hazlett. 2014. “Kernel Regularized Least Squares: Reducing Misspecification Bias with a Flexible and Interpretable Machine Learning Approach.” Political Analysis 22 (2): 143-168.\nChapters 2 and 4; Rasmussen, Carl Edward, and Christopher K. I. Williams. 2006. Gaussian Processes for Machine Learning. Cambridge, MA: MIT Press."
-  },
-  {
-    "objectID": "schedule.html#week-13-causal-inference-with-flexible-regression",
-    "href": "schedule.html#week-13-causal-inference-with-flexible-regression",
-    "title": "Schedule",
-    "section": "Week 13: Causal Inference with Flexible Regression",
-    "text": "Week 13: Causal Inference with Flexible Regression\nMonday, November 30 & Wednesday, December 2\nTopics:\n\nEfficient semiparametric estimation of statistical functionals\nInfluence functions\n“Doubly-robust”/“Neyman-orthogonal” estimators\n\nReadings:\n\nFisher, Aaron, and Edward H. Kennedy. 2021. “Visually Communicating and Teaching Intuition for Influence Functions.” The American Statistician 75 (2): 162-172.\nKennedy, Edward H. 2024. “Semiparametric Doubly Robust Targeted Double Machine Learning: A Review.” In Handbook of Statistical Methods for Precision Medicine, 207-236.\n\n\n\n\n\n\n\n\nPoster Session Friday, December 4th"
-  },
-  {
-    "objectID": "schedule.html#week-14-working-with-big-datasets",
-    "href": "schedule.html#week-14-working-with-big-datasets",
-    "title": "Schedule",
-    "section": "Week 14: Working with “Big” Datasets",
-    "text": "Week 14: Working with “Big” Datasets\nMonday, December 7 & Wednesday, December 9\nTopics:\n\nEstimation with out-of-memory data\nStochastic gradient descent\nLossless compression in regression\n\nReadings:\n\nToulis, Panos, and Edoardo M. Airoldi. 2015. “Scalable Estimation Strategies Based on Stochastic Approximations: Classical Results and New Insights.” Statistics and Computing 25 (4): 781-795.\nWong, Jeffrey, Eskil Forsell, Randall A. Lewis, Tobias Mao, and Matthew Wardrop. 2021. “You Only Compress Once: Optimal Data Compression for Estimating Linear Models.” arXiv preprint arXiv:2102.11297."
   },
   {
     "objectID": "staff.html",
