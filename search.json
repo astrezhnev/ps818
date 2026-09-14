@@ -116,21 +116,21 @@
     "href": "slides/week2/week2_likelihood_inference.html#general-model-notation",
     "title": "Week 2: Introduction to Likelihood Inference",
     "section": "General model notation",
-    "text": "General model notation\n\nWe can specify a broad set of models for \\(Y_i\\) using this framework\nStochastic\n\\[Y_i \\sim f(\\theta_i, \\alpha)\\]\nSystematic\n\\[\\theta_i = g(X_i, \\beta)\\]"
+    "text": "General model notation\n\nWe can specify a broad set of models for \\(y_i\\) using this framework\nStochastic\n\\[y_i \\sim f(\\theta_i, \\alpha)\\]\nSystematic\n\\[\\theta_i = g(x_i, \\beta)\\]"
   },
   {
     "objectID": "slides/week2/week2_likelihood_inference.html#general-model-notation-1",
     "href": "slides/week2/week2_likelihood_inference.html#general-model-notation-1",
     "title": "Week 2: Introduction to Likelihood Inference",
     "section": "General model notation",
-    "text": "General model notation\n\nWhat are these quantities?\n\n\\(Y_i\\) is a random variable\n\\(f()\\) denotes the distribution of that random variable\n\\(\\theta_i\\) and \\(\\alpha\\) are parameters of that distribution\n\\(g()\\) is some function\n\\(X_i\\) are observed, known constants (e.g. regressors)\n\\(\\beta\\) are parameters of interest\n\nLater, we will spend some time with a particular class of models called “Generalized Linear Models” where the systematic component has the form\n\\[\\theta_i = g(X_i^{\\prime}\\beta)\\]"
+    "text": "General model notation\n\nWhat are these quantities?\n\n\\(y_i\\) is a random variable\n\\(f()\\) denotes the distribution of that random variable\n\\(\\theta_i\\) and \\(\\alpha\\) are parameters of that distribution\n\\(g()\\) is some function\n\\(x_i\\) are observed, known constants (e.g. regressors)\n\\(\\beta\\) are parameters of interest\n\nLater, we will spend some time with a particular class of models called “Generalized Linear Models” where the systematic component has the form\n\\[\\theta_i = g(x_i^{\\prime}\\beta)\\]"
   },
   {
     "objectID": "slides/week2/week2_likelihood_inference.html#types-of-distributions",
     "href": "slides/week2/week2_likelihood_inference.html#types-of-distributions",
     "title": "Week 2: Introduction to Likelihood Inference",
     "section": "Types of distributions",
-    "text": "Types of distributions\n\nNormal\n\n\n\nContinuous on an unbounded support \\((-\\infty, \\infty)\\)\nTwo parameters: Mean \\(\\mu\\) and Variance \\(\\sigma^2\\)\n\\[f_N(x;\\mu, \\sigma) = \\frac{1}{\\sigma\\sqrt{2\\pi}} \\exp\\left\\{- \\frac{1}{2}\\left(\\frac{x - \\mu}{\\sigma}\\right)^2 \\right\\}\\]"
+    "text": "Types of distributions\n\nNormal\n\n\n\nContinuous on an unbounded support \\((-\\infty, \\infty)\\)\nTwo parameters: Mean \\(\\mu\\) and Variance \\(\\sigma^2\\)\n\\[f(x;\\mu, \\sigma) = \\frac{1}{\\sigma\\sqrt{2\\pi}} \\exp\\left\\{- \\frac{1}{2}\\left(\\frac{x - \\mu}{\\sigma}\\right)^2 \\right\\}\\]"
   },
   {
     "objectID": "slides/week2/week2_likelihood_inference.html#types-of-distributions-1",
@@ -221,21 +221,21 @@
     "href": "slides/week2/week2_likelihood_inference.html#consistency",
     "title": "Week 2: Introduction to Likelihood Inference",
     "section": "Consistency",
-    "text": "Consistency\n\nBy the weak law of large numbers, for each \\(\\theta\\)\n\\[\\bar{\\ell}_n(\\theta) = \\frac{1}{n} \\sum_{i=1}^n \\log f(y_i | \\theta) \\overset{p}{\\rightarrow} \\mathbb{E}_{\\theta_0}[\\log f(y_i | \\theta)] \\equiv \\ell^{*}(\\theta)\\]\nThe MLE maximizes the left-hand side, so (under regularity conditions) \\(\\hat{\\theta}\\) converges to whatever maximizes the right-hand side \\(\\ell^{*}(\\theta)\\).\nWe can show that the true parameter \\(\\theta_0\\) maximizes \\(\\ell^{*}(\\theta)\\)"
+    "text": "Consistency\n\nBy the weak law of large numbers, for each \\(\\theta\\)\n\\[\\bar{\\ell}_n(\\theta) = \\frac{1}{n} \\sum_{i=1}^n \\log f(y_i | \\theta) \\overset{p}{\\rightarrow} \\mathbb{E}_{\\theta_0}[\\log f(y_i | \\theta)] \\]\nThe MLE maximizes the left-hand side, so (under regularity conditions) \\(\\hat{\\theta}\\) converges to whatever maximizes \\(\\mathbb{E}_{\\theta_0}[\\log f(y_i | \\theta)]\\)\nWe can show that the true parameter \\(\\theta_0\\) maximizes \\(\\mathbb{E}_{\\theta_0}[\\log f(y_i | \\theta)]\\)"
   },
   {
     "objectID": "slides/week2/week2_likelihood_inference.html#consistency-1",
     "href": "slides/week2/week2_likelihood_inference.html#consistency-1",
     "title": "Week 2: Introduction to Likelihood Inference",
     "section": "Consistency",
-    "text": "Consistency\n\nConsider the difference in the expected log-likelihood at \\(\\theta_0\\) compared to any other \\(\\theta\\)\n\\[\\ell^{*}(\\theta) - \\ell^{*}(\\theta_0) = \\mathbb{E}_{\\theta_0}\\left[\\log \\frac{f(y_i|\\theta)}{f(y_i|\\theta_0)}\\right]\\]\nBy Jensen’s inequality (\\(\\log\\) is concave),\n\\[\\mathbb{E}_{\\theta_0}\\left[\\log \\frac{f(y_i|\\theta)}{f(y_i|\\theta_0)}\\right] \\le \\log \\mathbb{E}_{\\theta_0}\\left[\\frac{f(y_i|\\theta)}{f(y_i|\\theta_0)}\\right] = \\log \\int f(y|\\theta) \\, dy = \\log 1 = 0\\]\nSo \\(\\ell^{*}(\\theta) \\le \\ell^{*}(\\theta_0)\\) for all \\(\\theta\\)\nTherefore the MLE is consistent: \\(\\hat{\\theta} \\overset{p}{\\to} \\theta_0\\)."
+    "text": "Consistency\n\nConsider any other value of \\(\\theta\\) and apply properties of logs\n\\[\\mathbb{E}_{\\theta_0}[\\log f(y_i | \\theta)]  - \\mathbb{E}_{\\theta_0}[\\log f(y_i | \\theta_0)]  = \\mathbb{E}_{\\theta_0}\\left[\\log \\frac{f(y_i|\\theta)}{f(y_i|\\theta_0)}\\right]\\]\nBy Jensen’s inequality (\\(\\log\\) is concave),\n\\[\\mathbb{E}_{\\theta_0}\\left[\\log \\frac{f(y_i|\\theta)}{f(y_i|\\theta_0)}\\right] \\le \\log \\mathbb{E}_{\\theta_0}\\left[\\frac{f(y_i|\\theta)}{f(y_i|\\theta_0)}\\right] = \\log \\int f(y|\\theta) \\, dy = \\log 1 = 0\\]\nSo \\(\\mathbb{E}_{\\theta_0}[\\log f(y_i | \\theta)] \\le \\mathbb{E}_{\\theta_0}[\\log f(y_i | \\theta_0)]\\) for all \\(\\theta\\)\n\nAnd we get equality at \\(\\theta = \\theta_0\\): \\(\\theta_0\\) maximizes \\(\\mathbb{E}_{\\theta_0}[\\log f(y_i | \\theta)]\\)\n\nTherefore the MLE is consistent: \\(\\hat{\\theta} \\overset{p}{\\to} \\theta_0\\)."
   },
   {
     "objectID": "slides/week2/week2_likelihood_inference.html#consistency-2",
     "href": "slides/week2/week2_likelihood_inference.html#consistency-2",
     "title": "Week 2: Introduction to Likelihood Inference",
     "section": "Consistency",
-    "text": "Consistency\n\nNote a few important conditions for identification\nIdentifiability\n\nNo “plateaus” in the log-likelihood.\nTwo different values of \\(\\theta\\) can’t both maximize the log-likelihood\n\n\\[f(\\cdot\\,|\\theta) \\neq f(\\cdot\\,| \\theta_0) \\ \\forall \\ \\theta \\neq \\theta_0\\]\n\nThis is exactly what makes the Jensen inequality above strict.\n\nFixed parameter space\n\nThe dimensionality of \\(\\theta\\) stays fixed and does not depend on \\(n\\)\nViolated (e.g.) in ideal point models (new legislators mean new ideal points)\n\n\\(\\theta_0\\) is in the interior of the parameter space\n\nOtherwise the score need not be zero at the optimum."
+    "text": "Consistency\n\nNote a few important conditions for identification\nIdentifiability\n\nNo “plateaus” in the log-likelihood.\nTwo different values of \\(\\theta\\) can’t both maximize the log-likelihood\n\n\\[f(\\cdot\\,|\\theta) \\neq f(\\cdot\\,| \\theta_0) \\ \\forall \\ \\theta \\neq \\theta_0\\]\n\nThis is exactly what makes the inequality above strict aside from \\(\\theta = \\theta_0\\)\n\nFixed parameter space\n\nThe dimensionality of \\(\\theta\\) stays fixed and does not depend on \\(n\\)\nViolated (e.g.) in ideal point models (new legislators mean new ideal points)\n\n\\(\\theta_0\\) is in the interior of the parameter space\n\nOtherwise the score need not be zero at the optimum."
   },
   {
     "objectID": "slides/week2/week2_likelihood_inference.html#information",
