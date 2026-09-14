@@ -117,14 +117,14 @@ options(digits=3)
 
 ::: {.incremental}
 
-- We can specify a broad set of models for $Y_i$ using this framework
+- We can specify a broad set of models for $y_i$ using this framework
 - **Stochastic**
 
-  $$Y_i \sim f(\theta_i, \alpha)$$
+  $$y_i \sim f(\theta_i, \alpha)$$
 
 - **Systematic**
 
-  $$\theta_i = g(X_i, \beta)$$
+  $$\theta_i = g(x_i, \beta)$$
 
 :::
 
@@ -133,15 +133,15 @@ options(digits=3)
 ::: {.incremental}
 
 - What are these quantities?
-  - $Y_i$ is a random variable
+  - $y_i$ is a random variable
   - $f()$ denotes the distribution of that random variable
   - $\theta_i$ and $\alpha$ are parameters of that distribution
   - $g()$ is some function 
-  - $X_i$ are observed, known constants (e.g. regressors)
+  - $x_i$ are observed, known constants (e.g. regressors)
   - $\beta$ are parameters of interest 
 - Later, we will spend some time with a particular class of models called "Generalized Linear Models" where the systematic component has the form
 
-  $$\theta_i = g(X_i^{\prime}\beta)$$
+  $$\theta_i = g(x_i^{\prime}\beta)$$
 
 :::
 
@@ -159,7 +159,7 @@ norm_curve
 - Continuous on an unbounded support $(-\infty, \infty)$
 - Two parameters: Mean $\mu$ and Variance $\sigma^2$
 
-  $$f_N(x;\mu, \sigma) = \frac{1}{\sigma\sqrt{2\pi}} \exp\left\{- \frac{1}{2}\left(\frac{x - \mu}{\sigma}\right)^2 \right\}$$
+  $$f(x;\mu, \sigma) = \frac{1}{\sigma\sqrt{2\pi}} \exp\left\{- \frac{1}{2}\left(\frac{x - \mu}{\sigma}\right)^2 \right\}$$
 
 :::
 
@@ -375,10 +375,10 @@ binom_curve
 
 - By the weak law of large numbers, for each $\theta$
 
-  $$\bar{\ell}_n(\theta) = \frac{1}{n} \sum_{i=1}^n \log f(y_i | \theta) \overset{p}{\rightarrow} \mathbb{E}_{\theta_0}[\log f(y_i | \theta)] \equiv \ell^{*}(\theta)$$
+  $$\bar{\ell}_n(\theta) = \frac{1}{n} \sum_{i=1}^n \log f(y_i | \theta) \overset{p}{\rightarrow} \mathbb{E}_{\theta_0}[\log f(y_i | \theta)] $$
 
-- The MLE maximizes the left-hand side, so (under regularity conditions) $\hat{\theta}$ converges to whatever maximizes the right-hand side $\ell^{*}(\theta)$.
-- We can show that the true parameter $\theta_0$ maximizes $\ell^{*}(\theta)$
+- The MLE maximizes the left-hand side, so (under regularity conditions) $\hat{\theta}$ converges to whatever maximizes $\mathbb{E}_{\theta_0}[\log f(y_i | \theta)]$
+- We can show that the true parameter $\theta_0$ maximizes $\mathbb{E}_{\theta_0}[\log f(y_i | \theta)]$
 
 :::
 
@@ -386,15 +386,16 @@ binom_curve
 
 ::: {.incremental}
 
-- Consider the difference in the expected log-likelihood at $\theta_0$ compared to any other $\theta$
+- Consider any other value of $\theta$ and apply properties of logs
 
-  $$\ell^{*}(\theta) - \ell^{*}(\theta_0) = \mathbb{E}_{\theta_0}\left[\log \frac{f(y_i|\theta)}{f(y_i|\theta_0)}\right]$$
+  $$\mathbb{E}_{\theta_0}[\log f(y_i | \theta)]  - \mathbb{E}_{\theta_0}[\log f(y_i | \theta_0)]  = \mathbb{E}_{\theta_0}\left[\log \frac{f(y_i|\theta)}{f(y_i|\theta_0)}\right]$$
 
 - By **Jensen's inequality** ($\log$ is concave),
 
   $$\mathbb{E}_{\theta_0}\left[\log \frac{f(y_i|\theta)}{f(y_i|\theta_0)}\right] \le \log \mathbb{E}_{\theta_0}\left[\frac{f(y_i|\theta)}{f(y_i|\theta_0)}\right] = \log \int f(y|\theta) \, dy = \log 1 = 0$$
 
-- So $\ell^{*}(\theta) \le \ell^{*}(\theta_0)$ for all $\theta$
+- So $\mathbb{E}_{\theta_0}[\log f(y_i | \theta)] \le \mathbb{E}_{\theta_0}[\log f(y_i | \theta_0)]$ for all $\theta$
+  - And we get equality at $\theta = \theta_0$: $\theta_0$ maximizes $\mathbb{E}_{\theta_0}[\log f(y_i | \theta)]$
 - Therefore the MLE is consistent: $\hat{\theta} \overset{p}{\to} \theta_0$.
 
 :::
@@ -410,7 +411,7 @@ binom_curve
   
   $$f(\cdot\,|\theta) \neq f(\cdot\,| \theta_0) \ \forall \ \theta \neq \theta_0$$ 
   
-  - This is exactly what makes the Jensen inequality above **strict**.
+  - This is exactly what makes the inequality above **strict** aside from $\theta = \theta_0$
 - **Fixed parameter space**
   - The dimensionality of $\theta$ stays fixed and does not depend on $n$
   - Violated (e.g.) in ideal point models (new legislators mean new ideal points)
