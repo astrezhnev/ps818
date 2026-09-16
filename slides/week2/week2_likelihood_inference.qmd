@@ -344,13 +344,6 @@ binom_curve
 
   $$\mathbb{E}_{\theta}\big[s_i(\theta)\big] = 0$$
 
-
-:::
-
-## The score has mean zero
-
-::: {.incremental}
-
 - Start from the definition of the score
 
   $$\mathbb{E}_{\theta}\big[s_i(\theta)\big] = \int \left[\frac{\partial}{\partial\theta} \log f(y|\theta)\right] f(y|\theta) \, dy$$
@@ -358,6 +351,12 @@ binom_curve
 - Apply the chain rule to $\log f$, then cancel $f(y|\theta)$
 
   $$= \int \frac{\partial}{\partial\theta} f(y|\theta) \, dy$$
+
+:::
+
+## The score has mean zero
+
+::: {.incremental}
 
 - Swap the derivative and the integral (regularity condition - we assume we're able to do this)
 
@@ -449,11 +448,11 @@ binom_curve
 
 :::
 
-## Asymptotic distribution {.smaller}
+## Asymptotic distribution 
 
 ::: {.incremental}
 
-- We now show that
+- Now we can show that the MLE is asymptotically normal.
 
   $$\sqrt{n}(\hat{\theta} - \theta_0) \overset{d}{\rightarrow} \text{Normal}\big(0, \mathcal{I}(\theta_0)^{-1}\big)$$
 
@@ -469,15 +468,15 @@ binom_curve
 
   $$(\hat{\theta} - \theta_0) = \big[-\bar{H}_n(\theta_0)\big]^{-1}\bar{S}_n(\theta_0)$$
 
+:::
+
+## Asymptotic distribution 
+
+::: {.incremental}
+
 - Multiplying by $\sqrt{n}$
 
   $$\sqrt{n}(\hat{\theta} - \theta_0) = \big[-\bar{H}_n(\theta_0)\big]^{-1}\big[\sqrt{n}\,\bar{S}_n(\theta_0)\big]$$
-
-:::
-
-## Asymptotic distribution {.smaller}
-
-::: {.incremental}
 
 - **First**, by the law of large numbers applied to the *average* Hessian,
 
@@ -487,15 +486,15 @@ binom_curve
 
   $$\sqrt{n} \, \bar{S}_n(\theta_0) = \frac{1}{\sqrt{n}} \sum_{i=1}^n s_i(\theta_0) \overset{d}{\to} \text{Normal}\big(0, \, \text{Var}_{\theta_0}(s_i(\theta_0))\big) = \text{Normal}\big(0, \mathcal{I}(\theta_0)\big)$$
 
+:::
+
+## Asymptotic distribution 
+
+::: {.incremental}
+
 - **Lastly**, by Slutsky's theorem,
 
   $$\sqrt{n}(\hat{\theta} - \theta_0) \overset{d}{\to} \text{Normal}\big(0, \mathcal{I}(\theta_0)^{-1}\mathcal{I}(\theta_0)\mathcal{I}(\theta_0)^{-1}\big) = \text{Normal}\big(0, \mathcal{I}(\theta_0)^{-1}\big)$$
-
-:::
-
-## Asymptotic distribution
-
-::: {.incremental}
 
 - So our large-sample approximation for the distribution of the MLE is
 
@@ -593,9 +592,9 @@ binom_curve
 
   $$\text{Var}(\hat{\theta}) \times \mathcal{I}_n(\theta) \ge 1 \quad \Longrightarrow \quad \text{Var}(\hat{\theta}) \ge \frac{1}{\mathcal{I}_n(\theta)}$$
 
-- Comparing to the asymptotic variance of the MLE:
+- Compare this to the large-sample distribution of the MLE from earlier:
 
-  $$\text{avar}(\hat{\theta}_{MLE}) = \mathcal{I}_n(\theta_0)^{-1}$$
+  $$\hat{\theta}_{MLE} \overset{a}{\sim} \text{Normal}\big(\theta_0, \ \mathcal{I}_n(\theta_0)^{-1}\big)$$
 
 - The MLE attains the bound **asymptotically**.
 
@@ -696,12 +695,21 @@ binom_curve
 election <- read_csv("data/prez_election_2016_vote.csv")
 election$voteshare <- 100*(election$candidatevotes/election$totalvotes)
 election <- election %>% filter(!is.na(voteshare) & !is.na(pctWhiteNH))
-nrow(election)
 ```
 
-- For **optimization** we reparameterize $\sigma = \exp(\eta)$, so the optimizer can range over all of $\mathbb{R}$ and never has to worry about $\sigma \le 0$.
+```{r, echo=F, message=F, warning=F, fig.width=5, fig.height = 3, fig.align="center"}
+election %>% ggplot(aes(x=pctWhiteNH, y=voteshare)) + geom_point(alpha=.2, size=.7) + geom_smooth(method="lm", se=F) + theme_bw() + xlab("Percent non-Hispanic white") + ylab("Clinton vote share (%)")
+```
 
-- Write a function returning the log-likelihood **evaluated at each observation**
+
+## Fitting the model
+
+- We'll use a **numerical optimizer** implemented in R
+  - The `maxLik` package is a nice wrapper for the various optimizers built in to R
+- The main routine, `maxLik`, takes a function whose first argument is the parameter vector. 
+  - We'll initially give it *only* the log-likelihood, so every derivative it needs is computed **numerically**.
+
+- First, write a function returning the log-likelihood **evaluated at each observation**
 
 ```{r, echo=T}
 norm_loglik <- function(pars, Y, X){
@@ -711,6 +719,12 @@ norm_loglik <- function(pars, Y, X){
 }
 ```
 
+- For **optimization** we reparameterize $\sigma = \exp(\eta)$, so the optimizer can range over all of $\mathbb{R}$ and never has to worry about $\sigma \le 0$.
+
+## Fitting the model
+
+- We initialize our $\mathbf{X}$ matrix, our outcome $Y$ and some starting values for the optimizer.
+
 ```{r, echo=T, message=F}
 library(maxLik)
 X_matrix <- model.matrix(voteshare ~ pctWhiteNH, data=election)
@@ -718,12 +732,8 @@ Y_vec <- election$voteshare
 start_vals <- c(0, 0, 3)   # beta0, beta1, log(sigma)
 ```
 
-## Fitting the model
-
-- We'll use a **numerical optimizer** implemented in R
-  - The `maxLik` package is a nice wrapper for the various optimizers built in to R
-- The main routine, `maxLik`, takes a function whose first argument is the parameter vector. 
-  - We'll first give it *only* the log-likelihood, so every derivative it needs is computed **numerically**.
+- Then pass the function `norm_loglik` and all other arguments to `maxLik()`. 
+  - We'll choose `method = "NR"` to select the **Newton-Raphson** optimizer
 
 ```{r, echo=T}
 mle_numeric <- maxLik(norm_loglik, start = start_vals, method = "NR",
@@ -738,13 +748,17 @@ ols_est <- lm(voteshare ~ pctWhiteNH, data=election)
 round(coef(ols_est), 5)
 ```
 
-
 ## Standard errors
+
+- We use a **plug-in estimator** for the standard errors.
+  - Calculate the Hessian at the MLE and plug it into our asymptotic variance formula we derived earlier (invert the negative hessian).
 
 ```{r, echo=T, warning=F}
 vcov_numeric <- solve(-maxLik::hessian(mle_numeric))
 se_numeric <- sqrt(diag(vcov_numeric))
 ```
+
+- Compare these to what we get from conventional OLS standard errors
 
 ```{r, echo=T}
 comparison <- data.frame(
@@ -760,10 +774,8 @@ comparison
 pct_slope <- abs(round(comparison$pct_error[2]))
 ```
 
-::: {.fragment}
-- These should be **similar** (aside from degrees of freedom correction in `lm`)
+- These should be **identical** (aside from degrees of freedom correction in `lm`)
 - Instead the slope standard error is off by about **`r pct_slope`%**.
-:::
 
 ## The answer isn't stable!
 
@@ -780,10 +792,9 @@ starts <- c(2.0, 2.303, exp(1), 2.708, 3.0)
 round(t(sapply(starts, se_from_start)), 6)
 ```
 
-::: {.fragment}
 - The **standard error** swings wildly, and in some runs the negative Hessian is not even positive definite
 - The truth (from OLS) is `r round(summary(ols_est)$coefficients[2,2], 6)`.
-:::
+- The optimizer is behaving poorly 
 
 ## Numerical vs. analytical derivatives
 
@@ -792,7 +803,7 @@ round(t(sapply(starts, se_from_start)), 6)
 - The **Newton-Raphson** algorithm uses the **gradient** and the **Hessian** to find the optimum iteratively.
 - It can get them two ways:
 - **Finite differences** ("numerical differentiation")
-  - $\frac{\partial f}{\partial\theta_j} \approx \frac{f(\theta + h e_j) - f(\theta - h e_j)}{2h}$
+  - $\frac{\partial f}{\partial\theta} \approx \frac{f(\theta + h) - f(\theta - h)}{2h}$ (done one parameter at a time)
   - Needs only the ability to *evaluate* $f$, so it works with just the likelihood as input.
   - **Approximate**, the error depends on software-selected $h$.
 - **Exact derivatives**
@@ -816,7 +827,6 @@ norm_grad <- function(pars, Y, X){
 ```
 
 
-
 ## Analytic gradient: the standard errors
 
 ```{r, echo=T}
@@ -834,10 +844,10 @@ data.frame(
 )
 ```
 
-::: {.fragment}
+
 - Supplying the gradient recovers the OLS standard errors essentially exactly.
 - `maxLik` is *still* finite-differencing to get the Hessian -- but now it differences the **exact** gradient - less room for numerical error.
-:::
+
 
 ## And now it is stable
 
@@ -847,36 +857,23 @@ data.frame(
 round(t(sapply(starts, se_from_start, grad = norm_grad)), 6)
 ```
 
-::: {.fragment}
+
 - The same answer from every start.
-:::
 
-
-## The problem: scaling the inputs
-
-::: {.incremental}
-
-- Why is this problem so fragile? Look at the data!
-
-```{r, echo=T}
-c(kappa_X = kappa(crossprod(X_matrix)),
-  sd_Y = sd(election$voteshare), sd_X = sd(election$pctWhiteNH),
-  mean_X = mean(election$pctWhiteNH))
-```
-
-:::
 
 ## Standardizing $Y$ and $X$
 
-- Put everything on a common scale: mean zero, unit standard deviation.
+- Another solution is to make the inputs better behaved
+  - Normalize $Y$ and $X$ by subtracting the mean and dividing by the standard deviation.
 
 ```{r, echo=T}
 election$voteshare_z  <- (election$voteshare  - mean(election$voteshare))/sd(election$voteshare)
 election$pctWhiteNH_z <- (election$pctWhiteNH - mean(election$pctWhiteNH))/sd(election$pctWhiteNH)
 X_z <- model.matrix(voteshare_z ~ pctWhiteNH_z, data=election)
 Y_z <- election$voteshare_z
-c(kappa_raw = kappa(crossprod(X_matrix)), kappa_std = kappa(crossprod(X_z)))
 ```
+
+- We'll compare the two approaches
 
 ```{r, echo=T}
 mle_z_numeric  <- maxLik(norm_loglik, start = start_vals, method="NR", Y = Y_z, X = X_z)
@@ -884,7 +881,7 @@ mle_z_analytic <- maxLik(norm_loglik, grad = norm_grad, start = start_vals,
                          method="NR", Y = Y_z, X = X_z)
 ```
 
-## The discrepancy disappears
+- The discrepancy disappears
 
 ```{r, echo=T}
 se_z_numeric  <- sqrt(diag(solve(-maxLik::hessian(mle_z_numeric))))
@@ -921,15 +918,15 @@ data.frame(
 
 - Return to the asymptotic variance derivation. We had the **sandwich**
 
-  $$\text{avar}\big(\sqrt{n}(\hat{\theta}-\theta_0)\big) = \underbrace{\big[-\mathbb{E}_{\theta_0}[H_i(\theta_0)]\big]^{-1}}_{\text{bread}} \underbrace{\text{Var}_{\theta_0}\big(s_i(\theta_0)\big)}_{\text{meat}} \underbrace{\big[-\mathbb{E}_{\theta_0}[H_i(\theta_0)]\big]^{-1}}_{\text{bread}}$$
+  $$\text{Var}\big(\sqrt{n}(\hat{\theta}-\theta_0)\big) \approx \underbrace{\big[-\mathbb{E}_{\theta_0}[H_i(\theta_0)]\big]^{-1}}_{\text{bread}} \underbrace{\text{Var}_{\theta_0}\big(s_i(\theta_0)\big)}_{\text{meat}} \underbrace{\big[-\mathbb{E}_{\theta_0}[H_i(\theta_0)]\big]^{-1}}_{\text{bread}}$$
 
-- Previously we used the information matrix equality -- meat $=$ bread$^{-1}$ $= \mathcal{I}(\theta_0)$ -- to collapse this to $\mathcal{I}(\theta_0)^{-1}$.
+- Previously we used the information matrix equality -- $\text{meat} = \text{bread}^{-1} = \mathcal{I}(\theta_0)$ -- to collapse this to $\mathcal{I}(\theta_0)^{-1}$.
   - That equality holds **only if the model is correctly specified**. If it isn't, the two differ, and only the sandwich is consistent.
-- Instead, we can estimate each piece separately with sample analogues, using the **totals** so the $n$'s land in the right place:
+- Instead, we can estimate each piece separately with sample analogues:
 
   $$\widehat{\text{Var}}(\hat{\theta}) = \bigg[-\sum_{i=1}^n H_i(\hat\theta)\bigg]^{-1}\bigg[\sum_{i=1}^n s_i(\hat{\theta})  s_i(\hat{\theta})^{\prime}\bigg]\bigg[-\sum_{i=1}^n H_i(\hat\theta)\bigg]^{-1}$$
 
-- Consistent under misspecification of the outcome distribution, but finite-sample properties can be poor -- usually *undercoverage* in small samples, so a correction like $\frac{n}{n-k}$ is common.
+- Consistent under misspecification of the outcome distribution, but finite-sample properties can be poor absent corrections (e.g. $\frac{n}{n-k}$ scaling known as HC1).
 
 :::
 
@@ -964,6 +961,8 @@ data.frame(
 
 ## Conclusion
 
+::: {.incremental}
+
 - **Statistical models**
   - Describe the data-generating process in terms of *systematic* and *stochastic* components
   - In a parametric model, we assume the data $\mathbf{y}$ come from a known *distribution* with unknown parameters $\theta$
@@ -974,6 +973,8 @@ data.frame(
 - **Maximum Likelihood Estimator**
   - A *technique* for constructing a good estimator whenever we can write down a well-behaved likelihood
   - Consistency, asymptotic normality, asymptotic efficiency -- all **large sample** properties
+
+:::
 
 ## Next week
 
