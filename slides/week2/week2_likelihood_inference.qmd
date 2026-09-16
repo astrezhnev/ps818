@@ -72,7 +72,7 @@ options(digits=3)
 
 :::
 
-# Statistical models
+## Statistical models
 
 ## Defining a statistical model
 
@@ -200,7 +200,7 @@ binom_curve
 
 :::
 
-# Likelihood inference
+## Likelihood inference
 
 ## Learning about the unknown
 
@@ -493,7 +493,7 @@ binom_curve
 
 :::
 
-## Asymptotic distribution {.smaller}
+## Asymptotic distribution
 
 ::: {.incremental}
 
@@ -601,7 +601,7 @@ binom_curve
 
 :::
 
-# The Normal model
+## The Normal model
 
 ## Deriving the log-likelihood
 
@@ -866,7 +866,7 @@ c(kappa_X = kappa(crossprod(X_matrix)),
 
 :::
 
-## Standardizing $Y$ and $X$ {.smaller}
+## Standardizing $Y$ and $X$
 
 - Put everything on a common scale: mean zero, unit standard deviation.
 
@@ -897,7 +897,7 @@ data.frame(
 )
 ```
 
-## Getting back to interpretable units {.smaller}
+## Getting back to interpretable units
 
 - To get back to the units of interest, **undo** the re-scaling:
 
@@ -913,7 +913,7 @@ data.frame(
 ```
 
 
-# "Robust" standard errors
+## "Robust" standard errors
 
 ## Relaxing the information matrix equality {.smaller}
 
@@ -933,7 +933,7 @@ data.frame(
 
 :::
 
-## Implementing the sandwich {.smaller}
+## Implementing the sandwich
 
 - `sandwich::estfun` returns the per-observation gradient
 
@@ -962,7 +962,7 @@ data.frame(
 ```
 
 
-## Conclusion {.smaller}
+## Conclusion
 
 - **Statistical models**
   - Describe the data-generating process in terms of *systematic* and *stochastic* components
