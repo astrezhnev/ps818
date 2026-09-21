@@ -1,0 +1,1295 @@
+---
+title: "Week 3: Generalized Linear Models"
+subtitle: "PS 818 - Data Analysis with Statistical Models"
+author:
+  - name: "Anton Strezhnev"
+    affiliation: "University of Wisconsin-Madison"
+    email: strezhnev@wisc.edu
+date: "September 21, 2026"
+date-format: "MMMM D, YYYY"
+editor: 
+  render-on-save: true
+format: 
+  revealjs:
+    theme: [default, custom.scss]
+    slide-number: true
+    overview: true
+    navigation-mode: vertical
+    progress: false
+    controls: true
+    link-external-newwindow: true
+    footer: "PS 818 - University of Wisconsin-Madison"
+    html-math-method:
+      method: mathjax
+      url: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+execute: 
+  cache: false
+embed-resources: true
+bibliography: ../ps818.bib
+link-citations: true
+
+---
+
+## Generalized Linear Models {.title-slide}
+
+::: {style="display: none"}
+$$
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+$$
+:::
+
+```{r, echo = F, message=F, warnings=F}
+library(tidyverse)
+library(knitr)
+library(broom)
+library(estimatr)
+options(digits=3)
+```
+
+## Previously
+
+::: {.incremental}
+
+- **Likelihood**: a function of the parameters $\theta$ evaluated at the observed data
+
+  $$\mathcal{L}(\theta| \mathbf{y}) = f(\mathbf{y}| \theta) \qquad \ell_n(\theta) = \sum_{i=1}^n \log f(y_i|\theta)$$
+
+- **Maximum likelihood estimator**: $\hat{\theta} = \argmax_{\theta \in \Theta} \ \ell_n(\theta)$
+  - **Consistent**: $\hat{\theta} \overset{p}{\to} \theta_0$
+  - **Asymptotically normal**: $\sqrt{n}(\hat{\theta} - \theta_0) \overset{d}{\to} \text{Normal}\big(0, \mathcal{I}(\theta_0)^{-1}\big)$
+  - **Asymptotically efficient**: attains the Cramér-Rao lower bound
+
+:::
+
+## This week
+
+::: {.incremental}
+
+- **More properties of the MLE**
+  - **Invariance** and the **delta method**
+- **How does numerical optimization actually work?**
+  - **Newton-Raphson**, Fisher scoring, gradient ascent
+- **Generalized linear models**
+  - Extending the classic linear form to **functions** of the CEF
+  - $g(\mathbb{E}[Y_i|X_i]) = X_i^{\prime}\beta$
+- **Binary outcome models**
+  - Logit and probit; latent-variable formulations
+  - Ordinal and multinomial extensions
+
+:::
+
+## More on the MLE
+
+## Invariance
+
+::: {.incremental}
+
+- We often want to do inference on some **function** of $\theta$
+  - (e.g.) we estimate $\beta$ but want a predicted probability, a risk ratio, or a marginal effect.
+- The MLE has a convenient property: **invariance**.
+  - If $\hat{\theta}$ is the MLE of $\theta$, then $g(\hat{\theta})$ is the MLE of $g(\theta)$ -- for *any* function $g$.
+- Combined with consistency, $g(\hat{\theta}) \overset{p}{\to} g(\theta_0)$ for continuous $g$ (continuous mapping theorem).
+- But how do we get the standard errors (asymptotically)?
+  - The **delta method**
+
+:::
+
+## Delta method
+
+::: {.incremental}
+
+- We know the asymptotic variance of $\hat{\theta}$
+  - It's the inverse Fisher information, estimated by the inverse negative Hessian at the MLE.
+- To get $\text{Var}(g(\hat{\theta}))$, start with a first-order Taylor approximation around the true value $\theta_0$
+
+  $$g(\hat{\theta}) \approx g(\theta_0) + \big[\nabla g(\theta_0)^{\prime}\big](\hat{\theta} - \theta_0)$$
+
+- Take the variance
+
+  $$\text{Var}\big(g(\hat{\theta})\big) \approx \text{Var}\bigg(g(\theta_0) + \big[\nabla g(\theta_0)^{\prime}\big]\hat{\theta} - \big[\nabla g(\theta_0)^{\prime}\big]\theta_0\bigg)$$
+
+- $g(\theta_0)$ and $\nabla g(\theta_0)$ are **constants**, so the variance of the first and third terms is zero
+
+  $$\text{Var}\big(g(\hat{\theta})\big) \approx \text{Var}\bigg(\big[\nabla g(\theta_0)^{\prime}\big]\hat{\theta}\bigg)$$
+
+:::
+
+## Delta method
+
+::: {.incremental}
+
+- Pull out and "square" the constant. We get an expression in terms of the original variance-covariance matrix
+
+  $$\text{Var}\big(g(\hat{\theta})\big) \approx \big[\nabla g(\theta_0)^{\prime}\big]\text{Var}(\hat{\theta})\big[\nabla g(\theta_0)\big]$$
+
+- And so our asymptotic approximation is
+
+  $$\sqrt{n}\big(g(\hat{\theta}) - g(\theta_0)\big) \overset{d}{\to} \text{Normal}\bigg(0, \ \big[\nabla g(\theta_0)^{\prime}\big]\mathcal{I}(\theta_0)^{-1}\big[\nabla g(\theta_0)\big]\bigg)$$
+
+- We can use a plug-in estimator at the MLE: evaluate the gradient at $\hat{\theta}$ and use our existing estimator $\widehat{\text{Var}}(\hat{\theta})$.
+
+:::
+
+## How optimizers work
+
+## Finding the maximum
+
+::: {.incremental}
+
+- How does `maxLik()` actually find a solution?
+- Our estimator is defined as
+
+  $$\hat{\theta} = \argmax_{\theta \in \Theta} \ \ell_n(\theta)$$
+
+- For well-behaved problems the log-likelihood is **concave**, so finding the maximum amounts to finding the unique *solution* to $S_n(\theta) = 0$.
+- Closed form solutions are rare (the Normal linear model is a special case).
+  - Generally, we'll use an *iterative* algorithm to find this solution.
+
+:::
+
+## Newton-Raphson
+
+::: {.incremental}
+
+- We start at some initial guess $\hat{\theta}^{(0)}$
+- Let $\hat{\theta}^{(t)}$ denote the "current" value and $\hat{\theta}^{(t+1)}$ our update -- we keep iterating until convergence.
+- Our goal is to solve for a zero of $S_n(\theta)$. Take a first-order Taylor approximation around our current guess
+
+  $$S_n(\theta) \approx S_n(\hat{\theta}^{(t)}) + \nabla S_n(\hat{\theta}^{(t)}) \left(\theta - \hat{\theta}^{(t)}\right)$$
+
+- What's $\nabla S_n(\hat{\theta}^{(t)})$?
+  - It's the Jacobian of the gradient... or the matrix of second-order partial derivatives of the log-likelihood... or the **Hessian** $H_n(\hat{\theta}^{(t)})$!
+
+:::
+
+## Newton-Raphson
+
+::: {.incremental}
+
+- Our next value of $\hat{\theta}$ is the value that sets this approximation to zero
+
+  $$0 =  S_n(\hat{\theta}^{(t)}) + H_n(\hat{\theta}^{(t)}) \left(\hat{\theta}^{(t+1)} - \hat{\theta}^{(t)}\right)$$
+
+- Multiply through by the inverse Hessian and rearrange
+
+  $$\hat{\theta}^{(t+1)} =  \hat{\theta}^{(t)} - H_n^{-1}(\hat{\theta}^{(t)}) S_n(\hat{\theta}^{(t)})$$
+
+- Recall that the **negative** Hessian at $\hat\theta$ is the **observed Fisher information** $\mathcal{J}_n(\hat\theta) = -H_n(\hat\theta)$
+  - So the update is the score scaled by the inverse negative hessian.
+- An alternative algorithm, **Fisher scoring**, substitutes the *expected* Fisher information $\mathcal{I}_n$ for the observed one.
+  - Identical for GLMs with the canonical link -- we'll see why later.
+
+:::
+
+## Gradient ascent
+
+::: {.incremental}
+
+- Compare the Newton-Raphson update to the classic "gradient descent/gradient ascent" algorithm
+
+  $$\hat{\theta}^{(t+1)} =  \hat{\theta}^{(t)} + \gamma_t S_n(\hat{\theta}^{(t)})$$
+
+- Gradient ascent chooses some sequence of $\gamma_t$ (the "learning rate" or "step size") at iteration $t$
+  - The gradient tells us **which direction** to move in and $\gamma_t$ tells us **how far** to move.
+- Contrast with Newton-Raphson, where "how far to move" comes from computing and inverting the Hessian
+  - More information per step, but each step is computationally expensive (inverting a matrix is computationally hard)
+- **Trade-off**: Newton-Raphson converges quickly but each step is costly; gradient ascent steps are cheap but need more of them.
+  - Also typically need to **tune** the learning rate $\gamma_t$ - too large and we **overshoot** the true optimum
+
+:::
+
+
+## Illustration
+
+::: {.incremental}
+
+- Let's illustrate with a simple one-parameter likelihood.
+
+  $$y_i \underset{\text{i.i.d}}{\sim} \text{Bernoulli}(\pi), \qquad \pi = \frac{1}{1 + \exp(-\theta)}$$
+
+  - One parameter $\theta$, the log-odds of success.
+- The **average** log-likelihood, its score, and its Hessian all have closed forms
+
+  $$\bar{\ell}_n(\theta) = \bar{y}\,\theta - \log\big(1 + e^{\theta}\big), \qquad \bar{S}_n(\theta) = \bar{y} - \pi, \qquad \bar{H}_n(\theta) = -\pi(1-\pi)$$
+
+- The Newton-Raphson step can be written in closed form
+
+  $$\hat{\theta}^{(t+1)} = \hat{\theta}^{(t)} + \frac{\bar{y} - \pi^{(t)}}{\pi^{(t)}\big(1 - \pi^{(t)}\big)}$$
+
+- And the true MLE is also known in closed form: $\hat{\theta} = \log\frac{\bar{y}}{1-\bar{y}}$ 
+
+:::
+
+## Coding the two algorithms
+
+- Simulate some data and write down the three components
+
+```{r, echo=T}
+set.seed(60637)
+n <- 100
+y <- rbinom(n, 1, 1/(1 + exp(-0.8)))   # true theta = 0.8
+ybar <- mean(y)
+
+loglik <- function(th) ybar*th - log(1 + exp(th))      # average log-likelihood
+score  <- function(th) ybar - 1/(1 + exp(-th))         # average score
+hess   <- function(th){ p <- 1/(1 + exp(-th)); -p*(1-p) }  # average Hessian
+
+theta_hat <- log(ybar/(1 - ybar))                      # the analytic MLE
+theta_hat
+```
+
+## Coding the two algorithms
+
+```{r, echo=T}
+newton <- function(th, iter){                 # step = score / curvature
+  path <- th
+  for (t in 1:iter){ th <- th - score(th)/hess(th); path <- c(path, th) }
+  path
+}
+grad_ascent <- function(th, gamma, iter){     # step = score * fixed learning rate
+  path <- th
+  for (t in 1:iter){ th <- th + gamma*score(th); path <- c(path, th) }
+  path
+}
+```
+
+## Coding the two algorithms
+
+- Start both at $\hat{\theta}^{(0)} = -1$
+
+```{r, echo=T}
+nr_path <- newton(-1, iter = 4)
+ga_path <- grad_ascent(-1, gamma = 1, iter = 12)
+round(nr_path, 6)
+```
+
+```{r, echo=T}
+round(ga_path, 6)
+```
+
+- Newton-Raphson is at the MLE (`r round(theta_hat,4)`) by the **fourth** iteration.
+- Gradient ascent has taken twelve steps and still isn't there.
+
+## Newton-Raphson
+
+```{r, echo=F, fig.width=8.5, fig.height=3.4, fig.align="center"}
+grid <- seq(-2.2, 3.2, length.out = 400)
+mk <- function(i){
+  t0 <- nr_path[i]; t1 <- nr_path[i+1]
+  lab <- sprintf("Step %d:  %.2f  to  %.2f", i, t0, t1)
+  list(curve = data.frame(panel=lab, th=grid, ll=loglik(grid)),
+       quad  = data.frame(panel=lab, th=grid,
+                          q = loglik(t0) + score(t0)*(grid-t0) + 0.5*hess(t0)*(grid-t0)^2),
+       cur   = data.frame(panel=lab, th=t0, ll=loglik(t0)),
+       apex  = data.frame(panel=lab, th=t1,
+                          q = loglik(t0) + score(t0)*(t1-t0) + 0.5*hess(t0)*(t1-t0)^2,
+                          ll = loglik(t1)))
+}
+L <- lapply(1:2, mk)
+curve_df <- bind_rows(lapply(L,`[[`,"curve")); quad_df <- bind_rows(lapply(L,`[[`,"quad"))
+cur_df <- bind_rows(lapply(L,`[[`,"cur"));     apex_df <- bind_rows(lapply(L,`[[`,"apex"))
+ggplot() +
+  geom_line(data=curve_df, aes(th, ll), linewidth=1) +
+  geom_line(data=quad_df, aes(th, q), col="dodgerblue", lty=2, linewidth=.8) +
+  geom_point(data=cur_df, aes(th, ll), size=3, col="indianred") +
+  geom_point(data=apex_df, aes(th, q), size=3, col="dodgerblue", shape=17) +
+  geom_segment(data=apex_df, aes(x=th, xend=th, y=q, yend=ll),
+               col="dodgerblue", lty=3, linewidth=.6) +
+  geom_point(data=apex_df, aes(th, ll), size=3, col="dodgerblue") +
+  geom_vline(xintercept=theta_hat, lty=3, col="grey30") +
+  facet_wrap(~panel) + coord_cartesian(ylim=c(-1.65, -0.45)) +
+  theme_bw() + xlab(expression(theta)) + ylab("Average log-likelihood")
+```
+
+## Gradient ascent
+
+```{r, echo=F, fig.width=8.5, fig.height=3.3, fig.align="center"}
+curve_all <- data.frame(th=seq(-2.2,3.2,length.out=400)) %>% mutate(ll=loglik(th))
+paths <- bind_rows(
+  data.frame(alg="Newton-Raphson",  iter=0:4,  th=nr_path),
+  data.frame(alg="Gradient ascent", iter=0:12, th=ga_path)) %>% mutate(ll=loglik(th))
+paths$alg <- factor(paths$alg, levels=c("Newton-Raphson","Gradient ascent"))
+ggplot() +
+  geom_line(data=curve_all, aes(th, ll), linewidth=.9, col="grey40") +
+  geom_path(data=paths, aes(th, ll, col=alg), linewidth=.5, alpha=.6) +
+  geom_point(data=paths, aes(th, ll, col=alg), size=2.3) +
+  geom_vline(xintercept=theta_hat, lty=3) +
+  facet_wrap(~alg) +
+  scale_color_manual(values=c("Newton-Raphson"="dodgerblue","Gradient ascent"="indianred"), guide="none") +
+  coord_cartesian(ylim=c(loglik(-1)-.02, loglik(theta_hat)+.02)) +
+  theme_bw() + xlab(expression(theta)) + ylab("Average log-likelihood")
+```
+
+## Intro to GLMs
+
+## Motivation: Propensity Scores
+
+::: {.incremental}
+
+- Researchers wanting to estimate causal effects from observational designs often use a *weighting* estimator to account for non-random treatment assignment.
+  - Observe treatment $D_i$, confounders $X_i$, outcome $Y_i$
+  - Need to estimate the **propensity score** $\pi_i = \Pr(D_i = 1 | X_i)$ to construct "inverse propensity of treatment weights"
+- **Key problem**: with many continuous covariates, it's hard to estimate $\Pr(D_i = 1 | X_i)$ non-parametrically
+  - One solution: assume a parametric *model* for $D_i$.
+- Propensity scores are **predictions** from the model.
+
+:::
+
+## The LaLonde dataset
+
+::: {.incremental}
+
+- @lalonde1986evaluating asked: can selection-on-observables designs recover the answer from a randomized experiment?
+  - The **National Supported Work Demonstration (NSW)** randomly assigned disadvantaged workers to a job training program.
+  - Outcome: real earnings in 1978 (`re78`).
+  - Because assignment was random, the experiment gives a **credible benchmark**: roughly **\$1,794** for the subsample we'll use [@dehejia1999causal].
+- LaLonde **created** an observational dataset by replacing the experimental controls with a survey comparison group drawn from the **Panel Study of Income Dynamics** (PSID).
+  - Now treatment is *not* randomly assigned -- the comparison group is much older, better educated, and far richer at baseline.
+  - If our adjustment methods work, they should recover something near \$1,794 anyway.
+- @lalonde1986evaluating found typical OLS regression worked poorly 
+  - @dehejia1999causal tackle this with **propensity score** methods (specifically *matching*, but we'll do weighting).
+
+:::
+
+## The LaLonde dataset
+
+- The dataset is in a lot of R packages, such as `causalsens`
+
+```{r, warning=F, message=F, echo=T}
+library(causalsens)
+data(lalonde.psid)
+lalonde <- lalonde.psid   # shorter name for the slides
+glimpse(lalonde)
+```
+
+- $n = 2{,}675$: **185** NSW treated units and **2,490** PSID comparison units.
+
+## The experimental benchmark
+
+- The **experimental** controls are not in that dataset -- LaLonde replaced them. But they ship alongside it.
+
+```{r, warning=F, message=F, echo=T}
+data(lalonde.exp)   # 185 treated + 260 *randomized* controls
+lalonde.exp %>% group_by(treat) %>%
+  summarize(n = n(), age = mean(age), education = mean(education),
+            married = mean(married), re74 = mean(re74))
+```
+
+- Randomization did its job -- the two arms look alike on every pre-treatment covariate.
+
+```{r, echo=T}
+exp_att <- lm_robust(re78 ~ treat, data = lalonde.exp, se_type = "HC2")
+coef(summary(exp_att))["treat",]
+```
+
+- Training raised 1978 earnings by about **\$1,794**. That is the number our adjustment methods have to recover.
+  - The 185 treated units are the *same people* in both datasets; only the comparison group changes.
+  - Note the benchmark is **itself an estimate**, with a 95% CI of roughly $[\$476,\ \$3{,}113]$.
+
+## The naive comparison
+
+- What happens if we just compare treated and control earnings directly?
+
+```{r, echo=T}
+lalonde %>% group_by(treat) %>% 
+  summarize(n = n(), mean_re78 = mean(re78), mean_re74 = mean(re74), 
+            mean_age = mean(age), mean_married = mean(married))
+```
+
+- Complete ignorability is implausible -- the PSID men are nine years older, nearly two years better educated, four times as likely to be married, and earned nine times as much in 1974.
+
+## The naive comparison
+
+- Regressing 1978 earnings on treatment alone:
+
+```{r, echo=T}
+naive_fit <- lm_robust(re78 ~ treat, data=lalonde, se_type="HC2")
+summary(naive_fit)
+```
+
+- The training program appears to **lower** earnings by about \$15,205.
+
+## Generalized Linear Models
+
+::: {.incremental}
+
+- Generalized linear models (GLMs) [@nelder1972glm] have three components:
+  1) A parametric distribution for $Y_i|X_i$ ("stochastic component")
+  2) A linear predictor: $\eta_i = X_i^{\prime}\beta = \beta_0 + \beta_1X_{i1} + \beta_2X_{i2} + \dotsc + \beta_kX_{ik}$ ("systematic component")
+  3) A link function $g()$ applied to the CEF $\mathbb{E}[Y_i|X_i]$ that yields the linear predictor
+
+      $$g\big(\mathbb{E}[Y_i | X_i]\big) = \eta_i$$
+
+- Alternatively, we can write the CEF in terms of the "inverse link" $g^{-1}()$ applied to the linear predictor
+
+      $$\mathbb{E}[Y_i | X_i] = g^{-1}(\eta_i)$$
+
+:::
+
+## Exponential Family
+
+::: {.incremental}
+
+- The types of probability distributions permitted for $Y_i$ are quite general: the **exponential family**
+  - This contains the Normal as well as many other common distributions -- the Bernoulli, Poisson, exponential, gamma, and more.
+- Exponential family distributions have density functions of the form
+
+  $$f(Y|\theta) = h(Y) \exp\bigg\{b(\theta) \cdot T(Y) - A(\theta)\bigg\}$$
+
+- $h(Y)$, $b(\theta)$, $T(Y)$ and $A(\theta)$ are known functions
+  - $T(Y)$ is the **sufficient statistic**, $b(\theta)$ the **canonical (natural) parameter**, $A(\theta)$ the **log-normalizer**.
+- **The key intuition**: exponential family distributions factorize in a convenient way
+  - The parameter and the data interact only through the product $b(\theta) \cdot T(Y)$.
+  - If $b(\theta) = \theta$, the distribution is in "canonical" form.
+
+:::
+
+## Example: Bernoulli
+
+::: {.incremental}
+
+- Consider the Bernoulli PMF
+
+  $$f(Y_i|\pi_i) = \pi_i^{Y_i}(1-\pi_i)^{1-Y_i}$$
+
+- Take the log, then the exponent
+
+  $$f(Y_i|\pi_i) = \exp\bigg\{\log\bigg[\pi_i^{Y_i}(1-\pi_i)^{1-Y_i}\bigg]\bigg\}$$
+
+- Properties of logs
+
+  $$f(Y_i|\pi_i) = \exp\bigg\{Y_i\log(\pi_i) + (1-Y_i)\log(1-\pi_i)\bigg\}$$
+
+:::
+
+## Example: Bernoulli
+
+::: {.incremental}
+
+- Rearranging and using properties of logs again
+
+  $$f(Y_i|\pi_i) = \exp\bigg\{Y_i\log\bigg(\frac{\pi_i}{1-\pi_i}\bigg) + \log(1-\pi_i)\bigg\}$$
+
+- So our exponential form is
+  - $h(Y) = 1$
+  - $T(Y) = Y_i$
+  - $b(\pi_i) = \log\bigg(\frac{\pi_i}{1-\pi_i}\bigg)$
+  - $A(\pi_i) = -\log(1-\pi_i)$
+    - remember the exponential form carries a **minus** sign in front of $A$
+- Critically, this is where we get a good link function
+  - The **canonical parameter** is $\log\bigg(\frac{\pi}{1-\pi}\bigg)$ -- the log-odds.
+  - The **canonical link** is the function that equates this parameter with the linear predictor: $\log\bigg(\frac{\pi_i}{1-\pi_i}\bigg) = X_i^{\prime}\beta$
+
+:::
+
+## Binary outcome models
+
+## Logistic regression
+
+::: {.incremental}
+
+- The "logit" or "logistic" GLM models the **log-odds** of a binary outcome as a function of the linear predictor $X_i^{\prime}\beta$
+
+  $$Y_i \underset{\text{i.i.d}}{\sim} \text{Bernoulli}(\pi_i)$$
+
+  $$\mathbb{E}[Y_i | X_i] = \Pr(Y_i = 1 | X_i) = \pi_i$$
+
+  $$\log\bigg(\frac{\pi_i}{1-\pi_i}\bigg) = X_i^{\prime}\beta$$
+
+- Alternatively, this is written in terms of the "inverse link" function (the logistic function) relating $\pi_i$ to $g^{-1}(X_i^{\prime}\beta)$
+
+  $$\pi_i = \frac{\exp(X_i^{\prime}\beta)}{1 + \exp(X_i^{\prime}\beta)} = \frac{1}{1 + \exp(-X_i^{\prime}\beta)}$$
+
+:::
+
+## Inverse-link functions
+
+- The logistic function maps inputs on $\mathbb{R}$ to $(0, 1)$
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+logistic <- function(x) 1/(1 + exp(-x))
+logistic_curve <- ggplot() + xlim(-5, 5) + ylim(0,1) + geom_function(fun=logistic) + theme_bw() + ylab(expression(pi)) + xlab(expression(paste("X",minute,beta))) + geom_vline(xintercept=0, lty=2) + ggtitle("Logistic function")
+logistic_curve
+```
+
+## Inverse-link functions
+
+- Another link is the "probit", whose inverse link is the Normal CDF $\Phi()$
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+normal_cdf <- ggplot() + xlim(-5, 5) + ylim(0,1) + geom_function(fun=pnorm) + theme_bw() + ylab(expression(pi)) + xlab(expression(paste("X",minute,beta))) + geom_vline(xintercept=0, lty=2) + ggtitle("Normal CDF")
+normal_cdf
+```
+
+## Inverse-link functions
+
+- When do we use probit vs. logit?
+  - Computational convenience -- the logit is the canonical link, so it's better behaved.
+  - Probit has some good properties for Bayesian inference (we'll come back to this).
+- Can you tell the difference?
+
+```{r, echo=F, fig.width=6, fig.height = 3.5, fig.align="center"}
+normal_logit <- ggplot() + xlim(-5, 5) + ylim(0,1) + geom_function(fun=pnorm, col="dodgerblue") + geom_function(fun=logistic, lty=2, col="indianred") + theme_bw() + ylab(expression(pi)) + xlab(expression(paste("X",minute,beta))) + geom_vline(xintercept=0, lty=2) + ggtitle("Logistic (red, dashed) vs. Normal CDF (blue)")
+normal_logit
+```
+
+## Deriving the logit likelihood
+
+::: {.incremental}
+
+- Start from the Bernoulli log-likelihood
+
+  $$\ell_n(\beta) = \sum_{i=1}^n Y_i\log(\pi_i) + (1-Y_i)\log(1 - \pi_i)$$
+
+- Collecting the $Y_i$ terms gives us the log-odds, which is just $X_i^{\prime}\beta$
+
+  $$\ell_n(\beta) = \sum_{i=1}^n Y_i \log\bigg(\frac{\pi_i}{1-\pi_i}\bigg) + \log(1 - \pi_i)$$
+
+- And from the inverse link,
+
+  $$1 - \pi_i = 1 -  \frac{1}{1 + \exp(-X_i^{\prime}\beta)} = \frac{\exp(-X_i^{\prime}\beta)}{1 + \exp(-X_i^{\prime}\beta)} = \frac{1}{1 + \exp(X_i^{\prime}\beta)}$$
+
+- Substituting in
+
+  $$\ell_n(\beta) = \sum_{i=1}^n \bigg[Y_i X_i^{\prime}\beta - \log\bigg(1 + \exp(X_i^{\prime}\beta)\bigg)\bigg]$$
+
+:::
+
+## Example: Estimating the propensity score
+
+- We want to predict assignment to training, `treat`, from the pre-treatment covariates
+  - `age` - Age in years
+  - `education` - Years of schooling
+  - `black`, `hispanic` - Race/ethnicity indicators
+  - `married` - Married; binary indicator
+  - `nodegree` - No high school degree; binary indicator
+  - `re74` - Real earnings in 1974 (pre-treatment)
+  - `re75` - Real earnings in 1975 (pre-treatment)
+
+## Example: Estimating the propensity score
+
+- Make the design matrix $\mathbf{X}$
+
+```{r, warning=F, message=F, echo=T}
+X_mat <- model.matrix(treat ~ age + education + black + hispanic + married + nodegree + re74 + re75, data=lalonde)
+head(X_mat) # View the top of the matrix
+```
+
+- How many observations?
+
+```{r, echo=T}
+n_obs <- nrow(X_mat)
+n_obs
+```
+
+## Example: Estimating the propensity score
+
+- Put the log-likelihood into code (this returns a vector of the log-likelihood for each observation)
+
+```{r, warning = F, message = F}
+logit_loglik <- function(beta, Y, X){
+  eta <- X%*%beta # linear predictor
+  lik <- Y*eta - log(1+exp(eta))
+  return(lik)
+}
+```
+
+- We derived the score analytically, so let's supply it too -- one row per observation
+
+```{r, warning = F, message = F}
+logit_grad <- function(beta, Y, X){
+  eta <- X%*%beta
+  pi_hat <- 1/(1 + exp(-eta))
+  X * as.vector(Y - pi_hat)  
+}
+```
+
+## Example: Estimating the propensity score
+
+- Now let's optimize it to get the MLE
+
+```{r, warning=F, message=F}
+library(maxLik)
+
+logit_mle <- maxLik(logit_loglik, 
+                      grad = logit_grad,
+                      Y=lalonde$treat,
+                      X=X_mat,
+                      start = rep(0, ncol(X_mat)),
+                      method = "NR")
+```
+
+- What did we get?
+
+```{r, echo=T}
+est <- coef(logit_mle) # Our optimization routine
+names(est) <- colnames(X_mat)
+est
+```
+
+## Example: Estimating the propensity score
+
+- Compare to the built-in R routine
+
+```{r, echo=T}
+logit_Rglm <- glm(treat ~ age + education + black + hispanic + married + nodegree + re74 + re75, 
+                  data=lalonde, family=binomial(link="logit"))
+coef(logit_Rglm)
+```
+
+- Let's obtain our (asymptotic) variance-covariance matrix -- the inverse of the observed information
+
+```{r, echo=T}
+logit_vcov <- solve(-maxLik::hessian(logit_mle))
+```
+
+- Square root of the diagonal gives our SEs
+
+```{r, echo=T}
+logit_SEs <- sqrt(diag(logit_vcov))
+```
+
+## Example: Estimating the propensity score
+
+- Let's get our test statistics and p-values, using the usual asymptotic normal approximation
+
+```{r, echo=T}
+results <- rbind(coef(logit_mle), logit_SEs, 
+                     coef(logit_mle)/logit_SEs, 
+                     2*pnorm(-abs(coef(logit_mle)/logit_SEs)))
+colnames(results) <- colnames(X_mat)
+rownames(results) <- c("Estimate", "Std. Error", "Test statistic", "p-value")
+round(results, 4)
+```
+
+## Interpreting logit coefficients
+
+::: {.incremental}
+
+- How do we interpret the $\beta$ parameters substantively?
+
+  $$\log\bigg(\frac{\pi_i}{1-\pi_i}\bigg) = \beta_0 + \beta_1X_{i1} + \beta_2X_{i2} + \dotsc + \beta_k X_{ik}$$
+
+- Take the partial derivative w.r.t. $X_{ik}$
+
+  $$\frac{\partial}{\partial X_{ik}} \log\bigg(\frac{\pi_i}{1-\pi_i}\bigg) =  \beta_k$$
+
+- So $\beta_k$ captures the change in the log-odds for a one-unit change in $X_{k}$
+  - Descriptively, it's the difference in log-odds between two observations that differ in $X_{k}$ by one unit.
+  - Exponentiating, $\exp(\beta_k)$ is an **odds ratio**. This is *not* a risk ratio, and it is not a difference in probabilities.
+
+:::
+
+## Interpreting logit coefficients
+
+::: {.incremental}
+
+- On the "log-odds" scale, the change due to an increase in $X_{k}$ does not depend on the values of the other $X$ variables (unless we explicitly specify an interaction).
+  - But thinking on the log-odds scale is hard! We think in terms of probabilities.
+  - This additivity *does not hold* when we take $\frac{\partial}{\partial X_{i1}} \pi_i$
+- Working through the chain rule,
+
+  $$\frac{\partial \pi_i}{\partial X_{ik}} = \beta_k \, \pi_i(1 - \pi_i)$$
+
+  - The effect on the probability scale depends on $\pi_i$, and therefore on **every** covariate.
+- Logit models *implicitly* encode interactions with respect to the CEF $\mathbb{E}[Y_i | X_i]$.
+
+:::
+
+## Interpreting logit coefficients
+
+- **Remember**: A one-unit change in the linear predictor corresponds to *different* changes in probability depending on your baseline.
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+#| layout-ncol: 2
+
+logistic <- function(x) 1/(1 + exp(-x))
+draw_points <- data.frame(x1 = c(0, 1), x2 = c(0, 1), y1 = c(0,0), y2 = logistic(c(0,1)))
+draw_points2 <- data.frame(x1 = c(-5, -5), x2 = c(0, 1), y1 = logistic(c(0,1)), y2 = logistic(c(0,1)))
+logistic_marginal <- ggplot() + xlim(-5, 5) + ylim(0,1) + geom_function(fun=logistic) + theme_bw() + ylab(expression(pi)) + 
+  xlab(expression(paste("X",minute,beta))) + geom_vline(xintercept=0, lty=2) + ggtitle("Marginal Effect at 0") +
+  geom_segment(aes(x=x1, y=y1, xend=x2, yend=y2), data=draw_points, col="dodgerblue", lwd=2) +
+  geom_segment(aes(x=x1, y=y1, xend=x2, yend=y2), data=draw_points2, col="indianred", lwd=2) 
+  
+logistic_marginal
+
+draw_points_2 <- data.frame(x1 = c(2, 3), x2 = c(2, 3), y1 = c(0,0), y2 = logistic(c(2,3)))
+draw_points_22 <- data.frame(x1 = c(-5, -5), x2 = c(2, 3), y1 = logistic(c(2,3)), y2 = logistic(c(2,3)))
+logistic_marginal_2 <- ggplot() + xlim(-5, 5) + ylim(0,1) + geom_function(fun=logistic) + theme_bw() + ylab(expression(pi)) + 
+  xlab(expression(paste("X",minute,beta))) + geom_vline(xintercept=0, lty=2) + ggtitle("Marginal Effect at 2") +
+  geom_segment(aes(x=x1, y=y1, xend=x2, yend=y2), data=draw_points_2, col="dodgerblue", lwd=2) +
+  geom_segment(aes(x=x1, y=y1, xend=x2, yend=y2), data=draw_points_22, col="indianred", lwd=2) 
+  
+logistic_marginal_2
+```
+
+## Inference on transformations
+
+## Transformed quantities
+
+::: {.incremental}
+
+- We have $\hat{\beta}$, but we actually want the **propensity score** $\hat{\pi}_i = \Pr(D_i = 1 | X_i)$
+  - Just apply the inverse link to get the quantity we want
+
+  $$\hat{\pi}_i = \frac{1}{1 + \exp(-X_i^{\prime}\hat{\beta})}$$
+
+- By **invariance**, this is the MLE of $\pi_i$, and it's consistent for the true propensity score (under our modeling assumptions).
+- But if we want a confidence interval for $\hat{\pi}_i$, we use the **delta method**.
+
+:::
+
+## Example: a predicted propensity
+
+- Let's get the propensity of receiving training for a **typical NSW participant** -- the median covariate profile among the treated
+
+```{r}
+X_medians <- apply(X_mat[lalonde$treat == 1, ], 2, median)
+X_medians
+```
+
+- Construct our prediction function
+
+```{r}
+pred_prob <- function(beta, X){
+  return(1/(1 + exp(-X%*%beta)))
+}
+pred_median <- pred_prob(coef(logit_mle), X_medians)
+pred_median
+```
+
+## Example: a predicted propensity
+
+- Let's do the gradient numerically (we could calculate it analytically though!)
+
+```{r}
+pred_prob_gradient <- numericGradient(pred_prob, 
+                                      t0 = coef(logit_mle),
+                                      X = X_medians)
+```
+
+- Applying the delta method
+
+```{r}
+pred_prob_var <- pred_prob_gradient%*%logit_vcov%*%t(pred_prob_gradient) # R treats vectors as row-vectors not column vectors
+```
+
+- Making our 95% asymptotic CI for $\hat{\pi}(X)$
+
+```{r}
+c(pred_median - abs(qnorm(.025))*sqrt(pred_prob_var),
+  pred_median + abs(qnorm(.025))*sqrt(pred_prob_var))
+```
+
+## `marginaleffects`
+
+- The `marginaleffects` R package provides a straightforward implementation of the delta method for a lot of transformed quantities
+  - (e.g.) the marginal change in the **probability of** $D_i=1$ for a one-unit change in $X$
+- `avg_predictions()` will calculate point estimates + CIs for the expected outcome just like we did above.
+- `avg_comparisons()` will do the implied "marginal effects" for a unit change in $X$ given a set baseline.
+
+```{r, echo=T}
+marginaleffects::avg_predictions(logit_Rglm, newdata = "median")
+```
+
+```{r, echo=T}
+marginaleffects::avg_comparisons(logit_Rglm, variables = "married", newdata = "median")
+```
+
+
+## Inverse propensity of treatment weighting
+
+::: {.incremental}
+
+- Now we have $\hat{\pi}_i$ for every unit.
+- The control group is unrepresentative of the treated group.
+  - So we **reweight** it. Upweight controls who look like treated units; downweight the ones who don't.
+- Under **conditional ignorability** ($\{Y_i(1), Y_i(0)\} \perp D_i \mid X_i$) and **positivity** ($0 < \pi_i < 1$), the IPTW estimator identifies a causal contrast [@rosenbaum1983central].
+- For the **average treatment effect on the treated** (ATT), the weights are
+
+  $$w_i = D_i + (1 - D_i)\frac{\hat{\pi}_i}{1 - \hat{\pi}_i}$$
+
+  - Treated units get weight 1 -- we keep the treated sample as-is and re-weight controls to match.
+  - Controls get the **odds** of treatment: a control who looked very likely to be treated counts for more.
+
+:::
+
+## Inverse propensity of treatment weighting
+
+::: {.incremental}
+
+- The ATT estimator is then a difference of weighted means
+
+  $$\widehat{\text{ATT}} = \frac{1}{n_1}\sum_{i: D_i = 1} Y_i \ - \ \frac{\sum_{i: D_i = 0} w_i Y_i}{\sum_{i: D_i = 0} w_i}$$
+
+- Dividing by the **sum of weights** rather than $n_0$ gives the *Hájek* (stabilized) estimator
+- For the **ATE** instead, we would weight *every* unit by the inverse probability of the treatment it actually received
+
+  $$w_i^{\text{ATE}} = \frac{D_i}{\hat{\pi}_i} + \frac{1 - D_i}{1 - \hat{\pi}_i}$$
+
+- We'll target the ATT, since that's what the experimental benchmark of \$1,794 estimates.
+
+:::
+
+## Checking overlap first
+
+- Before weighting anything, look at the estimated propensity scores by treatment status
+
+```{r, echo=T}
+lalonde$pscore <- as.vector(pred_prob(coef(logit_mle), X_mat))
+```
+
+```{r, echo=F, fig.width=7.5, fig.height=3.6, fig.align="center"}
+lalonde %>% mutate(grp = factor(ifelse(treat==1, "Treated (NSW), n = 185", "Control (PSID), n = 2,490"),
+                                levels=c("Treated (NSW), n = 185", "Control (PSID), n = 2,490"))) %>%
+  ggplot(aes(x=pscore, fill=grp)) +
+  geom_histogram(bins=50) +
+  facet_wrap(~grp, ncol=1, scales="free_y") +   # free y: the control spike would hide the treated
+  scale_fill_manual(values=c("Treated (NSW), n = 185"="dodgerblue",
+                             "Control (PSID), n = 2,490"="indianred"), guide="none") +
+  theme_bw() + xlab("Estimated propensity score") + ylab("Count")
+```
+
+- A large mass of PSID controls has $\hat\pi \approx 0$, not close to the treated group.
+
+## Checking overlap first
+
+::: {.incremental}
+
+- Effectively, weighting **discards** most of the PSID sample.
+
+```{r, echo=T}
+lalonde$w_att <- with(lalonde, ifelse(treat == 1, 1, pscore/(1 - pscore)))
+c(max_control_weight = max(lalonde$w_att[lalonde$treat==0]),
+  sum_control_weights = sum(lalonde$w_att[lalonde$treat==0]))
+```
+
+:::
+
+## Did the weights fix the imbalance?
+
+- The point of the weights is **balance**. After weighting, the covariate distributions should look alike.
+- The standard diagnostic is the **standardized mean difference**
+
+  $$\text{SMD}_k = \frac{\bar{X}_{k,\text{treated}} - \bar{X}_{k,\text{control}}^{\,w}}{s_{k,\text{treated}}}$$
+
+  - Scaling by the treated-group SD puts every covariate on a common, unit-free scale.
+  - Common heuristic for observational studies (from biostats/epi): $|\text{SMD}| < 0.1$ is "balanced."
+- The `cobalt` package does this.
+
+## Did the weights fix the imbalance?
+
+```{r, echo=T, message=F, warning=F}
+library(cobalt)
+bt <- bal.tab(treat ~ age + education + black + hispanic + married + nodegree + re74 + re75,
+              data = lalonde, weights = lalonde$w_att,
+              method = "weighting", estimand = "ATT",
+              un = TRUE, binary = "std", thresholds = c(m = .1))
+bt$Balance
+```
+
+## Did the weights fix the imbalance?
+
+- And the **effective sample sizes**:
+
+```{r, echo=T}
+bt$Observations
+```
+
+::: {.incremental}
+
+- The unweighted imbalances are enormous -- `re74` starts at $-3.5$ standard deviations, `married` at $-1.7$.
+  - After weighting nearly everything is inside or roughly at the $0.1$ band.
+- **Note the effective sample size**: the 2,490 controls are worth about **43** after weighting.
+  - This is what our histogram shows - weighting puts a large amount of weight on a small number of units.
+  - Low effective sample size = higher variance estimator.
+- Don't forget that we by definition can't check balance on things we **didn't** control for.
+  - Balance on the covariates we *included* says nothing about the confounders we omitted.
+
+:::
+
+## The Love plot
+
+- Common to present this in a **Love plot**
+
+```{r, echo=T, message=F, warning=F, fig.width=8, fig.height=3.6, fig.align="center"}
+love.plot(treat ~ age + education + black + hispanic + married + nodegree + re74 + re75,
+          data = lalonde, weights = lalonde$w_att,
+          method = "weighting", estimand = "ATT",
+          binary = "std", thresholds = c(m = .1),
+          var.names = c(age = "Age", education = "Years of education", married = "Married",
+                        nodegree = "No HS degree", re74 = "Earnings 1974",
+                        re75 = "Earnings 1975", black = "Black", hispanic = "Hispanic"),
+          sample.names = c(Unadjusted = "Unweighted", Adjusted = "IPTW (ATT)"),
+          colors = c("indianred", "dodgerblue"), shapes = c("circle", "triangle"),
+          title = "Covariate balance before and after weighting")
+```
+
+- Red circles are the unweighted sample, blue triangles the weighted one. Dashed lines mark $\pm 0.1$.
+
+## The IPTW estimate
+
+- Now compute the weighted difference in means
+
+```{r, echo=T}
+att_hajek <- with(lalonde,
+  mean(re78[treat == 1]) - weighted.mean(re78[treat == 0], w_att[treat == 0]))
+att_hajek
+```
+
+## The IPTW estimate
+
+- Equivalently, as a weighted least squares regression
+
+```{r, echo=T}
+summary(lm_robust(re78 ~ treat, data = lalonde, weights = w_att, se_type = "HC2"))
+```
+
+## The IPTW estimate
+
+- Compare to the alternatives:
+
+```{r, echo=F}
+naive_est <- with(lalonde, mean(re78[treat==1]) - mean(re78[treat==0]))
+reg_fit <- lm_robust(re78 ~ treat + age + education + black + hispanic + married + nodegree + re74 + re75,
+                     data=lalonde, se_type="HC2")
+reg_est <- coef(reg_fit)["treat"]
+data.frame(estimator = c("Naive difference", "Regression adjustment", "IPTW (ATT)", "Experimental benchmark"),
+           estimate  = c(naive_est, as.numeric(reg_est), att_hajek, coef(exp_att)["treat"]))
+```
+
+## Estimating the standard errors
+
+::: {.incremental}
+
+- For the standard errors, we want to account for estimation uncertainty in the propensity scores.
+- Two options:
+  - **Bootstrap** the whole procedure -- refit the logit *inside* each bootstrap iteration.
+  - Stack the score functions of both stages and apply the **sandwich estimator**
+- We'll implement the bootstrap
+
+```{r, echo=T}
+att_fn <- function(dd){
+  Xb <- model.matrix(treat ~ age + education + black + hispanic + married + nodegree + re74 + re75, data=dd)
+  fit <- suppressWarnings(glm.fit(Xb, dd$treat, family = binomial()))
+  ps <- as.vector(1/(1 + exp(-Xb %*% fit$coefficients)))
+  w  <- ifelse(dd$treat == 1, 1, ps/(1 - ps))
+  mean(dd$re78[dd$treat == 1]) - weighted.mean(dd$re78[dd$treat == 0], w[dd$treat == 0])
+}
+set.seed(53703)
+boot_att <- replicate(2000, att_fn(lalonde[sample(nrow(lalonde), replace = TRUE),]))
+c(bootstrap_SE = sd(boot_att), quantile(boot_att, c(.025, .975)))
+```
+
+:::
+
+## Results
+
+```{r, echo=F}
+grab <- function(f) coef(summary(f))["treat", c("Estimate", "Std. Error", "CI Lower", "CI Upper")]
+results_tab <- data.frame(
+  estimator = c("Naive difference", "Regression adjustment", "IPTW (ATT)", "Experimental benchmark"),
+  rbind(grab(naive_fit), grab(reg_fit),
+        c(att_hajek, sd(boot_att), unname(quantile(boot_att, c(.025, .975)))),
+        grab(exp_att)),
+  se = c("HC2", "HC2", "bootstrap", "HC2"),
+  row.names = NULL)
+names(results_tab) <- c("estimator", "estimate", "std_error", "ci_lower", "ci_upper", "se_type")
+results_tab
+```
+
+::: {.incremental}
+
+- Adjustment moved us an enormous distance: $-\$15{,}205 \rightarrow +\$1{,}759$, against a benchmark of $\$1{,}794$.
+  - Regression adjustment alone only reaches about $+\$752$
+- But the bootstrap interval is **wide** and includes zero.
+  - With the comparison group weighted down to an effective 43 units, there simply isn't much information left.
+- IPTW estimators are **extremely noisy** when propensities are close to $0$ or $1$.
+  - **Doubly-robust** approaches (e.g. AIPW) combine the weights with an outcome model, which helps reduce variance [@kang2007demystifying].
+
+:::
+
+
+## "Latent variables" and logit
+
+## Latent variables
+
+::: {.incremental}
+
+- Another common way of formulating discrete outcome regressions is in terms of an unobserved continuous "latent" variable and an observation mechanism.
+  - Instead of putting a distribution on $Y_i$, we put one on an unobserved $Y_i^*$
+  - $Y_i$ is some function of $Y_i^*$ (usually an indicator function of some sort)
+- For the logistic regression
+
+  $$Y_i = \mathbb{1}(Y_i^* \ge 0)$$
+  $$Y_i^* = X_i^{\prime}\beta + \epsilon_i$$
+  $$\epsilon_i \sim \text{Logistic}(0, 1)$$
+
+- The Logistic distribution is parameterized in terms of a "location" (mean) $\mu$ and a "scale" parameter $s>0$.
+  - For $\mu = 0$, $s= 1$ we have the "standard" logistic
+
+  $$\Pr(\epsilon_i \le x) = \frac{1}{1 + \exp(-x)}$$
+
+:::
+
+## Latent variables
+
+::: {.incremental}
+
+- So what's $\mathbb{E}[Y_i|X_i] = \Pr(Y_i = 1|X_i)$?
+
+  $$\Pr(Y_i = 1|X_i) = \Pr(Y_i^* \ge 0 | X_i) = \Pr(\epsilon_i \ge -X_i^{\prime}\beta) = \Pr(\epsilon_i \le X_i^{\prime}\beta) = \frac{1}{1 + \exp(-X_i^{\prime}\beta)}$$
+
+  - The last-but-one step uses the **symmetry** of the logistic distribution around zero.
+- We can write the **probit** similarly, defining the error distribution as
+
+  $$\epsilon_i \sim \text{Normal}(0, 1)$$
+
+- And by extension, the probability $\Pr(Y_i = 1|X_i)$
+
+  $$\Pr(Y_i = 1|X_i) = \Pr(Y_i^* \ge 0|X_i) = \Pr(\epsilon_i \le X_i^{\prime}\beta) = \Phi(X_i^{\prime}\beta)$$
+
+- **Note** the scale of $\epsilon_i$ is fixed by assumption, not estimated
+  - $Y_i^*$ is never observed, so only the *ratio* $\beta/s$ is identified -- so we normalize to $s =1$
+
+:::
+
+## Latent variables
+
+- We can visualize this as an integral over the density of the random "error" $\epsilon_i$
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+logistic_dens <- ggplot() + xlim(-5, 5) + geom_function(fun=dlogis) + theme_bw() + ylab("Density") + geom_area(aes(x=c(-5,2)),stat = "function", fun = dlogis, fill = "dodgerblue", xlim = c(-5, 2)) + 
+  xlab(expression(epsilon)) + geom_vline(xintercept=0, lty=2) + geom_vline(xintercept=2, lty=3, col="indianred", lwd=1) 
+
+logistic_dens
+```
+
+## Latent variables
+
+- Same thing for a probit
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+probit_dens <- ggplot() + xlim(-5, 5) + geom_function(fun=dnorm) + theme_bw() + ylab("Density") + geom_area(aes(x=c(-5,2)),stat = "function", fun = dnorm, fill = "dodgerblue", xlim = c(-5, 2)) + 
+  xlab(expression(epsilon)) + geom_vline(xintercept=0, lty=2) + geom_vline(xintercept=2, lty=3, col="indianred", lwd=1) 
+
+probit_dens
+```
+
+## Ordinal logit
+
+::: {.incremental}
+
+- Using the latent variable formulation lets us extend binary outcome models to outcomes with multiple discrete levels.
+- For example, consider an "ordinal" response variable
+  - (e.g.) a Likert scale (1 = "strongly disagree", 3 = "neutral", 5 = "strongly agree")
+- The responses are *ordered* but the intervals between them do not have any meaning.
+  - A popular modeling technique with an ordinal $Y$ is to treat it as an expression of a latent variable.
+
+:::
+
+## Ordinal logit
+
+::: {.incremental}
+
+- In an *ordered logit* model, an ordinal outcome $Y$ with $L$ unique, ordered values $Y \in \{1, 2, 3, \dotsc L\}$ is a function of a latent variable and a set of $L-1$ cutpoints $\kappa$
+
+  $$Y_i = \begin{cases}1 &\text{if } Y_i^* \le \kappa_1 \\
+                        2 &\text{if } \kappa_1 < Y_i^* \le \kappa_2\\
+                        3 &\text{if } \kappa_2 < Y_i^* \le \kappa_3\\
+                        \vdots &\\
+                        L &\text{if } Y_i^* > \kappa_{L-1}\end{cases}$$
+
+- We still assume $Y_i^*$ has a logistic distribution
+
+  $$Y_i^* = X_i^{\prime}\beta + \epsilon_i, \qquad \epsilon_i \sim \text{Logistic}(0, 1)$$
+
+:::
+
+## Ordinal logit
+
+::: {.incremental}
+
+- To estimate the model, we now have to estimate both the $\beta$ parameters and the $\kappa$ parameters
+  - Note we omit the intercept from $X_i$ -- the $\kappa$ parameters are essentially the "intercepts" for each boundary between the choices.
+- How does the model map changes in the latent variable to changes in probability? Work with the **cumulative** probabilities:
+
+  $$\Pr(Y_i \le l \,|\, X_i) = \Pr(Y_i^* \le \kappa_l \,|\, X_i) = \Pr(\epsilon_i \le \kappa_l - X_i^{\prime}\beta)$$
+
+- And then difference adjacent cumulatives to get each cell probability
+
+  $$\Pr(Y_i = l \,|\, X_i) = \Pr(Y_i \le l \,|\, X_i) - \Pr(Y_i \le l-1 \,|\, X_i)$$
+
+  with the conventions $\Pr(Y_i \le 0) = 0$ and $\Pr(Y_i \le L) = 1$.
+
+:::
+
+## Ordinal logit
+
+- Let's think in terms of the distribution of $Y_i^*$ and the cut-points for a case with $L=3$. For $X_i^{\prime}\beta = 0$:
+
+```{r, echo=F, fig.width=7, fig.height = 3, fig.align="center"}
+logistic_dens <- ggplot() + xlim(-8, 8) + geom_function(fun=dlogis) + theme_bw() + ylab("Density") + geom_area(aes(x=c(-8,-1)),stat = "function", fun = dlogis, fill = "dodgerblue", xlim = c(-8, -1)) +  geom_area(aes(x=c(-1,2)),stat = "function", fun = dlogis, fill = "darkorange", xlim = c(-1, 2)) + geom_area(aes(x=c(2,8)),stat = "function", fun = dlogis, fill = "gold", xlim = c(2, 8)) + 
+  xlab(expression(Y^"*")) + geom_vline(xintercept=0, lty=2) + geom_vline(xintercept=-1, lty=3, col="darkgreen", lwd=1) + geom_vline(xintercept=2, lty=3, col="darkgreen", lwd=1) 
+
+logistic_dens
+```
+
+- The green lines are the cutpoints $\kappa_1, \kappa_2$; the shaded areas are $\Pr(Y_i = 1), \Pr(Y_i = 2), \Pr(Y_i = 3)$.
+
+## Ordinal logit
+
+- Shifting the mean of $Y^*$ up by 3:
+
+```{r, echo=F, fig.width=7, fig.height = 3, fig.align="center"}
+logistic_dens <- ggplot() + xlim(-8, 8) + geom_function(fun=dlogis, args=list(location=3)) + theme_bw() + ylab("Density") + geom_area(aes(x=c(-8,-1)),stat = "function", fun = dlogis, fill = "dodgerblue", xlim = c(-8, -1),  args=list(location=3)) +  geom_area(aes(x=c(-1,2)),stat = "function", fun = dlogis, fill = "darkorange", xlim = c(-1, 2),  args=list(location=3)) + geom_area(aes(x=c(2,8)),stat = "function", fun = dlogis, fill = "gold", xlim = c(2, 8),  args=list(location=3)) + 
+  xlab(expression(Y^"*")) + geom_vline(xintercept=3, lty=2) + geom_vline(xintercept=-1, lty=3, col="darkgreen", lwd=1) + geom_vline(xintercept=2, lty=3, col="darkgreen", lwd=1) 
+
+logistic_dens
+```
+
+- The cutpoints stay put but the *distribution* slides. All three probabilities move together as a result.
+
+## Ordinal logit
+
+::: {.incremental}
+
+- This structural mapping from $Y^*$ to $\Pr(Y_i = l)$ encodes a particular assumption about how these probabilities relate to one another.
+- Referred to as the **proportional odds** assumption
+
+  $$\log\left(\frac{\Pr(Y_i \le l)}{1 - \Pr(Y_i \le l)}\right) = \kappa_l - X_i^{\prime}\beta$$
+
+  - The same $\beta$ appears for *every* $l$; only the intercept $\kappa_l$ changes.
+- **Intuitively**: the $\beta$ parameters are shared across all the possible outcome levels. Information about whether someone responds "strongly agree" *also* tells us something about how likely they would be to respond "agree", "neutral", "disagree", or "strongly disagree".
+  - Not innocuous if there's non-monotonicity or heterogeneous effects.
+  - Be careful with these models!
+
+:::
+
+## Multinomial logit
+
+::: {.incremental}
+
+- In a setting with multiple **unordered** outcomes, the natural extension of the logit regression is the **multinomial** logit
+- Suppose we have an outcome with $K$ unordered levels (e.g. "choices"). Define a latent "utility" $Y_{ik}^*$ for each of the $K$ categories
+  - For identification, we set one category to be the "baseline" by anchoring its coefficients to zero: $\beta_1 = 0$
+
+  $$\begin{align*}Y_{i1}^* &= X_i^{\prime}\beta_1 + \epsilon_{i1} = \epsilon_{i1}\\
+  Y_{i2}^* &= X_i^{\prime}\beta_2 + \epsilon_{i2}\\
+  &\vdots \\
+  Y_{iK}^* &= X_i^{\prime}\beta_K + \epsilon_{iK}\end{align*}$$
+
+- The probability of observing choice $Y_{i} = k$ is the probability that the $k$th latent variable is greater than all of the others
+
+  $$\Pr(Y_i = k \,|\, X_i) = \Pr\big(Y^*_{ik} = \max\{Y^*_{i1}, Y^*_{i2}, \dotsc Y^*_{iK}\}\big)$$
+
+:::
+
+## Multinomial logit
+
+::: {.incremental}
+
+- It turns out that if the error terms $\epsilon_{ik}$ have i.i.d. "Type I extreme value" distributions, we can write the choice probabilities in closed form
+
+  $$\Pr(Y_i = k \,|\, X_i) = \frac{\exp(X_i^{\prime}\beta_{k})}{\sum_{l=1}^K \exp(X_i^{\prime}\beta_{l})}$$
+
+- This is sometimes referred to as the "softmax" function in machine learning.
+- **Note**: with the normalized baseline category $\beta_1 = 0$, we can write this equivalently as
+
+  $$\Pr(Y_i = k \,|\, X_i) = \frac{\exp(X_i^{\prime}\beta_{k})}{1 + \sum_{l=2}^K \exp(X_i^{\prime}\beta_{l})}$$
+
+- The i.i.d. error assumption implies **independence of irrelevant alternatives** (IIA).
+  - The relative odds of choice $k$ vs. $l$ don't depend on what *other* options are available.
+  - Famously implausible in some choice settings (the "red bus/blue bus" problem).
+
+:::
+
+## Example: Appointer Affiliation Bias
+
+- @puig2017affiliation ran a survey experiment on a group of international arbitration experts to see how manipulating the appointing party affected their decisionmaking in a vignette
+  - Respondents were given a hypothetical dispute and asked to determine who should pay the legal costs
+  - Three options: **Loser pays all**, **Loser pays some**, **Both sides split**
+
+```{r, echo=F, message = F}
+study1 <- read_csv("data/experiment1_cleaned.csv", na= c("", "NA", "-99"))
+```
+
+```{r, include=F, echo=F}
+study1 <- study1 %>% mutate(isReimbursement_Factor = case_when(isReimbursement == 1 ~ "Claimant pays all",
+                                                     isReimbursement == 2 ~ "Claimant pays some",
+                                                     isReimbursement == 3 ~ "Split costs",
+                                                     isReimbursement == 4 ~ "Respondent pays some",
+                                                     isReimbursement == 5 ~ "Respondent pays all"),
+                  isReimbursementFolded_Factor = case_when(isReimbursementFolded == 1 ~ "Winner pays all",
+                                                           isReimbursementFolded == 2 ~ "Winner pays some",
+                                                           isReimbursementFolded == 3 ~ "Split costs",
+                                                           isReimbursementFolded == 4 ~ "Loser pays some",
+                                                           isReimbursementFolded == 5 ~ "Loser pays all"))
+
+study1$isReimbursementFolded_Factor <- factor(study1$isReimbursementFolded_Factor, levels = c("Winner pays all", "Winner pays some", "Split costs", "Loser pays some", "Loser pays all"), ordered =T)
+study1_complete <- study1 %>% filter(!is.na(isReimbursementFolded)&Finished == 1) %>% filter(isReimbursementFolded_Factor != "Winner pays some"&isReimbursementFolded_Factor != "Winner pays all")
+```
+
+```{r, echo=F, fig.align="center", fig.width=7, fig.height=3.2}
+study1_complete %>% ggplot(aes(x=isReimbursementFolded_Factor)) + geom_bar() + xlab("Selected outcome") + ylab("Count") + ggtitle("Distribution of outcome in Puig and Strezhnev (2017)") + theme_minimal()
+```
+
+## Example: Appointer Affiliation Bias
+
+- It would seem like an ordinal logit regression would be appropriate here -- a three-category discrete outcome with a clear ordering
+  - Implemented in the `ordinal` package
+
+```{r, echo=T}
+ordered_logit <- ordinal::clm(isReimbursementFolded_Factor ~ isAppointerSide, data=study1_complete %>% 
+                       filter(isAppointerSide == "Appointed by Winner"|isAppointerSide == "Appointed by Loser"))
+```
+
+```{r, echo=T}
+summary(ordered_logit)
+```
+
+## Example: Appointer Affiliation Bias
+
+- The model implies that arbitrators appointed by the winning party shift mostly from **splitting the costs** to making the loser pay for **everything**
+  - But is this real or an artifact of the proportional odds assumption? Is there a "constant effect" on the latent variable scale?
+
+```{r}
+marginaleffects::avg_comparisons(ordered_logit)
+```
+
+## Example: Appointer Affiliation Bias
+
+- Compare with **multinomial logit** (which in this case is equivalent to OLS for each category since we're using a fully-saturated regression)
+
+```{r, echo = T, warning = F, message = F, results = "hide"}
+multinom_logit <- nnet::multinom(isReimbursementFolded_Factor ~ isAppointerSide, data=study1_complete %>% 
+                       filter(isAppointerSide == "Appointed by Winner"|isAppointerSide == "Appointed by Loser"))
+```
+
+```{r, echo=T}
+marginaleffects::avg_comparisons(multinom_logit)
+```
+
+- Running the ordinal logit (as a reviewer asked us to do!) would have given us the **wrong result**
+  - Remember, don't just fixate on the outcome when choosing a modeling strategy - think about what your entire bundle of assumptions implies!
+
+
+## Next week
+
+::: {.incremental}
+
+- **More likelihood models**
+- **Duration models**
+  - The survival function, the hazard, and censoring
+  - Parametric (exponential, Weibull), semi-parametric (Cox), and non-parametric (Kaplan-Meier) approaches
+- **Event count models**
+  - Poisson regression, overdispersion, and "agnostic" Poisson (quasi-MLE)
+- **Readings:** Chapter 15 of @gelman2020ros; @clark2003survival; @stensrud2020proportional; @wooldridge1999quasi
+
+:::
+
+## References {.refs-slide}
+
+::: {#refs}
+:::

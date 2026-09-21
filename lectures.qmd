@@ -27,7 +27,8 @@ Links become active as the materials for each week are posted.
 
 ### Week 3: Generalized Linear Models
 
-*To be posted*
+- [Week 3 Github Repository](https://github.com/astrezhnev/ps818/tree/main/slides/week3/)
+- [Week 3 `.html` slides](https://www.antonstrezhnev.com/ps818/slides/week3/week3_generalized_linear_models.html)
 
 ### Week 4: More Likelihood Models
 
