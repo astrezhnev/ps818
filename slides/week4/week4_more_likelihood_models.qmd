@@ -1,0 +1,615 @@
+---
+title: "Week 4: More Likelihood Models"
+subtitle: "PS 818 - Data Analysis with Statistical Models"
+author:
+  - name: "Anton Strezhnev"
+    affiliation: "University of Wisconsin-Madison"
+    email: strezhnev@wisc.edu
+date: "September 28, 2026"
+date-format: "MMMM D, YYYY"
+editor: 
+  render-on-save: true
+format: 
+  revealjs:
+    theme: [default, custom.scss]
+    slide-number: true
+    overview: true
+    navigation-mode: vertical
+    progress: false
+    controls: true
+    link-external-newwindow: true
+    footer: "PS 818 - University of Wisconsin-Madison"
+    html-math-method:
+      method: mathjax
+      url: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+execute: 
+  cache: false
+embed-resources: true
+bibliography: ../ps818.bib
+link-citations: true
+
+---
+
+## More Likelihood Models {.title-slide}
+
+::: {style="display: none"}
+$$
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+$$
+:::
+
+```{r, echo = F, message=F, warnings=F}
+library(tidyverse)
+library(knitr)
+library(broom)
+options(digits=3)
+```
+
+## Previously
+
+::: {.incremental}
+
+- **Generalized linear models**: a link function $g()$ relating the CEF to the linear predictor
+
+  $$g(\mathbb{E}[Y_i|X_i]) = X_i^{\prime}\beta$$
+
+- **Binary outcome models**: the logit and probit, estimated by maximum likelihood
+  - Interpretation is harder than OLS -- $\beta_k$ is a change in **log-odds**, and $\frac{\partial \pi_i}{\partial X_{ik}} = \beta_k\pi_i(1-\pi_i)$ depends on every covariate.
+- **Inference on transformations**: invariance gives us the point estimate, the **delta method** gives us the standard error.
+- We used all of this to estimate **propensity scores** and construct an IPTW estimator.
+
+:::
+
+## This week
+
+::: {.incremental}
+
+- **Latent variables and discrete choice** (finishing up from last week)
+  - The latent-variable representation of the logit and probit
+  - **Ordinal** logit and the proportional odds assumption
+  - **Multinomial** logit and independence of irrelevant alternatives (IIA)
+- **Random utility and conditional logit**
+  - Choice data, alternative-specific covariates, and the RUM foundation
+- **Duration models**
+  - The survival function, the hazard, and censoring
+  - Parametric, semi-parametric (Cox), and non-parametric (Kaplan-Meier) approaches
+
+:::
+
+## "Latent variables" and logit
+
+## Latent variables
+
+::: {.incremental}
+
+- Another common way of formulating discrete outcome regressions is in terms of an unobserved continuous "latent" variable and an observation mechanism.
+  - Instead of putting a distribution on $Y_i$, we put one on an unobserved $Y_i^*$
+  - $Y_i$ is some function of $Y_i^*$ (usually an indicator function of some sort)
+- For the logistic regression
+
+  $$Y_i = \mathbb{1}(Y_i^* \ge 0)$$
+  $$Y_i^* = X_i^{\prime}\beta + \epsilon_i$$
+  $$\epsilon_i \sim \text{Logistic}(0, 1)$$
+
+- The Logistic distribution is parameterized in terms of a "location" (mean) $\mu$ and a "scale" parameter $s>0$.
+  - For $\mu = 0$, $s= 1$ we have the "standard" logistic
+
+  $$\Pr(\epsilon_i \le x) = \frac{1}{1 + \exp(-x)}$$
+
+:::
+
+## Latent variables
+
+::: {.incremental}
+
+- So what's $\mathbb{E}[Y_i|X_i] = \Pr(Y_i = 1|X_i)$?
+
+  $$\Pr(Y_i = 1|X_i) = \Pr(Y_i^* \ge 0 | X_i) = \Pr(\epsilon_i \ge -X_i^{\prime}\beta) = \Pr(\epsilon_i \le X_i^{\prime}\beta) = \frac{1}{1 + \exp(-X_i^{\prime}\beta)}$$
+
+  - The last-but-one step uses the **symmetry** of the logistic distribution around zero.
+- We can write the **probit** similarly, defining the error distribution as
+
+  $$\epsilon_i \sim \text{Normal}(0, 1)$$
+
+- And by extension, the probability $\Pr(Y_i = 1|X_i)$
+
+  $$\Pr(Y_i = 1|X_i) = \Pr(Y_i^* \ge 0|X_i) = \Pr(\epsilon_i \le X_i^{\prime}\beta) = \Phi(X_i^{\prime}\beta)$$
+
+- **Note** the scale of $\epsilon_i$ is fixed by assumption, not estimated
+  - $Y_i^*$ is never observed, so only the *ratio* $\beta/s$ is identified -- so we normalize to $s =1$
+
+:::
+
+## Latent variables
+
+- We can visualize this as an integral over the density of the random "error" $\epsilon_i$
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+logistic_dens <- ggplot() + xlim(-5, 5) + geom_function(fun=dlogis) + theme_bw() + ylab("Density") + geom_area(aes(x=c(-5,2)),stat = "function", fun = dlogis, fill = "dodgerblue", xlim = c(-5, 2)) + 
+  xlab(expression(epsilon)) + geom_vline(xintercept=0, lty=2) + geom_vline(xintercept=2, lty=3, col="indianred", lwd=1) 
+
+logistic_dens
+```
+
+## Latent variables
+
+- Same thing for a probit
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+probit_dens <- ggplot() + xlim(-5, 5) + geom_function(fun=dnorm) + theme_bw() + ylab("Density") + geom_area(aes(x=c(-5,2)),stat = "function", fun = dnorm, fill = "dodgerblue", xlim = c(-5, 2)) + 
+  xlab(expression(epsilon)) + geom_vline(xintercept=0, lty=2) + geom_vline(xintercept=2, lty=3, col="indianred", lwd=1) 
+
+probit_dens
+```
+
+## Ordinal logit
+
+::: {.incremental}
+
+- Using the latent variable formulation lets us extend binary outcome models to outcomes with multiple discrete levels.
+- For example, consider an "ordinal" response variable
+  - (e.g.) a Likert scale (1 = "strongly disagree", 3 = "neutral", 5 = "strongly agree")
+- The responses are *ordered* but the intervals between them do not have any meaning.
+  - A popular modeling technique with an ordinal $Y$ is to treat it as an expression of a latent variable.
+
+:::
+
+## Ordinal logit
+
+::: {.incremental}
+
+- In an *ordered logit* model, an ordinal outcome $Y$ with $L$ unique, ordered values $Y \in \{1, 2, 3, \dotsc L\}$ is a function of a latent variable and a set of $L-1$ cutpoints $\kappa$
+
+  $$Y_i = \begin{cases}1 &\text{if } Y_i^* \le \kappa_1 \\
+                        2 &\text{if } \kappa_1 < Y_i^* \le \kappa_2\\
+                        3 &\text{if } \kappa_2 < Y_i^* \le \kappa_3\\
+                        \vdots &\\
+                        L &\text{if } Y_i^* > \kappa_{L-1}\end{cases}$$
+
+- We still assume $Y_i^*$ has a logistic distribution
+
+  $$Y_i^* = X_i^{\prime}\beta + \epsilon_i, \qquad \epsilon_i \sim \text{Logistic}(0, 1)$$
+
+:::
+
+## Ordinal logit
+
+::: {.incremental}
+
+- To estimate the model, we now have to estimate both the $\beta$ parameters and the $\kappa$ parameters
+  - Note we omit the intercept from $X_i$ -- the $\kappa$ parameters are essentially the "intercepts" for each boundary between the choices.
+- How does the model map changes in the latent variable to changes in probability? Work with the **cumulative** probabilities:
+
+  $$\Pr(Y_i \le l \,|\, X_i) = \Pr(Y_i^* \le \kappa_l \,|\, X_i) = \Pr(\epsilon_i \le \kappa_l - X_i^{\prime}\beta)$$
+
+- And then difference adjacent cumulatives to get each cell probability
+
+  $$\Pr(Y_i = l \,|\, X_i) = \Pr(Y_i \le l \,|\, X_i) - \Pr(Y_i \le l-1 \,|\, X_i)$$
+
+  with the conventions $\Pr(Y_i \le 0) = 0$ and $\Pr(Y_i \le L) = 1$.
+
+:::
+
+## Ordinal logit
+
+- Let's think in terms of the distribution of $Y_i^*$ and the cut-points for a case with $L=3$. For $X_i^{\prime}\beta = 0$:
+
+```{r, echo=F, fig.width=7, fig.height = 3, fig.align="center"}
+logistic_dens <- ggplot() + xlim(-8, 8) + geom_function(fun=dlogis) + theme_bw() + ylab("Density") + geom_area(aes(x=c(-8,-1)),stat = "function", fun = dlogis, fill = "dodgerblue", xlim = c(-8, -1)) +  geom_area(aes(x=c(-1,2)),stat = "function", fun = dlogis, fill = "darkorange", xlim = c(-1, 2)) + geom_area(aes(x=c(2,8)),stat = "function", fun = dlogis, fill = "gold", xlim = c(2, 8)) + 
+  xlab(expression(Y^"*")) + geom_vline(xintercept=0, lty=2) + geom_vline(xintercept=-1, lty=3, col="darkgreen", lwd=1) + geom_vline(xintercept=2, lty=3, col="darkgreen", lwd=1) 
+
+logistic_dens
+```
+
+- The green lines are the cutpoints $\kappa_1, \kappa_2$; the shaded areas are $\Pr(Y_i = 1), \Pr(Y_i = 2), \Pr(Y_i = 3)$.
+
+## Ordinal logit
+
+- Shifting the mean of $Y^*$ up by 3:
+
+```{r, echo=F, fig.width=7, fig.height = 3, fig.align="center"}
+logistic_dens <- ggplot() + xlim(-8, 8) + geom_function(fun=dlogis, args=list(location=3)) + theme_bw() + ylab("Density") + geom_area(aes(x=c(-8,-1)),stat = "function", fun = dlogis, fill = "dodgerblue", xlim = c(-8, -1),  args=list(location=3)) +  geom_area(aes(x=c(-1,2)),stat = "function", fun = dlogis, fill = "darkorange", xlim = c(-1, 2),  args=list(location=3)) + geom_area(aes(x=c(2,8)),stat = "function", fun = dlogis, fill = "gold", xlim = c(2, 8),  args=list(location=3)) + 
+  xlab(expression(Y^"*")) + geom_vline(xintercept=3, lty=2) + geom_vline(xintercept=-1, lty=3, col="darkgreen", lwd=1) + geom_vline(xintercept=2, lty=3, col="darkgreen", lwd=1) 
+
+logistic_dens
+```
+
+- The cutpoints stay put but the *distribution* slides. All three probabilities move together as a result.
+
+## Ordinal logit
+
+::: {.incremental}
+
+- This structural mapping from $Y^*$ to $\Pr(Y_i = l)$ encodes a particular assumption about how these probabilities relate to one another.
+- Referred to as the **proportional odds** assumption
+
+  $$\log\left(\frac{\Pr(Y_i \le l)}{1 - \Pr(Y_i \le l)}\right) = \kappa_l - X_i^{\prime}\beta$$
+
+  - The same $\beta$ appears for *every* $l$; only the intercept $\kappa_l$ changes.
+- **Intuitively**: the $\beta$ parameters are shared across all the possible outcome levels. Information about whether someone responds "strongly agree" *also* tells us something about how likely they would be to respond "agree", "neutral", "disagree", or "strongly disagree".
+  - Not innocuous if there's non-monotonicity or heterogeneous effects.
+  - Be careful with these models!
+
+:::
+
+## Multinomial logit
+
+::: {.incremental}
+
+- In a setting with multiple **unordered** outcomes, the natural extension of the logit regression is the **multinomial** logit
+- Suppose we have an outcome with $K$ unordered levels (e.g. "choices"). Define a latent "utility" $Y_{ik}^*$ for each of the $K$ categories
+  - For identification, we set one category to be the "baseline" by anchoring its coefficients to zero: $\beta_1 = 0$
+
+  $$\begin{align*}Y_{i1}^* &= X_i^{\prime}\beta_1 + \epsilon_{i1} = \epsilon_{i1}\\
+  Y_{i2}^* &= X_i^{\prime}\beta_2 + \epsilon_{i2}\\
+  &\vdots \\
+  Y_{iK}^* &= X_i^{\prime}\beta_K + \epsilon_{iK}\end{align*}$$
+
+- The probability of observing choice $Y_{i} = k$ is the probability that the $k$th latent variable is greater than all of the others
+
+  $$\Pr(Y_i = k \,|\, X_i) = \Pr\big(Y^*_{ik} = \max\{Y^*_{i1}, Y^*_{i2}, \dotsc Y^*_{iK}\}\big)$$
+
+:::
+
+## Multinomial logit
+
+::: {.incremental}
+
+- It turns out that if the error terms $\epsilon_{ik}$ have i.i.d. "Type I extreme value" distributions, we can write the choice probabilities in closed form
+
+  $$\Pr(Y_i = k \,|\, X_i) = \frac{\exp(X_i^{\prime}\beta_{k})}{\sum_{l=1}^K \exp(X_i^{\prime}\beta_{l})}$$
+
+- This is sometimes referred to as the "softmax" function in machine learning.
+- **Note**: with the normalized baseline category $\beta_1 = 0$, we can write this equivalently as
+
+  $$\Pr(Y_i = k \,|\, X_i) = \frac{\exp(X_i^{\prime}\beta_{k})}{1 + \sum_{l=2}^K \exp(X_i^{\prime}\beta_{l})}$$
+
+- The i.i.d. error assumption implies **independence of irrelevant alternatives** (IIA).
+  - The relative odds of choice $k$ vs. $l$ don't depend on what *other* options are available.
+  - Famously implausible in some choice settings (the "red bus/blue bus" problem).
+
+:::
+
+## Example: Appointer Affiliation Bias
+
+- @puig2017affiliation ran a survey experiment on a group of international arbitration experts to see how manipulating the appointing party affected their decisionmaking in a vignette
+  - Respondents were given a hypothetical dispute and asked to determine who should pay the legal costs
+  - Three options: **Loser pays all**, **Loser pays some**, **Both sides split**
+
+## Example: Appointer Affiliation Bias
+
+- Read in the responses -- `-99` is the survey platform's missing-value code
+
+```{r, echo=T, message = F}
+study1 <- read_csv("data/experiment1_cleaned.csv", na = c("", "NA", "-99"))
+```
+
+- The outcome is stored as an integer, so recode it into an **ordered factor**
+  - The ordering is what makes this an ordinal outcome rather than a nominal one
+
+```{r, echo=T}
+study1 <- study1 %>%
+  mutate(isReimbursementFolded_Factor = case_when(
+    isReimbursementFolded == 1 ~ "Winner pays all",
+    isReimbursementFolded == 2 ~ "Winner pays some",
+    isReimbursementFolded == 3 ~ "Split costs",
+    isReimbursementFolded == 4 ~ "Loser pays some",
+    isReimbursementFolded == 5 ~ "Loser pays all"))
+
+study1$isReimbursementFolded_Factor <- factor(
+  study1$isReimbursementFolded_Factor,
+  levels = c("Winner pays all", "Winner pays some", "Split costs",
+             "Loser pays some", "Loser pays all"), ordered = TRUE)
+```
+
+## Example: Appointer Affiliation Bias
+
+- Keep the completed responses, and drop the two "winner pays" categories
+  - Essentially no one chose them, so we're left with the **three** options in the vignette
+
+```{r, echo=T}
+study1_complete <- study1 %>%
+  filter(!is.na(isReimbursementFolded) & Finished == 1) %>%
+  filter(isReimbursementFolded_Factor != "Winner pays some" &
+         isReimbursementFolded_Factor != "Winner pays all")
+
+table(study1_complete$isReimbursementFolded_Factor)
+```
+
+## Example: Appointer Affiliation Bias
+
+```{r, echo=F, fig.align="center", fig.width=7, fig.height=3.2}
+study1_complete %>% ggplot(aes(x=isReimbursementFolded_Factor)) + geom_bar() + xlab("Selected outcome") + ylab("Count") + ggtitle("Distribution of outcome in Puig and Strezhnev (2017)") + theme_minimal()
+```
+
+## Example: Appointer Affiliation Bias
+
+- It would seem like an ordinal logit regression would be appropriate here -- a three-category discrete outcome with a clear ordering
+  - Implemented in the `ordinal` package
+
+```{r, echo=T}
+ordered_logit <- ordinal::clm(isReimbursementFolded_Factor ~ isAppointerSide, data=study1_complete %>% 
+                       filter(isAppointerSide == "Appointed by Winner"|isAppointerSide == "Appointed by Loser"))
+```
+
+```{r, echo=T}
+summary(ordered_logit)
+```
+
+## Example: Appointer Affiliation Bias
+
+- The model implies that arbitrators appointed by the winning party shift mostly from **splitting the costs** to making the loser pay for **everything**
+  - But is this real or an artifact of the proportional odds assumption? Is there a "constant effect" on the latent variable scale?
+
+```{r}
+marginaleffects::avg_comparisons(ordered_logit)
+```
+
+## Example: Appointer Affiliation Bias
+
+- Compare with **multinomial logit** (which in this case is equivalent to OLS for each category since we're using a fully-saturated regression)
+
+```{r, echo = T, warning = F, message = F, results = "hide"}
+multinom_logit <- nnet::multinom(isReimbursementFolded_Factor ~ isAppointerSide, data=study1_complete %>% 
+                       filter(isAppointerSide == "Appointed by Winner"|isAppointerSide == "Appointed by Loser"))
+```
+
+```{r, echo=T}
+marginaleffects::avg_comparisons(multinom_logit)
+```
+
+- Running the ordinal logit (as a reviewer asked us to do!) would have given us the **wrong result**
+  - Remember, don't just fixate on the outcome when choosing a modeling strategy - think about what your entire bundle of assumptions implies!
+
+## Random utility and conditional logit
+
+## From latent variables to utility
+
+::: {.incremental}
+
+- The latent-variable story generalizes naturally: let $U_{ij}$ be the **utility** individual $i$ gets from alternative $j$
+
+  $$U_{ij} = V_{ij} + \epsilon_{ij} = X_{ij}^{\prime}\beta + \epsilon_{ij}$$
+
+- Individual $i$ chooses the alternative with the highest utility
+
+  $$Y_i = \argmax_{j \in \{1, \dotsc, J\}} U_{ij}$$
+
+- The **systematic** component $V_{ij}$ is what we model; $\epsilon_{ij}$ is everything we don't observe.
+- This is the **random utility model** (RUM) -- the microeconomic foundation for discrete choice [@mcfadden1974conditional].
+
+:::
+
+## The conditional logit
+
+::: {.incremental}
+
+- @mcfadden1974conditional showed that if the $\epsilon_{ij}$ are i.i.d. **Type-I Extreme Value** (Gumbel), the choice probabilities have a closed form
+
+  $$\Pr(Y_i = j \,|\, X_i) = \frac{\exp(X_{ij}^{\prime}\beta)}{\sum_{k=1}^J \exp(X_{ik}^{\prime}\beta)}$$
+
+- Compare this to the **multinomial** logit we just derived:
+  - Multinomial logit: covariates vary over **individuals** $(X_i)$, and we estimate a separate $\beta_j$ per alternative.
+  - Conditional logit: covariates vary over **alternatives** $(X_{ij})$, and we estimate a *single* $\beta$.
+- Conditional logit lets us model the **attributes of the choices themselves** -- price, distance, ideological position -- not just the attributes of the chooser.
+
+:::
+
+## Multinomial vs. conditional logit
+
+<!-- TODO: a small worked table showing the two data layouts side by side.
+     Multinomial = one row per respondent (wide); conditional = one row per
+     respondent-alternative (long). This is the thing students get wrong. -->
+
+::: {.incremental}
+
+- The practical difference is the **shape of the data**
+  - Multinomial logit wants one row per **respondent**
+  - Conditional logit wants one row per **respondent-alternative** pair
+- The two can be combined -- alternative-specific covariates *and* individual-specific covariates in one model (sometimes called the "mixed" or "universal" logit).
+
+:::
+
+## IIA, revisited
+
+::: {.incremental}
+
+- The i.i.d. extreme value assumption buys us the closed form, but it also imposes **IIA**
+
+  $$\frac{\Pr(Y_i = j)}{\Pr(Y_i = k)} = \exp\big((X_{ij} - X_{ik})^{\prime}\beta\big)$$
+
+  - The relative odds of $j$ vs. $k$ depend *only* on $j$ and $k$ -- adding or removing other alternatives changes nothing.
+- The red bus/blue bus problem again, now with a name for the culprit: the errors are independent **across alternatives**.
+- Ways out:
+  - **Nested logit** -- group similar alternatives and allow correlation within nests
+  - **Mixed logit / random coefficients** -- let $\beta$ vary across individuals [@train2009discrete]
+  - **Multinomial probit** -- a full covariance matrix for $\epsilon$, at real computational cost
+
+:::
+
+## Example: (TBD)
+
+<!-- TODO: pick a running example with alternative-specific covariates.
+     Candidates:
+       - vote choice with party positions (alternative-specific ideological distance)
+       - conjoint / forced-choice experiment (natural long format, clean design)
+       - the Puig & Strezhnev arbitration data if we can get it into long form
+     Estimate with survival::clogit() or mlogit::mlogit(). -->
+
+```{r, echo=T, eval=F}
+# survival::clogit(choice ~ x1 + x2 + strata(respondent_id), data = long_df)
+```
+
+## Duration models
+
+## Duration data
+
+::: {.incremental}
+
+- Often the outcome of interest is **how long** until something happens
+  - How long does a cabinet government survive?
+  - How long until a civil war ends? Until a dispute is settled? Until a bill passes?
+- The outcome $T_i \ge 0$ is a **duration** (a "survival time", "failure time", "spell length")
+- Two features make this different from anything we've done so far:
+  - The outcome is non-negative and usually right-skewed
+  - We often **don't get to observe the event** for every unit
+
+:::
+
+## Censoring
+
+::: {.incremental}
+
+- A spell is **right-censored** if the study ends before the event happens
+  - We know $T_i > c_i$, but not what $T_i$ actually is
+- Throwing out censored observations **biases** us toward short durations; coding them as if the event happened at $c_i$ biases us the same way.
+- Instead, record a pair for each unit: the observed time and an **event indicator**
+
+  $$(\tilde{T}_i, \delta_i), \qquad \tilde{T}_i = \min(T_i, c_i), \qquad \delta_i = \mathbb{1}\{T_i \le c_i\}$$
+
+- The likelihood will handle the two cases differently -- and that's really the whole trick.
+
+:::
+
+## Survival and hazard
+
+::: {.incremental}
+
+- The **survival function** is the probability of lasting past $t$
+
+  $$S(t) = \Pr(T > t) = 1 - F(t)$$
+
+- The **hazard** is the instantaneous rate of failure, *given survival so far*
+
+  $$h(t) = \lim_{\Delta t \to 0}\frac{\Pr(t \le T < t + \Delta t \,|\, T \ge t)}{\Delta t} = \frac{f(t)}{S(t)}$$
+
+- These are all the same object in different clothes. Since $h(t) = -\frac{d}{dt}\log S(t)$,
+
+  $$S(t) = \exp\{-H(t)\}, \qquad H(t) = \int_0^t h(u)\,du$$
+
+- The hazard is usually where the **substance** lives -- "is the risk of collapse rising or falling with time in office?"
+
+:::
+
+## The likelihood with censoring
+
+::: {.incremental}
+
+- A unit that **fails** at $\tilde{T}_i$ contributes the density $f(\tilde{T}_i)$
+- A unit that is **censored** at $\tilde{T}_i$ contributes only $\Pr(T_i > \tilde{T}_i) = S(\tilde{T}_i)$
+- Putting them together
+
+  $$\mathcal{L}(\theta) = \prod_{i=1}^n f(\tilde{T}_i)^{\delta_i} \, S(\tilde{T}_i)^{1 - \delta_i}
+    = \prod_{i=1}^n h(\tilde{T}_i)^{\delta_i} \, S(\tilde{T}_i)$$
+
+- Censored observations are **not** discarded -- they contribute the information that the unit made it at least that far.
+- This is just maximum likelihood again. Everything from Week 2 still applies.
+
+:::
+
+## Parametric duration models
+
+::: {.incremental}
+
+- Pick a functional form for the hazard and estimate by MLE.
+- **Exponential**: constant hazard, $h(t) = \lambda$, so $S(t) = \exp(-\lambda t)$
+  - "Memoryless" -- the risk of collapse tomorrow doesn't depend on how long you've already lasted.
+  - Usually too strong an assumption to believe.
+- **Weibull**: $h(t) = \lambda p \, t^{p-1}$
+  - $p > 1$ gives a rising hazard (positive duration dependence), $p < 1$ a falling one, $p = 1$ collapses to the exponential.
+- Covariates enter through $\lambda_i = \exp(X_i^{\prime}\beta)$ -- a proportional hazards form.
+
+:::
+
+## Non-parametric: Kaplan-Meier
+
+<!-- TODO: KM plot of a real dataset. survival::survfit(Surv(time, event) ~ group).
+     Good candidates: cabinet duration data, or the veteran's lung cancer data
+     that ships with the survival package for a first pass. -->
+
+::: {.incremental}
+
+- If we don't want to assume a functional form at all, estimate $S(t)$ directly
+
+  $$\hat{S}(t) = \prod_{t_k \le t} \left(1 - \frac{d_k}{n_k}\right)$$
+
+  - $d_k$ events at time $t_k$, $n_k$ units still at risk just before $t_k$
+- Purely descriptive, handles censoring correctly, and it's the right first look at any duration dataset.
+- But there's no obvious way to condition on continuous covariates.
+
+:::
+
+## Semi-parametric: the Cox model
+
+::: {.incremental}
+
+- @cox1972regression splits the difference: leave the **baseline hazard** completely unspecified, but make covariates act proportionally on it
+
+  $$h(t \,|\, X_i) = h_0(t)\exp(X_i^{\prime}\beta)$$
+
+- We can estimate $\beta$ without ever estimating $h_0(t)$, using the **partial likelihood**
+
+  $$\mathcal{L}_p(\beta) = \prod_{i \,:\, \delta_i = 1} \frac{\exp(X_i^{\prime}\beta)}{\sum_{j \in R(\tilde{T}_i)} \exp(X_j^{\prime}\beta)}$$
+
+  where $R(t)$ is the **risk set** -- everyone still around just before $t$.
+
+:::
+
+## The Cox model is a conditional logit
+
+::: {.incremental}
+
+- Look at that partial likelihood again, and compare it to the conditional logit from earlier today.
+- At each failure time, we are asking: *given that exactly one unit in the risk set failed, which one was it?*
+  - That is a conditional logit over the risk set, with the "alternatives" being the units still at risk.
+- This is not an analogy -- it is the same likelihood. R's `survival::clogit()` is literally a wrapper around `coxph()`.
+- Two apparently unrelated halves of today's lecture turn out to be the same model.
+
+:::
+
+## Testing proportional hazards
+
+<!-- TODO: cox.zph() output + Schoenfeld residual plot on the running example. -->
+
+::: {.incremental}
+
+- Proportional hazards is a real assumption and it is often wrong.
+  - It says the hazard **ratio** between any two covariate profiles is constant over the whole time period.
+- Standard diagnostic: **Schoenfeld residuals** should show no trend in time (`cox.zph()` in R).
+- Fixes: stratify, or interact the covariate with a function of time.
+- But @stensrud2020proportional push back on the whole enterprise -- worth reading before you reflexively run the test.
+  - With enough data you will always reject; with too little you never will.
+  - The better question is whether the *estimand* you want is even a hazard ratio.
+
+:::
+
+## Example: (TBD)
+
+<!-- TODO: full worked example. Read data, KM plot, parametric fit (Weibull),
+     Cox fit, cox.zph diagnostic, and interpretation on the hazard-ratio scale.
+     Mirror the structure of the Week 3 propensity score example. -->
+
+```{r, echo=T, eval=F}
+# library(survival)
+# km  <- survfit(Surv(duration, event) ~ 1, data = spells)
+# cox <- coxph(Surv(duration, event) ~ x1 + x2, data = spells)
+# cox.zph(cox)
+```
+
+## Next week
+
+::: {.incremental}
+
+- **Bayesian inference**
+  - Priors, posteriors, and how this differs from what we've been doing
+  - Conjugate models and the Beta-Binomial
+  - Credible intervals vs. confidence intervals
+- **Readings:** TBD
+
+:::
+
+## References {.refs-slide}
+
+::: {#refs}
+:::
