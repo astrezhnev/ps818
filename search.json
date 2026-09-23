@@ -417,7 +417,28 @@
     "href": "slides/week3/week3_generalized_linear_models.html#marginaleffects",
     "title": "Week 3: Generalized Linear Models",
     "section": "marginaleffects",
-    "text": "marginaleffects\n\nThe marginaleffects R package provides a straightforward implementation of the delta method for a lot of transformed quantities\n\n(e.g.) the marginal change in the probability of \\(D_i=1\\) for a one-unit change in \\(X\\)\n\navg_predictions() will calculate point estimates + CIs for the expected outcome just like we did above.\navg_comparisons() will do the implied “marginal effects” for a unit change in \\(X\\) given a set baseline.\n\n\nmarginaleffects::avg_predictions(logit_Rglm, newdata = \"median\")\n\n\n Estimate Std. Error    z Pr(&gt;|z|)   S    2.5 %  97.5 %\n 8.36e-05   5.44e-05 1.54    0.124 3.0 -2.3e-05 0.00019\n\nType: response\n\n\n\nmarginaleffects::avg_comparisons(logit_Rglm, variables = \"married\", newdata = \"median\")\n\n\n  Estimate Std. Error     z Pr(&gt;|z|)   S     2.5 %   97.5 %\n -0.000342    0.00023 -1.48    0.138 2.9 -0.000793 0.000109\n\nTerm: married\nType: response\nComparison: 1 - 0"
+    "text": "marginaleffects\n\nThe marginaleffects R package provides a straightforward implementation of the delta method for a lot of transformed quantities\n\n(e.g.) the marginal change in the probability of \\(D_i=1\\) for a one-unit change in \\(X\\)\n\navg_predictions() will calculate point estimates + CIs for the expected outcome just like we did above.\navg_comparisons() will do the implied “marginal effects” for a unit change in \\(X\\) given a set baseline.\nWe have to tell it which covariate profile to evaluate at. We’ll use the treated units – the NSW participants are the group we care about.\n\n\nlibrary(marginaleffects)\ntreated &lt;- subset(lalonde, treat == 1)\n\ngrid_median &lt;- datagrid(model = logit_Rglm, newdata = treated,\n                        FUN_numeric = median, FUN_integer = median, FUN_binary = median)\ngrid_mean   &lt;- datagrid(model = logit_Rglm, newdata = treated,\n                        FUN_numeric = mean,   FUN_integer = mean,   FUN_binary = mean)"
+  },
+  {
+    "objectID": "slides/week3/week3_generalized_linear_models.html#marginaleffects-1",
+    "href": "slides/week3/week3_generalized_linear_models.html#marginaleffects-1",
+    "title": "Week 3: Generalized Linear Models",
+    "section": "marginaleffects",
+    "text": "marginaleffects\n\nThe median profile is the one we just built by hand; the mean profile is the other common convention\n\n\nrbind(median = unlist(grid_median[, -1]), mean = unlist(grid_mean[, -1]))\n\n        age black education hispanic married nodegree re74 re75\nmedian 25.0 1.000      11.0   0.0000   0.000    1.000    0    0\nmean   25.8 0.843      10.3   0.0595   0.189    0.708 2096 1532\n\n\n\nNote the mean profile is not a person anyone could be – it is 84% Black and 71% without a degree.\n\nThe median profile at least corresponds to a possible respondent."
+  },
+  {
+    "objectID": "slides/week3/week3_generalized_linear_models.html#marginaleffects-predicted-propensity",
+    "href": "slides/week3/week3_generalized_linear_models.html#marginaleffects-predicted-propensity",
+    "title": "Week 3: Generalized Linear Models",
+    "section": "marginaleffects: predicted propensity",
+    "text": "marginaleffects: predicted propensity\n\navg_predictions(logit_Rglm, newdata = grid_median)   # matches our hand calculation\n\n\n Estimate Std. Error    z Pr(&gt;|z|)     S 2.5 % 97.5 %\n    0.888     0.0258 34.4   &lt;0.001 859.9 0.838  0.939\n\nType: response\n\n\n\navg_predictions(logit_Rglm, newdata = grid_mean)\n\n\n Estimate Std. Error    z Pr(&gt;|z|)     S 2.5 % 97.5 %\n    0.645     0.0342 18.8   &lt;0.001 260.6 0.578  0.712\n\nType: response\n\n\n\nEvaluating at the mean moves us from \\(\\hat{\\pi} \\approx 0.89\\) down to \\(\\approx 0.64\\) – the profile is different, so the point on the curve is different."
+  },
+  {
+    "objectID": "slides/week3/week3_generalized_linear_models.html#marginaleffects-marginal-effect-of-married",
+    "href": "slides/week3/week3_generalized_linear_models.html#marginaleffects-marginal-effect-of-married",
+    "title": "Week 3: Generalized Linear Models",
+    "section": "marginaleffects: marginal effect of married",
+    "text": "marginaleffects: marginal effect of married\n\navg_comparisons(logit_Rglm, variables = \"married\", newdata = grid_median)\n\n\n Estimate Std. Error     z Pr(&gt;|z|)    S  2.5 % 97.5 %\n   -0.278     0.0612 -4.55   &lt;0.001 17.5 -0.398 -0.158\n\nTerm: married\nType: response\nComparison: 1 - 0\n\n\n\navg_comparisons(logit_Rglm, variables = \"married\", newdata = grid_mean)\n\n\n Estimate Std. Error     z Pr(&gt;|z|)    S  2.5 % 97.5 %\n   -0.385     0.0566 -6.81   &lt;0.001 36.5 -0.496 -0.274\n\nTerm: married\nType: response\nComparison: 1 - 0\n\n\n\nBeing married lowers the probability of NSW participation by 28 points at the median profile, 39 at the mean profile.\n\nSame \\(\\hat{\\beta}\\), same data – only the baseline \\(\\pi_i\\) differs. This is the \\(\\beta_k\\pi_i(1-\\pi_i)\\) scaling at work."
   },
   {
     "objectID": "slides/week3/week3_generalized_linear_models.html#inverse-propensity-of-treatment-weighting",
