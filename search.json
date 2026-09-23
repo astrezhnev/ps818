@@ -294,81 +294,158 @@
     "text": "Example: (TBD)\n\n\n# AMCE, design-based\n# lm_robust(chosen ~ educ + origin + job, data = conjoint, clusters = respondent_id)\n\n# conditional logit, model-based\n# survival::clogit(chosen ~ educ + origin + job + strata(task_id), data = conjoint)"
   },
   {
-    "objectID": "slides/week4/week4_more_likelihood_models.html#duration-models",
-    "href": "slides/week4/week4_more_likelihood_models.html#duration-models",
+    "objectID": "slides/week4/week4_more_likelihood_models.html#survival-models",
+    "href": "slides/week4/week4_more_likelihood_models.html#survival-models",
     "title": "Week 4: More Likelihood Models",
-    "section": "Duration models",
-    "text": "Duration models"
+    "section": "Survival models",
+    "text": "Survival models"
   },
   {
-    "objectID": "slides/week4/week4_more_likelihood_models.html#duration-data",
-    "href": "slides/week4/week4_more_likelihood_models.html#duration-data",
+    "objectID": "slides/week4/week4_more_likelihood_models.html#survival-models-1",
+    "href": "slides/week4/week4_more_likelihood_models.html#survival-models-1",
     "title": "Week 4: More Likelihood Models",
-    "section": "Duration data",
-    "text": "Duration data\n\nOften the outcome of interest is how long until something happens\n\nHow long does a cabinet government survive?\nHow long until a civil war ends? Until a dispute is settled? Until a bill passes?\n\nThe outcome \\(T_i \\ge 0\\) is a duration (a “survival time”, “failure time”, “spell length”)\nTwo features make this different from anything we’ve done so far:\n\nThe outcome is non-negative and usually right-skewed\nWe often don’t get to observe the event for every unit"
+    "section": "Survival models",
+    "text": "Survival models\n\nOften we have outcome data that is measured as the “time-to-event”\n\nFrom the medical literature, this is often the number of days before a patient suffers some adverse event (e.g. death).\nBut lots of other applications (e.g. time to treaty ratification)\n\nAssume we observe N i.i.d. event times \\(T_1, T_2, \\dotsc, T_n\\)\nDefine the “survival function”\n\\[S(t) = Pr(T &gt; t) = 1 - F(t)\\]\nWe’ll also often work with the “hazard” or the “instantaneous” probability of an event happening given that it has not yet occurred\n\\[h(t) = \\underset{\\Delta t \\to 0}{\\lim} \\frac{P(t &lt; T_i \\le t + \\Delta t | T_i &gt; t)}{\\Delta t} = \\frac{f(t)}{S(t)} = \\frac{f(t)}{1-F(t)}\\]\nIntuitively: Given that I know that an event has not occurred until \\(t\\), what is the probability that it will immediately occur next!"
   },
   {
-    "objectID": "slides/week4/week4_more_likelihood_models.html#censoring",
-    "href": "slides/week4/week4_more_likelihood_models.html#censoring",
+    "objectID": "slides/week4/week4_more_likelihood_models.html#survival-models-2",
+    "href": "slides/week4/week4_more_likelihood_models.html#survival-models-2",
     "title": "Week 4: More Likelihood Models",
-    "section": "Censoring",
-    "text": "Censoring\n\nA spell is right-censored if the study ends before the event happens\n\nWe know \\(T_i &gt; c_i\\), but not what \\(T_i\\) actually is\n\nThrowing out censored observations biases us toward short durations; coding them as if the event happened at \\(c_i\\) biases us the same way.\nInstead, record a pair for each unit: the observed time and an event indicator\n\\[(\\tilde{T}_i, \\delta_i), \\qquad \\tilde{T}_i = \\min(T_i, c_i), \\qquad \\delta_i = \\mathbb{1}\\{T_i \\le c_i\\}\\]\nThe likelihood will handle the two cases differently – and that’s really the whole trick."
+    "section": "Survival models",
+    "text": "Survival models\n\nWe’ll also define the cumulative hazard\n\\[H(t) = \\int_{0}^{t} h(u)du = \\int_0^{t} \\frac{f(u)}{S(u)} du =  -\\log(S(t))\\]"
   },
   {
-    "objectID": "slides/week4/week4_more_likelihood_models.html#survival-and-hazard",
-    "href": "slides/week4/week4_more_likelihood_models.html#survival-and-hazard",
+    "objectID": "slides/week4/week4_more_likelihood_models.html#non-parametric-approach",
+    "href": "slides/week4/week4_more_likelihood_models.html#non-parametric-approach",
     "title": "Week 4: More Likelihood Models",
-    "section": "Survival and hazard",
-    "text": "Survival and hazard\n\nThe survival function is the probability of lasting past \\(t\\)\n\\[S(t) = \\Pr(T &gt; t) = 1 - F(t)\\]\nThe hazard is the instantaneous rate of failure, given survival so far\n\\[h(t) = \\lim_{\\Delta t \\to 0}\\frac{\\Pr(t \\le T &lt; t + \\Delta t \\,|\\, T \\ge t)}{\\Delta t} = \\frac{f(t)}{S(t)}\\]\nThese are all the same object in different clothes. Since \\(h(t) = -\\frac{d}{dt}\\log S(t)\\),\n\\[S(t) = \\exp\\{-H(t)\\}, \\qquad H(t) = \\int_0^t h(u)\\,du\\]\nThe hazard is usually where the substance lives – “is the risk of collapse rising or falling with time in office?”"
+    "section": "Non-parametric approach",
+    "text": "Non-parametric approach\n\nThe easiest way to estimate \\(S(t) = 1 - F(t)\\) is to just plug in \\(\\hat{F(t)}\\) - our empirical CDF in the sample\n\nAt any given value \\(t\\), how many events occur after \\(t\\)\n\nProblem: This doesn’t address censoring of observations – sometimes we stop observing a unit at time \\(t^*\\) rather than observing an actual event.\n\nWe know that \\(T_i &gt; t^*\\) but not what \\(T_i\\) actually equals\n\nLet \\(C = \\{C_1, C_2, \\dotsc, C_n\\}\\) denote the censoring indicator\n\nIf \\(C_i = 1\\), then the observation is censored, the observed value \\(t\\) only gives us information on \\(T_i &gt; t\\) as opposed to \\(T_i = t\\).\nCrucially, we assume that censoring is “uninformative”\n\nOne approach to constructing a non-parametric estimator of the survival function under censoring is the Kaplan-Meier estimator."
   },
   {
-    "objectID": "slides/week4/week4_more_likelihood_models.html#the-likelihood-with-censoring",
-    "href": "slides/week4/week4_more_likelihood_models.html#the-likelihood-with-censoring",
+    "objectID": "slides/week4/week4_more_likelihood_models.html#kaplan-meier-estimator",
+    "href": "slides/week4/week4_more_likelihood_models.html#kaplan-meier-estimator",
     "title": "Week 4: More Likelihood Models",
-    "section": "The likelihood with censoring",
-    "text": "The likelihood with censoring\n\nA unit that fails at \\(\\tilde{T}_i\\) contributes the density \\(f(\\tilde{T}_i)\\)\nA unit that is censored at \\(\\tilde{T}_i\\) contributes only \\(\\Pr(T_i &gt; \\tilde{T}_i) = S(\\tilde{T}_i)\\)\nPutting them together\n\\[\\mathcal{L}(\\theta) = \\prod_{i=1}^n f(\\tilde{T}_i)^{\\delta_i} \\, S(\\tilde{T}_i)^{1 - \\delta_i}\n  = \\prod_{i=1}^n h(\\tilde{T}_i)^{\\delta_i} \\, S(\\tilde{T}_i)\\]\nCensored observations are not discarded – they contribute the information that the unit made it at least that far.\nThis is just maximum likelihood again. Everything from Week 2 still applies."
+    "section": "Kaplan-Meier Estimator",
+    "text": "Kaplan-Meier Estimator\n\nStart by arranging the possible event times from \\(0 &lt; t_{(1)} &lt; t_{(2)} &lt; t_{(3)} &lt; t_{(4)}, \\dotsc, &lt; t_{(n)}\\)\n\nSuppose \\(t\\) is after \\(t_{(j)}\\) and before \\(t_{(j+1)}\\). We can write the survival function in terms of conditional probabilities:\n\n\\[S(t) = Pr(T_i &gt; t | T_i &gt; t_{(j)}) \\times Pr(T_i &gt; t_{(j)} | T_i &gt; t_{(j-1)}) \\times \\dotsc \\times Pr(T_i &gt; t_{(2)} | T_i  &gt; t_{(1)}) \\times Pr(T_i &gt; t_{(1)})\\]\nThe Kaplan-Meier estimator \\(\\hat{S(t)}\\) can be understood as a “plug-in” estimator for each of these probabilities.\n\\[\\hat{S}(t) = \\prod_{j: t_{(j)} \\le t} \\bigg(1 - \\frac{d_j}{r_j} \\bigg)\\]\n\\(d_j\\) denotes the number of units that experience an event at time \\(t_{(j)}\\)\n\\(r_j\\) is the number of units that are still in the risk set up to time \\(j\\)\n\nUnits drop out of the risk set \\(r\\) over time by either experiencing an event or being censored"
   },
   {
-    "objectID": "slides/week4/week4_more_likelihood_models.html#parametric-duration-models",
-    "href": "slides/week4/week4_more_likelihood_models.html#parametric-duration-models",
+    "objectID": "slides/week4/week4_more_likelihood_models.html#kaplan-meier-estimator-1",
+    "href": "slides/week4/week4_more_likelihood_models.html#kaplan-meier-estimator-1",
     "title": "Week 4: More Likelihood Models",
-    "section": "Parametric duration models",
-    "text": "Parametric duration models\n\nPick a functional form for the hazard and estimate by MLE.\nExponential: constant hazard, \\(h(t) = \\lambda\\), so \\(S(t) = \\exp(-\\lambda t)\\)\n\n“Memoryless” – the risk of collapse tomorrow doesn’t depend on how long you’ve already lasted.\nUsually too strong an assumption to believe.\n\nWeibull: \\(h(t) = \\lambda p \\, t^{p-1}\\)\n\n\\(p &gt; 1\\) gives a rising hazard (positive duration dependence), \\(p &lt; 1\\) a falling one, \\(p = 1\\) collapses to the exponential.\n\nCovariates enter through \\(\\lambda_i = \\exp(X_i^{\\prime}\\beta)\\) – a proportional hazards form."
+    "section": "Kaplan-Meier Estimator",
+    "text": "Kaplan-Meier Estimator\n\nIntuition: Consider one of the terms in the product. Using the definition of conditional probability:\n\\[Pr(T_i &gt; t_{(j)} | T_i &gt; t_{(j-1)}) = 1 - Pr(T_i &lt; t_{(j)}|T_i &gt; t_{j-1}) = 1 - \\frac{Pr(T_i \\le t_{(j)}, T_i &gt; t_{(j-1)})}{Pr(T_i &gt; t_{(j-1)})}\\]\nIn the numerator, our “plug-in” estimator is just the share of units that have events occurring at \\(t_{(j)}\\).\nIn the denominator we have the share of units that we know for sure are still “active” in the interval after \\(t_{(j-1)}\\)\nHence our plug-in estimator:\n\\[\\widehat{Pr(T_i &gt; t_{(j)} | T_i &gt; t_{(j-1)})} = 1 - \\frac{d_j}{r_j}\\]\nTaking the product across all of the \\(j\\) where \\(t_{(j)} &lt; t\\) yields the Kaplan-Meier estimator."
   },
   {
-    "objectID": "slides/week4/week4_more_likelihood_models.html#non-parametric-kaplan-meier",
-    "href": "slides/week4/week4_more_likelihood_models.html#non-parametric-kaplan-meier",
+    "objectID": "slides/week4/week4_more_likelihood_models.html#illustration-lung-cancer",
+    "href": "slides/week4/week4_more_likelihood_models.html#illustration-lung-cancer",
     "title": "Week 4: More Likelihood Models",
-    "section": "Non-parametric: Kaplan-Meier",
-    "text": "Non-parametric: Kaplan-Meier\n\n\nIf we don’t want to assume a functional form at all, estimate \\(S(t)\\) directly\n\\[\\hat{S}(t) = \\prod_{t_k \\le t} \\left(1 - \\frac{d_k}{n_k}\\right)\\]\n\n\\(d_k\\) events at time \\(t_k\\), \\(n_k\\) units still at risk just before \\(t_k\\)\n\nPurely descriptive, handles censoring correctly, and it’s the right first look at any duration dataset.\nBut there’s no obvious way to condition on continuous covariates."
+    "section": "Illustration: Lung Cancer",
+    "text": "Illustration: Lung Cancer\n\nLet’s look at a sample dataset from the survival R package on survival times for patients with advanced lung cancer.\n\n\n\n# A tibble: 228 × 10\n    inst  time status   age   sex ph.ecog ph.karno pat.karno meal.cal wt.loss\n   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;\n 1     3   306      2    74     1       1       90       100     1175      NA\n 2     3   455      2    68     1       0       90        90     1225      15\n 3     3  1010      1    56     1       0       90        90       NA      15\n 4     5   210      2    57     1       1       90        60     1150      11\n 5     1   883      2    60     1       0      100        90       NA       0\n 6    12  1022      1    74     1       1       50        80      513       0\n 7     7   310      2    68     2       2       70        60      384      10\n 8    11   361      2    71     2       2       60        80      538       1\n 9     1   218      2    53     1       1       70        80      825      16\n10     7   166      2    61     1       2       70        70      271      34\n# ℹ 218 more rows\n\n\n\nWe want to estimate \\(S(t | \\text{Sex} = \\text{Male})\\) and \\(S(t | \\text{Sex} = \\text{Female})\\)"
   },
   {
-    "objectID": "slides/week4/week4_more_likelihood_models.html#semi-parametric-the-cox-model",
-    "href": "slides/week4/week4_more_likelihood_models.html#semi-parametric-the-cox-model",
+    "objectID": "slides/week4/week4_more_likelihood_models.html#illustration-lung-cancer-1",
+    "href": "slides/week4/week4_more_likelihood_models.html#illustration-lung-cancer-1",
     "title": "Week 4: More Likelihood Models",
-    "section": "Semi-parametric: the Cox model",
-    "text": "Semi-parametric: the Cox model\n\nCox (1972) splits the difference: leave the baseline hazard completely unspecified, but make covariates act proportionally on it\n\\[h(t \\,|\\, X_i) = h_0(t)\\exp(X_i^{\\prime}\\beta)\\]\nWe can estimate \\(\\beta\\) without ever estimating \\(h_0(t)\\), using the partial likelihood\n\\[\\mathcal{L}_p(\\beta) = \\prod_{i \\,:\\, \\delta_i = 1} \\frac{\\exp(X_i^{\\prime}\\beta)}{\\sum_{j \\in R(\\tilde{T}_i)} \\exp(X_j^{\\prime}\\beta)}\\]\nwhere \\(R(t)\\) is the risk set – everyone still around just before \\(t\\)."
+    "section": "Illustration: Lung Cancer",
+    "text": "Illustration: Lung Cancer\n\nIn the survival package, we need to define a “survival” outcome in terms of the event time and the censoring indicator"
   },
   {
-    "objectID": "slides/week4/week4_more_likelihood_models.html#the-cox-model-is-a-conditional-logit",
-    "href": "slides/week4/week4_more_likelihood_models.html#the-cox-model-is-a-conditional-logit",
+    "objectID": "slides/week4/week4_more_likelihood_models.html#illustration-lung-cancer-2",
+    "href": "slides/week4/week4_more_likelihood_models.html#illustration-lung-cancer-2",
     "title": "Week 4: More Likelihood Models",
-    "section": "The Cox model is a conditional logit",
-    "text": "The Cox model is a conditional logit\n\nLook at that partial likelihood again, and compare it to the conditional logit from earlier today.\nAt each failure time, we are asking: given that exactly one unit in the risk set failed, which one was it?\n\nThat is a conditional logit over the risk set, with the “alternatives” being the units still at risk.\n\nThis is not an analogy – it is the same likelihood. R’s survival::clogit() is literally a wrapper around coxph().\nTwo apparently unrelated halves of today’s lecture turn out to be the same model."
+    "section": "Illustration: Lung Cancer",
+    "text": "Illustration: Lung Cancer\n\nPlot the curve for the sample as a whole"
   },
   {
-    "objectID": "slides/week4/week4_more_likelihood_models.html#testing-proportional-hazards",
-    "href": "slides/week4/week4_more_likelihood_models.html#testing-proportional-hazards",
+    "objectID": "slides/week4/week4_more_likelihood_models.html#illustration-lung-cancer-3",
+    "href": "slides/week4/week4_more_likelihood_models.html#illustration-lung-cancer-3",
     "title": "Week 4: More Likelihood Models",
-    "section": "Testing proportional hazards",
-    "text": "Testing proportional hazards\n\n\nProportional hazards is a real assumption and it is often wrong.\n\nIt says the hazard ratio between any two covariate profiles is constant over the whole time period.\n\nStandard diagnostic: Schoenfeld residuals should show no trend in time (cox.zph() in R).\nFixes: stratify, or interact the covariate with a function of time.\nBut Stensrud and Hernán (2020) push back on the whole enterprise – worth reading before you reflexively run the test.\n\nWith enough data you will always reject; with too little you never will.\nThe better question is whether the estimand you want is even a hazard ratio."
+    "section": "Illustration: Lung Cancer",
+    "text": "Illustration: Lung Cancer\n\nNow let’s do this for gender"
   },
   {
-    "objectID": "slides/week4/week4_more_likelihood_models.html#example-tbd-1",
-    "href": "slides/week4/week4_more_likelihood_models.html#example-tbd-1",
+    "objectID": "slides/week4/week4_more_likelihood_models.html#illustration-lung-cancer-4",
+    "href": "slides/week4/week4_more_likelihood_models.html#illustration-lung-cancer-4",
     "title": "Week 4: More Likelihood Models",
-    "section": "Example: (TBD)",
-    "text": "Example: (TBD)\n\n\n# library(survival)\n# km  &lt;- survfit(Surv(duration, event) ~ 1, data = spells)\n# cox &lt;- coxph(Surv(duration, event) ~ x1 + x2, data = spells)\n# cox.zph(cox)"
+    "section": "Illustration: Lung Cancer",
+    "text": "Illustration: Lung Cancer\n\nPlot separate curves for men and women"
+  },
+  {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#parametric-inference",
+    "href": "slides/week4/week4_more_likelihood_models.html#parametric-inference",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Parametric inference",
+    "text": "Parametric inference\n\nWhen we want to model the survival function using covariates, we run into a clear constraint using purely non-parametric methods – with continuous covariates, we may only have one observation that has a unique covariate value\n\nSplitting the sample and constructing separate K-M curves quickly becomes infeasible.\n\nWe may want to assume a model for the event time. We can write that density in terms of the hazard and the survival function\n\\[f(t) = h(t)S(t)\\]\nNote that by the definition of the cumulative hazard \\(H(t) = - \\log(S(t))\\) and \\(S(t) = \\exp(-H(t))\\), so\n\\[f(t) = h(t)\\exp(-H(t))\\]"
+  },
+  {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#parametric-inference-1",
+    "href": "slides/week4/week4_more_likelihood_models.html#parametric-inference-1",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Parametric inference",
+    "text": "Parametric inference\n\nDepending on the assumptions we make about the nature of the hazard, we can obtain different distributions for \\(f(t)\\).\n\nIn the simplest case, lets assume that the hazard does not vary over time: \\(h(t) = \\lambda\\). \\(\\lambda &gt; 0\\)\nAnd the cumulative hazard is \\(H(t) = \\int_{0}^{t} \\lambda du = \\lambda t\\)\n\nThis yields the exponential distribution\n\\[f(t) = \\lambda \\exp(-\\lambda t)\\]"
+  },
+  {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#exponential-model",
+    "href": "slides/week4/week4_more_likelihood_models.html#exponential-model",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Exponential Model",
+    "text": "Exponential Model\n\nThe mean of \\(T_i \\sim \\text{Exponential}(\\lambda)\\) is \\(E[T_i] = \\frac{1}{\\lambda}\\). We’ll often reparameterize the mean as \\(\\theta\\), yielding a density of\n\\[f(t) = \\frac{1}{\\theta} \\exp\\bigg(-\\frac{1}{\\theta} t\\bigg)\\]\n\\(\\theta\\) is strictly greater than \\(0\\), so we’ll use a log-link to incorporate the covariates:\n\\[\\log(E[Y_i | X_i]) = \\log(\\theta_i) = X_i^{\\prime}\\beta\\]\nAlternatively, we can write\n\\[E[Y_i | X_i] = \\exp(X_i^{\\prime}\\beta)\\]\nNote that the constant hazard assumption is a strong one – the exponential distribution is “memoryless” in that knowing that a unit has survived up until time \\(t\\) tells you nothing about its instantenous probability of failure.\n\nMore flexible distributions like the Weibull allow for a time-varying hazard."
+  },
+  {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#exponential-model-1",
+    "href": "slides/week4/week4_more_likelihood_models.html#exponential-model-1",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Exponential Model",
+    "text": "Exponential Model\n\nWe can interpret changes in the linear predictor in terms of changes in the hazard since\n\n\\[h(t) = \\frac{1}{\\theta_i} = \\frac{1}{\\exp(X_i^{\\prime}\\beta)}\\]\n\nIncreases in the linear predictor reduce the hazard.\nThis also lets us write down the survival function\n\n\\[S(t) = \\exp\\bigg(- \\frac{1}{\\exp(X_i^{\\prime}\\beta)}t \\bigg)\\]"
+  },
+  {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#application",
+    "href": "slides/week4/week4_more_likelihood_models.html#application",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Application",
+    "text": "Application\n\nLet’s compare our parametric fit to the non-parametric Kaplan-Meier estimates\n\n\nGet the survival curves for men and women"
+  },
+  {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#application-1",
+    "href": "slides/week4/week4_more_likelihood_models.html#application-1",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Application",
+    "text": "Application\n\nOverlay the exponential survival curves on the Kaplan-Meier estimates"
+  },
+  {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#semi-parametric",
+    "href": "slides/week4/week4_more_likelihood_models.html#semi-parametric",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Semi-parametric",
+    "text": "Semi-parametric\n\nYou’ll notice that the fit is okay, but there is some discrepancy\n\nThis is because the hazard appears to be time-varying.\nYou can see a kind of “s-curve” which the exponential by construction cannot capture.\n\nOther parametric models allow for more flexibility in the hazard rate’s evolution over time\n\nFor example, the Weibull model, which adds an additional shape parameter to the hazard to allow it to vary over time actually fits the data quite well!\n\nBut suppose that we want to make very minimal assumptions about the structure of the hazard function – can we still estimate the relationship between covariates and the hazard?"
+  },
+  {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#cox-proportional-hazards",
+    "href": "slides/week4/week4_more_likelihood_models.html#cox-proportional-hazards",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Cox Proportional Hazards",
+    "text": "Cox Proportional Hazards\n\nThe Cox proportional hazards model assumes that covariates enter the hazard log-linearly, but the baseline hazard is unspecified\n\n\\[h_i(t) =  h_0(t)\\exp(X_i^{\\prime}\\beta)\\]\n\n\\(h_0(t)\\) is the unknown baseline hazard function.\nNote that while the baseline hazard is not explicitly identified, the ratio of the hazards of two observations \\(i\\) and \\(j\\) at time \\(t\\) does not depend on the baseline\n\\[\\frac{h_i(t)}{h_j(t)} = \\frac{\\exp(X_i^{\\prime}\\beta)}{\\exp(X_j^{\\prime}\\beta)}\\]\nThe model is semi-parametric in that some components are left entirely unspecified…\n\n… but others are not – we assume that the covariates act proportionally on the hazard irrespective of time."
+  },
+  {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#cox-proportional-hazards-1",
+    "href": "slides/week4/week4_more_likelihood_models.html#cox-proportional-hazards-1",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Cox Proportional Hazards",
+    "text": "Cox Proportional Hazards\n\nThe model is estimated by maximizing a partial likelihood\n\nWe observe event time \\(Y_i\\) - assume no ties\n\nThe individual partial likelihood is\n\\[L_i(\\beta) = \\frac{\\exp(X_i^{\\prime}\\beta)}{\\sum_{k; Y_k \\ge Y_i} \\exp(X_k^{\\prime}\\beta)}\\]\nIntuitively: The denominator contains the hazards of all observations in the risk set at the event time \\(Y_i\\)\nThen the full likelihood is just the product over all the individual partial likelihoods\n\\[L(\\beta) = \\prod_{i: C_i = 0}  \\frac{\\exp(X_i^{\\prime}\\beta)}{\\sum_{k; Y_k \\ge Y_i} \\exp(X_k^{\\prime}\\beta)}\\]"
+  },
+  {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#application-2",
+    "href": "slides/week4/week4_more_likelihood_models.html#application-2",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Application",
+    "text": "Application\n\nWhat does the Cox fit look like\n\n\n\nCall:\ncoxph(formula = Surv(time, status) ~ I(sex == 2), data = lung)\n\n                coef exp(coef) se(coef)  z     p\nI(sex == 2)TRUE -0.5       0.6      0.2 -3 0.001\n\nLikelihood ratio test=11  on 1 df, p=0.001\nn= 228, number of events= 165 \n\n\n\nNote that we don’t get an estimate of the hazard because the baseline is left unspecified\n\nIf we want to plot survival curves, we’ll need some estimate of \\(h_0\\) using another method (like Kaplan-Meier)"
+  },
+  {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#application-3",
+    "href": "slides/week4/week4_more_likelihood_models.html#application-3",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Application",
+    "text": "Application\n\nCalculate the baseline hazard via Kaplan-Meier and overlay the Cox predicted hazards for men and women"
   },
   {
     "objectID": "slides/week4/week4_more_likelihood_models.html#next-week",
@@ -382,7 +459,7 @@
     "href": "slides/week4/week4_more_likelihood_models.html#references",
     "title": "Week 4: More Likelihood Models",
     "section": "References",
-    "text": "References\n\n\nCox, David R. 1972. “Regression Models and Life-Tables.” Journal of the Royal Statistical Society, Series B 34 (2): 187–202. https://doi.org/10.1111/j.2517-6161.1972.tb00899.x.\n\n\nHainmueller, Jens, Daniel J. Hopkins, and Teppei Yamamoto. 2014. “Causal Inference in Conjoint Analysis: Understanding Multidimensional Choices via Stated Preference Experiments.” Political Analysis 22 (1): 1–30. https://doi.org/10.1093/pan/mpt024.\n\n\nMcFadden, Daniel. 1974. “Conditional Logit Analysis of Qualitative Choice Behavior.” In Frontiers in Econometrics, edited by Paul Zarembka, 105–42. New York: Academic Press.\n\n\nPuig, Sergio, and Anton Strezhnev. 2017. “Affiliation Bias in Arbitration: An Experimental Approach.” Journal of Legal Studies 46 (2): 371–89. https://doi.org/10.1086/694254.\n\n\nStensrud, Mats J., and Miguel A. Hernán. 2020. “Why Test for Proportional Hazards?” JAMA 323 (14): 1401–2. https://doi.org/10.1001/jama.2020.1267.\n\n\nTrain, Kenneth E. 2009. Discrete Choice Methods with Simulation. 2nd ed. Cambridge: Cambridge University Press. https://doi.org/10.1017/CBO9780511805271."
+    "text": "References\n\n\nHainmueller, Jens, Daniel J. Hopkins, and Teppei Yamamoto. 2014. “Causal Inference in Conjoint Analysis: Understanding Multidimensional Choices via Stated Preference Experiments.” Political Analysis 22 (1): 1–30. https://doi.org/10.1093/pan/mpt024.\n\n\nMcFadden, Daniel. 1974. “Conditional Logit Analysis of Qualitative Choice Behavior.” In Frontiers in Econometrics, edited by Paul Zarembka, 105–42. New York: Academic Press.\n\n\nPuig, Sergio, and Anton Strezhnev. 2017. “Affiliation Bias in Arbitration: An Experimental Approach.” Journal of Legal Studies 46 (2): 371–89. https://doi.org/10.1086/694254.\n\n\nTrain, Kenneth E. 2009. Discrete Choice Methods with Simulation. 2nd ed. Cambridge: Cambridge University Press. https://doi.org/10.1017/CBO9780511805271."
   },
   {
     "objectID": "slides/week2/week2_likelihood_inference.html#likelihood-inference",
