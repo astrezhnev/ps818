@@ -494,7 +494,7 @@
     "href": "slides/week3/week3_generalized_linear_models.html#the-iptw-estimate-2",
     "title": "Week 3: Generalized Linear Models",
     "section": "The IPTW estimate",
-    "text": "The IPTW estimate\n\nCompare to the alternatives:\n\n\n\n               estimator estimate\n1       Naive difference   -15205\n2  Regression adjustment      752\n3             IPTW (ATT)     1759\n4 Experimental benchmark     1794"
+    "text": "The IPTW estimate\n\nCompare to the alternatives:\n\n\nnaive_est &lt;- with(lalonde, mean(re78[treat==1]) - mean(re78[treat==0]))\nreg_fit &lt;- lm_robust(re78 ~ treat + age + education + black + hispanic + married + nodegree + re74 + re75,\n                     data=lalonde, se_type=\"HC2\")\nreg_est &lt;- coef(reg_fit)[\"treat\"]\ndata.frame(estimator = c(\"Naive difference\", \"Regression adjustment\", \"IPTW (ATT)\", \"Experimental benchmark\"),\n           estimate  = c(naive_est, as.numeric(reg_est), att_hajek, coef(exp_att)[\"treat\"]))\n\n               estimator estimate\n1       Naive difference   -15205\n2  Regression adjustment      752\n3             IPTW (ATT)     1759\n4 Experimental benchmark     1794"
   },
   {
     "objectID": "slides/week3/week3_generalized_linear_models.html#estimating-the-standard-errors",
@@ -508,7 +508,14 @@
     "href": "slides/week3/week3_generalized_linear_models.html#results",
     "title": "Week 3: Generalized Linear Models",
     "section": "Results",
-    "text": "Results\n\n\n               estimator estimate std_error ci_lower ci_upper   se_type\n1       Naive difference   -15205       657   -16493   -13916       HC2\n2  Regression adjustment      752       785     -788     2292       HC2\n3             IPTW (ATT)     1759       966     -170     3599 bootstrap\n4 Experimental benchmark     1794       671      476     3113       HC2\n\n\n\nAdjustment moved us an enormous distance: \\(-\\$15{,}205 \\rightarrow +\\$1{,}759\\), against a benchmark of \\(\\$1{,}794\\).\n\nRegression adjustment alone only reaches about \\(+\\$752\\)\n\nBut the bootstrap interval is wide and includes zero.\n\nWith the comparison group weighted down to an effective 43 units, there simply isn’t much information left.\n\nIPTW estimators are extremely noisy when propensities are close to \\(0\\) or \\(1\\).\n\nDoubly-robust approaches (e.g. AIPW) combine the weights with an outcome model, which helps reduce variance (Kang and Schafer 2007)."
+    "text": "Results\n\nCollect the four estimators, each with its own standard error\n\n\ngrab &lt;- function(f) coef(summary(f))[\"treat\", c(\"Estimate\", \"Std. Error\", \"CI Lower\", \"CI Upper\")]\nresults_tab &lt;- data.frame(\n  estimator = c(\"Naive difference\", \"Regression adjustment\", \"IPTW (ATT)\", \"Experimental benchmark\"),\n  rbind(grab(naive_fit), grab(reg_fit),\n        c(att_hajek, sd(boot_att), unname(quantile(boot_att, c(.025, .975)))),\n        grab(exp_att)),\n  se = c(\"HC2\", \"HC2\", \"bootstrap\", \"HC2\"),\n  row.names = NULL)\nnames(results_tab) &lt;- c(\"estimator\", \"estimate\", \"std_error\", \"ci_lower\", \"ci_upper\", \"se_type\")"
+  },
+  {
+    "objectID": "slides/week3/week3_generalized_linear_models.html#results-1",
+    "href": "slides/week3/week3_generalized_linear_models.html#results-1",
+    "title": "Week 3: Generalized Linear Models",
+    "section": "Results",
+    "text": "Results\n\nresults_tab\n\n               estimator estimate std_error ci_lower ci_upper   se_type\n1       Naive difference   -15205       657   -16493   -13916       HC2\n2  Regression adjustment      752       785     -788     2292       HC2\n3             IPTW (ATT)     1759       966     -170     3599 bootstrap\n4 Experimental benchmark     1794       671      476     3113       HC2\n\n\n\nAdjustment moved us an enormous distance: \\(-\\$15{,}205 \\rightarrow +\\$1{,}759\\), against a benchmark of \\(\\$1{,}794\\).\n\nRegression adjustment alone only reaches about \\(+\\$752\\)\n\nBut the bootstrap interval is wide and includes zero.\n\nWith the comparison group weighted down to an effective 43 units, there simply isn’t much information left.\n\nIPTW estimators are extremely noisy when propensities are close to \\(0\\) or \\(1\\).\n\nDoubly-robust approaches (e.g. AIPW) combine the weights with an outcome model, which helps reduce variance (Kang and Schafer 2007)."
   },
   {
     "objectID": "slides/week3/week3_generalized_linear_models.html#latent-variables-and-logit",
@@ -613,18 +620,39 @@
     "href": "slides/week3/week3_generalized_linear_models.html#example-appointer-affiliation-bias-1",
     "title": "Week 3: Generalized Linear Models",
     "section": "Example: Appointer Affiliation Bias",
-    "text": "Example: Appointer Affiliation Bias\n\nIt would seem like an ordinal logit regression would be appropriate here – a three-category discrete outcome with a clear ordering\n\nImplemented in the ordinal package\n\n\n\nordered_logit &lt;- ordinal::clm(isReimbursementFolded_Factor ~ isAppointerSide, data=study1_complete %&gt;% \n                       filter(isAppointerSide == \"Appointed by Winner\"|isAppointerSide == \"Appointed by Loser\"))\n\n\nsummary(ordered_logit)\n\nformula: isReimbursementFolded_Factor ~ isAppointerSide\ndata:    \nstudy1_complete %&gt;% filter(isAppointerSide == \"Appointed by Winner\" | isAppointerSide == \"Appointed by Loser\")\n\n link  threshold nobs logLik  AIC    niter max.grad cond.H \n logit flexible  123  -128.28 262.57 5(0)  2.98e-13 1.5e+01\n\nCoefficients:\n                                   Estimate Std. Error z value Pr(&gt;|z|)\nisAppointerSideAppointed by Winner    0.411      0.340    1.21     0.23\n\nThreshold coefficients:\n                               Estimate Std. Error z value\nSplit costs|Loser pays some      -0.672      0.262   -2.56\nLoser pays some|Loser pays all    0.302      0.256    1.18"
+    "text": "Example: Appointer Affiliation Bias\n\nRead in the responses – -99 is the survey platform’s missing-value code\n\n\nstudy1 &lt;- read_csv(\"data/experiment1_cleaned.csv\", na = c(\"\", \"NA\", \"-99\"))\n\n\nThe outcome is stored as an integer, so recode it into an ordered factor\n\nThe ordering is what makes this an ordinal outcome rather than a nominal one\n\n\n\nstudy1 &lt;- study1 %&gt;%\n  mutate(isReimbursementFolded_Factor = case_when(\n    isReimbursementFolded == 1 ~ \"Winner pays all\",\n    isReimbursementFolded == 2 ~ \"Winner pays some\",\n    isReimbursementFolded == 3 ~ \"Split costs\",\n    isReimbursementFolded == 4 ~ \"Loser pays some\",\n    isReimbursementFolded == 5 ~ \"Loser pays all\"))\n\nstudy1$isReimbursementFolded_Factor &lt;- factor(\n  study1$isReimbursementFolded_Factor,\n  levels = c(\"Winner pays all\", \"Winner pays some\", \"Split costs\",\n             \"Loser pays some\", \"Loser pays all\"), ordered = TRUE)"
   },
   {
     "objectID": "slides/week3/week3_generalized_linear_models.html#example-appointer-affiliation-bias-2",
     "href": "slides/week3/week3_generalized_linear_models.html#example-appointer-affiliation-bias-2",
     "title": "Week 3: Generalized Linear Models",
     "section": "Example: Appointer Affiliation Bias",
-    "text": "Example: Appointer Affiliation Bias\n\nThe model implies that arbitrators appointed by the winning party shift mostly from splitting the costs to making the loser pay for everything\n\nBut is this real or an artifact of the proportional odds assumption? Is there a “constant effect” on the latent variable scale?\n\n\n\n\n\n           Group Estimate Std. Error     z Pr(&gt;|z|)   S   2.5 % 97.5 %\n Loser pays all    0.1022     0.0839  1.22    0.223 2.2 -0.0623 0.2667\n Loser pays some  -0.0170     0.0156 -1.09    0.275 1.9 -0.0476 0.0135\n Split costs      -0.0851     0.0706 -1.21    0.228 2.1 -0.2235 0.0532\n\nTerm: isAppointerSide\nType: prob\nComparison: Appointed by Winner - Appointed by Loser"
+    "text": "Example: Appointer Affiliation Bias\n\nKeep the completed responses, and drop the two “winner pays” categories\n\nEssentially no one chose them, so we’re left with the three options in the vignette\n\n\n\nstudy1_complete &lt;- study1 %&gt;%\n  filter(!is.na(isReimbursementFolded) & Finished == 1) %&gt;%\n  filter(isReimbursementFolded_Factor != \"Winner pays some\" &\n         isReimbursementFolded_Factor != \"Winner pays all\")\n\ntable(study1_complete$isReimbursementFolded_Factor)\n\n\n Winner pays all Winner pays some      Split costs  Loser pays some \n               0                0               76               59 \n  Loser pays all \n             109"
   },
   {
     "objectID": "slides/week3/week3_generalized_linear_models.html#example-appointer-affiliation-bias-3",
     "href": "slides/week3/week3_generalized_linear_models.html#example-appointer-affiliation-bias-3",
+    "title": "Week 3: Generalized Linear Models",
+    "section": "Example: Appointer Affiliation Bias",
+    "text": "Example: Appointer Affiliation Bias"
+  },
+  {
+    "objectID": "slides/week3/week3_generalized_linear_models.html#example-appointer-affiliation-bias-4",
+    "href": "slides/week3/week3_generalized_linear_models.html#example-appointer-affiliation-bias-4",
+    "title": "Week 3: Generalized Linear Models",
+    "section": "Example: Appointer Affiliation Bias",
+    "text": "Example: Appointer Affiliation Bias\n\nIt would seem like an ordinal logit regression would be appropriate here – a three-category discrete outcome with a clear ordering\n\nImplemented in the ordinal package\n\n\n\nordered_logit &lt;- ordinal::clm(isReimbursementFolded_Factor ~ isAppointerSide, data=study1_complete %&gt;% \n                       filter(isAppointerSide == \"Appointed by Winner\"|isAppointerSide == \"Appointed by Loser\"))\n\n\nsummary(ordered_logit)\n\nformula: isReimbursementFolded_Factor ~ isAppointerSide\ndata:    \nstudy1_complete %&gt;% filter(isAppointerSide == \"Appointed by Winner\" | isAppointerSide == \"Appointed by Loser\")\n\n link  threshold nobs logLik  AIC    niter max.grad cond.H \n logit flexible  123  -128.28 262.57 5(0)  2.98e-13 1.5e+01\n\nCoefficients:\n                                   Estimate Std. Error z value Pr(&gt;|z|)\nisAppointerSideAppointed by Winner    0.411      0.340    1.21     0.23\n\nThreshold coefficients:\n                               Estimate Std. Error z value\nSplit costs|Loser pays some      -0.672      0.262   -2.56\nLoser pays some|Loser pays all    0.302      0.256    1.18"
+  },
+  {
+    "objectID": "slides/week3/week3_generalized_linear_models.html#example-appointer-affiliation-bias-5",
+    "href": "slides/week3/week3_generalized_linear_models.html#example-appointer-affiliation-bias-5",
+    "title": "Week 3: Generalized Linear Models",
+    "section": "Example: Appointer Affiliation Bias",
+    "text": "Example: Appointer Affiliation Bias\n\nThe model implies that arbitrators appointed by the winning party shift mostly from splitting the costs to making the loser pay for everything\n\nBut is this real or an artifact of the proportional odds assumption? Is there a “constant effect” on the latent variable scale?\n\n\n\n\n\n           Group Estimate Std. Error     z Pr(&gt;|z|)   S   2.5 % 97.5 %\n Loser pays all    0.1022     0.0839  1.22    0.223 2.2 -0.0623 0.2667\n Loser pays some  -0.0170     0.0156 -1.09    0.275 1.9 -0.0476 0.0135\n Split costs      -0.0851     0.0706 -1.21    0.228 2.1 -0.2235 0.0532\n\nTerm: isAppointerSide\nType: prob\nComparison: Appointed by Winner - Appointed by Loser"
+  },
+  {
+    "objectID": "slides/week3/week3_generalized_linear_models.html#example-appointer-affiliation-bias-6",
+    "href": "slides/week3/week3_generalized_linear_models.html#example-appointer-affiliation-bias-6",
     "title": "Week 3: Generalized Linear Models",
     "section": "Example: Appointer Affiliation Bias",
     "text": "Example: Appointer Affiliation Bias\n\nCompare with multinomial logit (which in this case is equivalent to OLS for each category since we’re using a fully-saturated regression)\n\n\nmultinom_logit &lt;- nnet::multinom(isReimbursementFolded_Factor ~ isAppointerSide, data=study1_complete %&gt;% \n                       filter(isAppointerSide == \"Appointed by Winner\"|isAppointerSide == \"Appointed by Loser\"))\n\n\nmarginaleffects::avg_comparisons(multinom_logit)\n\n\n           Group Estimate Std. Error      z Pr(&gt;|z|)   S    2.5 %  97.5 %\n Loser pays all     0.180     0.0892  2.015   0.0439 4.5  0.00494  0.3546\n Loser pays some   -0.197     0.0773 -2.544   0.0110 6.5 -0.34834 -0.0452\n Split costs        0.017     0.0826  0.205   0.8372 0.3 -0.14498  0.1789\n\nTerm: isAppointerSide\nType: probs\nComparison: Appointed by Winner - Appointed by Loser\n\n\n\nRunning the ordinal logit (as a reviewer asked us to do!) would have given us the wrong result\n\nRemember, don’t just fixate on the outcome when choosing a modeling strategy - think about what your entire bundle of assumptions implies!"
