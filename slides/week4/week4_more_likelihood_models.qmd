@@ -470,160 +470,297 @@ marginaleffects::avg_comparisons(multinom_logit)
 # survival::clogit(chosen ~ educ + origin + job + strata(task_id), data = conjoint)
 ```
 
-## Duration models
+## Survival models
 
-## Duration data
+## Survival models
 
-::: {.incremental}
-
-- Often the outcome of interest is **how long** until something happens
-  - How long does a cabinet government survive?
-  - How long until a civil war ends? Until a dispute is settled? Until a bill passes?
-- The outcome $T_i \ge 0$ is a **duration** (a "survival time", "failure time", "spell length")
-- Two features make this different from anything we've done so far:
-  - The outcome is non-negative and usually right-skewed
-  - We often **don't get to observe the event** for every unit
-
-:::
-
-## Censoring
 
 ::: {.incremental}
 
-- A spell is **right-censored** if the study ends before the event happens
-  - We know $T_i > c_i$, but not what $T_i$ actually is
-- Throwing out censored observations **biases** us toward short durations; coding them as if the event happened at $c_i$ biases us the same way.
-- Instead, record a pair for each unit: the observed time and an **event indicator**
+- Often we have outcome data that is measured as the "time-to-event"
+  - From the medical literature, this is often the number of days before a patient suffers some adverse event (e.g. death).
+  - But lots of other applications (e.g. time to treaty ratification)
 
-  $$(\tilde{T}_i, \delta_i), \qquad \tilde{T}_i = \min(T_i, c_i), \qquad \delta_i = \mathbb{1}\{T_i \le c_i\}$$
+- Assume we observe N i.i.d. event times $T_1, T_2, \dotsc, T_n$
 
-- The likelihood will handle the two cases differently -- and that's really the whole trick.
+- Define the "survival function"
+
+  $$S(t) = Pr(T > t) = 1 - F(t)$$
+
+- We'll also often work with the "hazard" or the "instantaneous" probability of an event happening *given* that it has not yet occurred
+
+  $$h(t) = \underset{\Delta t \to 0}{\lim} \frac{P(t < T_i \le t + \Delta t | T_i > t)}{\Delta t} = \frac{f(t)}{S(t)} = \frac{f(t)}{1-F(t)}$$
+
+- **Intuitively**: Given that I know that an event has not occurred until $t$, what is the probability that it will immediately occur next!
 
 :::
 
-## Survival and hazard
+## Survival models
+
+- We'll also define the cumulative hazard
+
+  $$H(t) = \int_{0}^{t} h(u)du = \int_0^{t} \frac{f(u)}{S(u)} du =  -\log(S(t))$$
+
+## Non-parametric approach
 
 ::: {.incremental}
 
-- The **survival function** is the probability of lasting past $t$
+- The easiest way to estimate $S(t) = 1 - F(t)$ is to just plug in $\hat{F(t)}$ - our empirical CDF in the sample
+  - At any given value $t$, how many events occur *after* $t$
 
-  $$S(t) = \Pr(T > t) = 1 - F(t)$$
+- **Problem**: This doesn't address *censoring* of observations -- sometimes we stop observing a unit at time $t^*$ rather than observing an actual event.
+  - We know that $T_i > t^*$ but not what $T_i$ actually equals
+  
+- Let $C = \{C_1, C_2, \dotsc, C_n\}$ denote the **censoring indicator**
+  - If $C_i = 1$, then the observation is *censored*, the observed value $t$ only gives us information on $T_i > t$ as opposed to $T_i = t$.
+  - Crucially, we assume that censoring is "uninformative"
 
-- The **hazard** is the instantaneous rate of failure, *given survival so far*
-
-  $$h(t) = \lim_{\Delta t \to 0}\frac{\Pr(t \le T < t + \Delta t \,|\, T \ge t)}{\Delta t} = \frac{f(t)}{S(t)}$$
-
-- These are all the same object in different clothes. Since $h(t) = -\frac{d}{dt}\log S(t)$,
-
-  $$S(t) = \exp\{-H(t)\}, \qquad H(t) = \int_0^t h(u)\,du$$
-
-- The hazard is usually where the **substance** lives -- "is the risk of collapse rising or falling with time in office?"
+- One approach to constructing a non-parametric estimator of the survival function *under censoring* is the **Kaplan-Meier** estimator.
 
 :::
 
-## The likelihood with censoring
+## Kaplan-Meier Estimator
 
 ::: {.incremental}
 
-- A unit that **fails** at $\tilde{T}_i$ contributes the density $f(\tilde{T}_i)$
-- A unit that is **censored** at $\tilde{T}_i$ contributes only $\Pr(T_i > \tilde{T}_i) = S(\tilde{T}_i)$
-- Putting them together
+- Start by arranging the possible event times from $0 < t_{(1)} < t_{(2)} < t_{(3)} < t_{(4)}, \dotsc, < t_{(n)}$
+  - Suppose $t$ is after $t_{(j)}$ and before $t_{(j+1)}$. We can write the survival function in terms of conditional probabilities:
+  
+  $$S(t) = Pr(T_i > t | T_i > t_{(j)}) \times Pr(T_i > t_{(j)} | T_i > t_{(j-1)}) \times \dotsc \times Pr(T_i > t_{(2)} | T_i  > t_{(1)}) \times Pr(T_i > t_{(1)})$$
 
-  $$\mathcal{L}(\theta) = \prod_{i=1}^n f(\tilde{T}_i)^{\delta_i} \, S(\tilde{T}_i)^{1 - \delta_i}
-    = \prod_{i=1}^n h(\tilde{T}_i)^{\delta_i} \, S(\tilde{T}_i)$$
+- The **Kaplan-Meier** estimator $\hat{S(t)}$ can be understood as a "plug-in" estimator for each of these probabilities.
 
-- Censored observations are **not** discarded -- they contribute the information that the unit made it at least that far.
-- This is just maximum likelihood again. Everything from Week 2 still applies.
+  $$\hat{S}(t) = \prod_{j: t_{(j)} \le t} \bigg(1 - \frac{d_j}{r_j} \bigg)$$
+
+- $d_j$ denotes the number of units that experience an event at time $t_{(j)}$ 
+- $r_j$ is the number of units that are still in the risk set up to time $j$
+  - Units drop out of the risk set $r$ over time by either experiencing an event or being censored
 
 :::
 
-## Parametric duration models
+## Kaplan-Meier Estimator
 
 ::: {.incremental}
 
-- Pick a functional form for the hazard and estimate by MLE.
-- **Exponential**: constant hazard, $h(t) = \lambda$, so $S(t) = \exp(-\lambda t)$
-  - "Memoryless" -- the risk of collapse tomorrow doesn't depend on how long you've already lasted.
-  - Usually too strong an assumption to believe.
-- **Weibull**: $h(t) = \lambda p \, t^{p-1}$
-  - $p > 1$ gives a rising hazard (positive duration dependence), $p < 1$ a falling one, $p = 1$ collapses to the exponential.
-- Covariates enter through $\lambda_i = \exp(X_i^{\prime}\beta)$ -- a proportional hazards form.
+- **Intuition**: Consider one of the terms in the product. Using the definition of conditional probability:
+
+  $$Pr(T_i > t_{(j)} | T_i > t_{(j-1)}) = 1 - Pr(T_i < t_{(j)}|T_i > t_{j-1}) = 1 - \frac{Pr(T_i \le t_{(j)}, T_i > t_{(j-1)})}{Pr(T_i > t_{(j-1)})}$$
+
+- In the numerator, our "plug-in" estimator is just the share of units that have events occurring at $t_{(j)}$.
+- In the denominator we have the share of units that we know for sure are still "active" in the interval after $t_{(j-1)}$
+
+- Hence our plug-in estimator:
+
+  $$\widehat{Pr(T_i > t_{(j)} | T_i > t_{(j-1)})} = 1 - \frac{d_j}{r_j}$$
+
+- Taking the product across all of the $j$ where $t_{(j)} < t$ yields the Kaplan-Meier estimator.
 
 :::
 
-## Non-parametric: Kaplan-Meier
+## Illustration: Lung Cancer
 
-<!-- TODO: KM plot of a real dataset. survival::survfit(Surv(time, event) ~ group).
-     Good candidates: cabinet duration data, or the veteran's lung cancer data
-     that ships with the survival package for a first pass. -->
+- Let's look at a sample dataset from the `survival` R package on survival times for patients with advanced lung cancer.
+
+```{r}
+library(survival)
+data(cancer, package="survival")
+as_tibble(lung)
+```
+
+- We want to estimate $S(t | \text{Sex} = \text{Male})$ and $S(t | \text{Sex} = \text{Female})$
+
+
+## Illustration: Lung Cancer
+
+- In the `survival` package, we need to define a "survival" outcome in terms of the event time and the censoring indicator
+
+```{r}
+surv_model <- survfit(Surv(time, status) ~ 1, data=lung)
+```
+
+
+
+## Illustration: Lung Cancer
+
+- Plot the curve for the sample as a whole
+
+```{r, fig.width=8, fig.height=6, fig.align='center'}
+plot(surv_model, xlab="Survival Time", conf.int=T, ylab="Survival Rate", mark.time=TRUE)
+```
+
+
+
+## Illustration: Lung Cancer
+
+- Now let's do this for gender
+
+```{r}
+surv_model_sex <- survfit(Surv(time, status) ~ I(sex==2), data=lung)
+```
+
+
+
+## Illustration: Lung Cancer
+
+- Plot separate curves for men and women
+
+```{r, fig.width=8, fig.height=6, fig.align='center'}
+plot(surv_model_sex, col=c("indianred", "dodgerblue"), xlab="Survival Time", conf.int=T, ylab="Survival Rate", mark.time=T)
+legend(750, .9, c("Male", "Female"), col=c("indianred", "dodgerblue"), lwd=2, bty='n')
+```
+
+
+
+## Parametric inference
 
 ::: {.incremental}
 
-- If we don't want to assume a functional form at all, estimate $S(t)$ directly
+- When we want to model the survival function using covariates, we run into a clear constraint using purely non-parametric methods -- with continuous covariates, we may only have one observation that has a unique covariate value
+  - Splitting the sample and constructing separate K-M curves quickly becomes infeasible.
 
-  $$\hat{S}(t) = \prod_{t_k \le t} \left(1 - \frac{d_k}{n_k}\right)$$
+- We may want to assume a **model** for the event time. We can write that density in terms of the *hazard* and the *survival* function
 
-  - $d_k$ events at time $t_k$, $n_k$ units still at risk just before $t_k$
-- Purely descriptive, handles censoring correctly, and it's the right first look at any duration dataset.
-- But there's no obvious way to condition on continuous covariates.
+  $$f(t) = h(t)S(t)$$
+
+- Note that by the definition of the cumulative hazard $H(t) = - \log(S(t))$ and $S(t) = \exp(-H(t))$, so 
+
+  $$f(t) = h(t)\exp(-H(t))$$
 
 :::
 
-## Semi-parametric: the Cox model
+## Parametric inference
+
+- Depending on the assumptions we make about the nature of the hazard, we can obtain different distributions for $f(t)$.
+  - In the simplest case, lets assume that the hazard does not vary over time: $h(t) = \lambda$. $\lambda > 0$
+  - And the cumulative hazard is $H(t) = \int_{0}^{t} \lambda du = \lambda t$
+
+
+- This yields the **exponential distribution**
+
+  $$f(t) = \lambda \exp(-\lambda t)$$
+
+
+## Exponential Model
+
+- The mean of $T_i \sim \text{Exponential}(\lambda)$ is $E[T_i] = \frac{1}{\lambda}$. We'll often reparameterize the mean as $\theta$, yielding a density of 
+
+  $$f(t) = \frac{1}{\theta} \exp\bigg(-\frac{1}{\theta} t\bigg)$$
+
+- $\theta$ is strictly greater than $0$, so we'll use a log-link to incorporate the covariates:
+
+  $$\log(E[Y_i | X_i]) = \log(\theta_i) = X_i^{\prime}\beta$$
+
+- Alternatively, we can write 
+
+  $$E[Y_i | X_i] = \exp(X_i^{\prime}\beta)$$
+
+- Note that the constant hazard assumption is a strong one -- the exponential distribution is "memoryless" in that knowing that a unit has survived up until time $t$ tells you nothing about its instantenous probability of failure.
+  - More flexible distributions like the Weibull allow for a time-varying hazard.
+
+## Exponential Model
+
+ - We can interpret changes in the linear predictor in terms of changes in the hazard since 
+ 
+ $$h(t) = \frac{1}{\theta_i} = \frac{1}{\exp(X_i^{\prime}\beta)}$$
+ 
+ - Increases in the linear predictor reduce the hazard.
+ 
+ - This also lets us write down the survival function
+ 
+ $$S(t) = \exp\bigg(- \frac{1}{\exp(X_i^{\prime}\beta)}t \bigg)$$
+
+## Application
+
+- Let's compare our parametric fit to the non-parametric Kaplan-Meier estimates
+ 
+```{r}
+exp_model_sex <- survreg(Surv(time, status) ~ I(sex==2), dist="exponential", data=lung) # sex = 2 is a dummy variable for female
+```
+
+- Get the survival curves for men and women
+
+```{r}
+exp_surv_men <- function(x) pexp(x, rate = 1/exp(coef(exp_model_sex)%*%c(1,0)), lower.tail = F)
+exp_surv_women <- function(x) pexp(x, rate = 1/exp(coef(exp_model_sex)%*%c(1,1)), lower.tail=F)
+```
+
+
+## Application
+
+- Overlay the exponential survival curves on the Kaplan-Meier estimates
+
+```{r, fig.width=8, fig.height=6, fig.align='center', warning=F}
+plot(surv_model_sex, col=c("indianred", "dodgerblue"), xlab="Survival Time", conf.int=T, ylab="Survival Rate", mark.time=T)
+legend(750, .9, c("Male", "Female"), col=c("indianred", "dodgerblue"), lwd=2, bty='n')
+curve(exp_surv_men, from = 0, to = 1000, lwd=2, col="indianred", add=T)
+curve(exp_surv_women, from = 0, to = 1000, lwd=2, col="dodgerblue", add=T)
+```
+
+
+## Semi-parametric
+
 
 ::: {.incremental}
 
-- @cox1972regression splits the difference: leave the **baseline hazard** completely unspecified, but make covariates act proportionally on it
+- You'll notice that the fit is okay, but there is some discrepancy 
+  - This is because the hazard appears to be **time-varying**.
+  - You can see a kind of "s-curve" which the exponential by construction cannot capture.
 
-  $$h(t \,|\, X_i) = h_0(t)\exp(X_i^{\prime}\beta)$$
+- Other parametric models allow for more flexibility in the hazard rate's evolution over time
+  - For example, the **Weibull** model, which adds an additional shape parameter to the hazard to allow it to vary over time actually fits the data quite well!
 
-- We can estimate $\beta$ without ever estimating $h_0(t)$, using the **partial likelihood**
-
-  $$\mathcal{L}_p(\beta) = \prod_{i \,:\, \delta_i = 1} \frac{\exp(X_i^{\prime}\beta)}{\sum_{j \in R(\tilde{T}_i)} \exp(X_j^{\prime}\beta)}$$
-
-  where $R(t)$ is the **risk set** -- everyone still around just before $t$.
-
-:::
-
-## The Cox model is a conditional logit
-
-::: {.incremental}
-
-- Look at that partial likelihood again, and compare it to the conditional logit from earlier today.
-- At each failure time, we are asking: *given that exactly one unit in the risk set failed, which one was it?*
-  - That is a conditional logit over the risk set, with the "alternatives" being the units still at risk.
-- This is not an analogy -- it is the same likelihood. R's `survival::clogit()` is literally a wrapper around `coxph()`.
-- Two apparently unrelated halves of today's lecture turn out to be the same model.
+- But suppose that we want to make very minimal assumptions about the structure of the hazard function -- can we still estimate the relationship between covariates and the hazard?
 
 :::
 
-## Testing proportional hazards
+## Cox Proportional Hazards
 
-<!-- TODO: cox.zph() output + Schoenfeld residual plot on the running example. -->
+- The **Cox proportional hazards model** assumes that covariates enter the hazard log-linearly, but the baseline hazard is unspecified
 
-::: {.incremental}
+$$h_i(t) =  h_0(t)\exp(X_i^{\prime}\beta)$$
 
-- Proportional hazards is a real assumption and it is often wrong.
-  - It says the hazard **ratio** between any two covariate profiles is constant over the whole time period.
-- Standard diagnostic: **Schoenfeld residuals** should show no trend in time (`cox.zph()` in R).
-- Fixes: stratify, or interact the covariate with a function of time.
-- But @stensrud2020proportional push back on the whole enterprise -- worth reading before you reflexively run the test.
-  - With enough data you will always reject; with too little you never will.
-  - The better question is whether the *estimand* you want is even a hazard ratio.
+- $h_0(t)$ is the unknown baseline hazard function.
+- Note that while the baseline hazard is not explicitly identified, the ratio of the hazards of two observations $i$ and $j$ at time $t$ **does not depend on the baseline**
 
-:::
+  $$\frac{h_i(t)}{h_j(t)} = \frac{\exp(X_i^{\prime}\beta)}{\exp(X_j^{\prime}\beta)}$$
 
-## Example: (TBD)
+- The model is **semi-parametric** in that some components are left entirely unspecified...
+  - ... but others are not -- we assume that the covariates act **proportionally** on the hazard irrespective of time.
 
-<!-- TODO: full worked example. Read data, KM plot, parametric fit (Weibull),
-     Cox fit, cox.zph diagnostic, and interpretation on the hazard-ratio scale.
-     Mirror the structure of the Week 3 propensity score example. -->
+## Cox Proportional Hazards
 
-```{r, echo=T, eval=F}
-# library(survival)
-# km  <- survfit(Surv(duration, event) ~ 1, data = spells)
-# cox <- coxph(Surv(duration, event) ~ x1 + x2, data = spells)
-# cox.zph(cox)
+- The model is estimated by maximizing a **partial likelihood**
+  - We observe event time $Y_i$ - assume no ties
+
+- The individual partial likelihood is
+
+  $$L_i(\beta) = \frac{\exp(X_i^{\prime}\beta)}{\sum_{k; Y_k \ge Y_i} \exp(X_k^{\prime}\beta)}$$
+
+
+- **Intuitively**: The denominator contains the hazards of all observations in the **risk set** at the event time $Y_i$
+
+- Then the full likelihood is just the product over all the individual partial likelihoods
+
+  $$L(\beta) = \prod_{i: C_i = 0}  \frac{\exp(X_i^{\prime}\beta)}{\sum_{k; Y_k \ge Y_i} \exp(X_k^{\prime}\beta)}$$
+
+## Application
+
+- What does the Cox fit look like
+
+```{r}
+cox_model_sex <- coxph(Surv(time, status) ~ I(sex==2), data=lung) # sex = 2 is a dummy variable for female
+print(cox_model_sex)
+```
+
+- Note that we **don't get** an estimate of the hazard because the baseline is left unspecified
+  - If we want to plot survival curves, we'll need some estimate of $h_0$ using another method (like Kaplan-Meier)
+
+## Application
+
+- Calculate the baseline hazard via Kaplan-Meier and overlay the Cox predicted hazards for men and women
+
+```{r, fig.width=8, fig.height=6, fig.align='center', warning=F}
+plot(survfit(cox_model_sex, newdata = data.frame(sex=c(1,2))), col=c("indianred", "dodgerblue"), xlab="Survival Time", conf.int=T, ylab="Survival Rate", mark.time=T)
 ```
 
 ## Next week
