@@ -1787,6 +1787,18 @@ Comparison: Appointed by Winner - Appointed by Loser</code></pre>
 <p><span class="math display">\[L(\beta) = \prod_{i: C_i = 0}  \frac{\exp(X_i^{\prime}\beta)}{\sum_{k; Y_k \ge Y_i} \exp(X_k^{\prime}\beta)}\]</span></p></li>
 </ul>
 </section>
+<section id="cox-and-conditional-logit" class="slide level2">
+<h2>Cox and conditional logit</h2>
+<ul>
+<li class="fragment"><p>Look again at the individual partial likelihood – it has exactly the form of the <strong>conditional logit</strong> from earlier today</p>
+<p><span class="math display">\[L_i(\beta) = \frac{\exp(X_i^{\prime}\beta)}{\sum_{k; Y_k \ge Y_i} \exp(X_k^{\prime}\beta)}\]</span></p></li>
+<li class="fragment"><p>At each event time we are asking: given that <strong>one</strong> unit in the risk set failed, which one was it?</p>
+<ul>
+<li class="fragment">The “choice set” is the risk set <span class="math inline">\(\{k: Y_k \ge Y_i\}\)</span>, and the “chosen alternative” is the unit that failed.</li>
+</ul></li>
+<li class="fragment"><p>This isn’t an analogy – it’s the same likelihood. <code>survival::clogit()</code> rewrites its call and hands it to <code>coxph()</code>.</p></li>
+</ul>
+</section>
 <section id="application-2" class="slide level2">
 <h2>Application</h2>
 <ul>

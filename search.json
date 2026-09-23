@@ -434,6 +434,13 @@
     "text": "Cox Proportional Hazards\n\nThe model is estimated by maximizing a partial likelihood\n\nWe observe event time \\(Y_i\\) - assume no ties\n\nThe individual partial likelihood is\n\\[L_i(\\beta) = \\frac{\\exp(X_i^{\\prime}\\beta)}{\\sum_{k; Y_k \\ge Y_i} \\exp(X_k^{\\prime}\\beta)}\\]\nIntuitively: The denominator contains the hazards of all observations in the risk set at the event time \\(Y_i\\)\nThen the full likelihood is just the product over all the individual partial likelihoods\n\\[L(\\beta) = \\prod_{i: C_i = 0}  \\frac{\\exp(X_i^{\\prime}\\beta)}{\\sum_{k; Y_k \\ge Y_i} \\exp(X_k^{\\prime}\\beta)}\\]"
   },
   {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#cox-and-conditional-logit",
+    "href": "slides/week4/week4_more_likelihood_models.html#cox-and-conditional-logit",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Cox and conditional logit",
+    "text": "Cox and conditional logit\n\nLook again at the individual partial likelihood – it has exactly the form of the conditional logit from earlier today\n\\[L_i(\\beta) = \\frac{\\exp(X_i^{\\prime}\\beta)}{\\sum_{k; Y_k \\ge Y_i} \\exp(X_k^{\\prime}\\beta)}\\]\nAt each event time we are asking: given that one unit in the risk set failed, which one was it?\n\nThe “choice set” is the risk set \\(\\{k: Y_k \\ge Y_i\\}\\), and the “chosen alternative” is the unit that failed.\n\nThis isn’t an analogy – it’s the same likelihood. survival::clogit() rewrites its call and hands it to coxph()."
+  },
+  {
     "objectID": "slides/week4/week4_more_likelihood_models.html#application-2",
     "href": "slides/week4/week4_more_likelihood_models.html#application-2",
     "title": "Week 4: More Likelihood Models",
