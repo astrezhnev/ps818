@@ -788,14 +788,61 @@ c(pred_median - abs(qnorm(.025))*sqrt(pred_prob_var),
   - (e.g.) the marginal change in the **probability of** $D_i=1$ for a one-unit change in $X$
 - `avg_predictions()` will calculate point estimates + CIs for the expected outcome just like we did above.
 - `avg_comparisons()` will do the implied "marginal effects" for a unit change in $X$ given a set baseline.
+- We have to tell it **which covariate profile** to evaluate at. We'll use the **treated** units -- the NSW participants are the group we care about.
+
+```{r, echo=T, message=F}
+library(marginaleffects)
+treated <- subset(lalonde, treat == 1)
+
+grid_median <- datagrid(model = logit_Rglm, newdata = treated,
+                        FUN_numeric = median, FUN_integer = median, FUN_binary = median)
+grid_mean   <- datagrid(model = logit_Rglm, newdata = treated,
+                        FUN_numeric = mean,   FUN_integer = mean,   FUN_binary = mean)
+```
+
+## `marginaleffects`
+
+- The **median** profile is the one we just built by hand; the **mean** profile is the other common convention
 
 ```{r, echo=T}
-marginaleffects::avg_predictions(logit_Rglm, newdata = "median")
+rbind(median = unlist(grid_median[, -1]), mean = unlist(grid_mean[, -1]))
+```
+
+::: {.incremental}
+
+- Note the mean profile is not a person anyone could be -- it is 84% Black and 71% without a degree.
+  - The median profile at least corresponds to a *possible* respondent.
+
+:::
+
+## `marginaleffects`: predicted propensity
+
+```{r, echo=T}
+avg_predictions(logit_Rglm, newdata = grid_median)   # matches our hand calculation
 ```
 
 ```{r, echo=T}
-marginaleffects::avg_comparisons(logit_Rglm, variables = "married", newdata = "median")
+avg_predictions(logit_Rglm, newdata = grid_mean)
 ```
+
+- Evaluating at the *mean* moves us from $\hat{\pi} \approx 0.89$ down to $\approx 0.64$ -- the profile is different, so the point on the curve is different.
+
+## `marginaleffects`: marginal effect of `married`
+
+```{r, echo=T}
+avg_comparisons(logit_Rglm, variables = "married", newdata = grid_median)
+```
+
+```{r, echo=T}
+avg_comparisons(logit_Rglm, variables = "married", newdata = grid_mean)
+```
+
+::: {.incremental}
+
+- Being married lowers the probability of NSW participation by **28** points at the median profile, **39** at the mean profile.
+  - Same $\hat{\beta}$, same data -- only the baseline $\pi_i$ differs. This is the $\beta_k\pi_i(1-\pi_i)$ scaling at work.
+
+:::
 
 
 ## Inverse propensity of treatment weighting
