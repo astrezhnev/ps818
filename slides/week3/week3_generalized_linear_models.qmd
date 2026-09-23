@@ -950,7 +950,7 @@ summary(lm_robust(re78 ~ treat, data = lalonde, weights = w_att, se_type = "HC2"
 
 - Compare to the alternatives:
 
-```{r, echo=F}
+```{r, echo=T}
 naive_est <- with(lalonde, mean(re78[treat==1]) - mean(re78[treat==0]))
 reg_fit <- lm_robust(re78 ~ treat + age + education + black + hispanic + married + nodegree + re74 + re75,
                      data=lalonde, se_type="HC2")
@@ -986,7 +986,9 @@ c(bootstrap_SE = sd(boot_att), quantile(boot_att, c(.025, .975)))
 
 ## Results
 
-```{r, echo=F}
+- Collect the four estimators, each with its own standard error
+
+```{r, echo=T}
 grab <- function(f) coef(summary(f))["treat", c("Estimate", "Std. Error", "CI Lower", "CI Upper")]
 results_tab <- data.frame(
   estimator = c("Naive difference", "Regression adjustment", "IPTW (ATT)", "Experimental benchmark"),
@@ -996,6 +998,11 @@ results_tab <- data.frame(
   se = c("HC2", "HC2", "bootstrap", "HC2"),
   row.names = NULL)
 names(results_tab) <- c("estimator", "estimate", "std_error", "ci_lower", "ci_upper", "se_type")
+```
+
+## Results
+
+```{r, echo=T}
 results_tab
 ```
 
@@ -1211,25 +1218,47 @@ logistic_dens
   - Respondents were given a hypothetical dispute and asked to determine who should pay the legal costs
   - Three options: **Loser pays all**, **Loser pays some**, **Both sides split**
 
-```{r, echo=F, message = F}
-study1 <- read_csv("data/experiment1_cleaned.csv", na= c("", "NA", "-99"))
+## Example: Appointer Affiliation Bias
+
+- Read in the responses -- `-99` is the survey platform's missing-value code
+
+```{r, echo=T, message = F}
+study1 <- read_csv("data/experiment1_cleaned.csv", na = c("", "NA", "-99"))
 ```
 
-```{r, include=F, echo=F}
-study1 <- study1 %>% mutate(isReimbursement_Factor = case_when(isReimbursement == 1 ~ "Claimant pays all",
-                                                     isReimbursement == 2 ~ "Claimant pays some",
-                                                     isReimbursement == 3 ~ "Split costs",
-                                                     isReimbursement == 4 ~ "Respondent pays some",
-                                                     isReimbursement == 5 ~ "Respondent pays all"),
-                  isReimbursementFolded_Factor = case_when(isReimbursementFolded == 1 ~ "Winner pays all",
-                                                           isReimbursementFolded == 2 ~ "Winner pays some",
-                                                           isReimbursementFolded == 3 ~ "Split costs",
-                                                           isReimbursementFolded == 4 ~ "Loser pays some",
-                                                           isReimbursementFolded == 5 ~ "Loser pays all"))
+- The outcome is stored as an integer, so recode it into an **ordered factor**
+  - The ordering is what makes this an ordinal outcome rather than a nominal one
 
-study1$isReimbursementFolded_Factor <- factor(study1$isReimbursementFolded_Factor, levels = c("Winner pays all", "Winner pays some", "Split costs", "Loser pays some", "Loser pays all"), ordered =T)
-study1_complete <- study1 %>% filter(!is.na(isReimbursementFolded)&Finished == 1) %>% filter(isReimbursementFolded_Factor != "Winner pays some"&isReimbursementFolded_Factor != "Winner pays all")
+```{r, echo=T}
+study1 <- study1 %>%
+  mutate(isReimbursementFolded_Factor = case_when(
+    isReimbursementFolded == 1 ~ "Winner pays all",
+    isReimbursementFolded == 2 ~ "Winner pays some",
+    isReimbursementFolded == 3 ~ "Split costs",
+    isReimbursementFolded == 4 ~ "Loser pays some",
+    isReimbursementFolded == 5 ~ "Loser pays all"))
+
+study1$isReimbursementFolded_Factor <- factor(
+  study1$isReimbursementFolded_Factor,
+  levels = c("Winner pays all", "Winner pays some", "Split costs",
+             "Loser pays some", "Loser pays all"), ordered = TRUE)
 ```
+
+## Example: Appointer Affiliation Bias
+
+- Keep the completed responses, and drop the two "winner pays" categories
+  - Essentially no one chose them, so we're left with the **three** options in the vignette
+
+```{r, echo=T}
+study1_complete <- study1 %>%
+  filter(!is.na(isReimbursementFolded) & Finished == 1) %>%
+  filter(isReimbursementFolded_Factor != "Winner pays some" &
+         isReimbursementFolded_Factor != "Winner pays all")
+
+table(study1_complete$isReimbursementFolded_Factor)
+```
+
+## Example: Appointer Affiliation Bias
 
 ```{r, echo=F, fig.align="center", fig.width=7, fig.height=3.2}
 study1_complete %>% ggplot(aes(x=isReimbursementFolded_Factor)) + geom_bar() + xlab("Selected outcome") + ylab("Count") + ggtitle("Distribution of outcome in Puig and Strezhnev (2017)") + theme_minimal()
