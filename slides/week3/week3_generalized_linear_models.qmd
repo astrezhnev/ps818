@@ -1070,11 +1070,12 @@ results_tab
 
 ::: {.incremental}
 
-- **Latent variables and discrete choice** -- we'll pick up where we ran out of time
+- **Latent variables and discrete choice**
   - The latent-variable representation of logit and probit
   - **Ordinal** logit and proportional odds; **multinomial** logit and IIA
 - **Random utility and conditional logit**
-  - Modelling the attributes of the *choices*, not just the chooser
+  - Modelling the attributes of the *choices* 
+  - Analyzing "conjoint" experiments with model-based approaches.
 - **Duration models**
   - The survival function, the hazard, and censoring
   - Parametric (exponential, Weibull), semi-parametric (Cox), and non-parametric (Kaplan-Meier) approaches

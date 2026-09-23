@@ -71,6 +71,7 @@ options(digits=3)
   - **Multinomial** logit and independence of irrelevant alternatives (IIA)
 - **Random utility and conditional logit**
   - Choice data, alternative-specific covariates, and the RUM foundation
+  - **Conjoint experiments** and model-based approaches to analyzing them
 - **Duration models**
   - The survival function, the hazard, and censoring
   - Parametric, semi-parametric (Cox), and non-parametric (Kaplan-Meier) approaches
@@ -428,17 +429,45 @@ marginaleffects::avg_comparisons(multinom_logit)
 
 :::
 
+## Conjoint experiments
+
+::: {.incremental}
+
+- A **conjoint** experiment shows respondents two (or more) profiles with **randomly assigned** attributes and asks them to pick one.
+  - Immigrants differing in education, country of origin, job; candidates differing in party, gender, experience.
+- This is a forced choice between alternatives described by **alternative-specific** covariates -- exactly the conditional logit data structure.
+- Randomization of the attributes is what makes the design so attractive: the attributes are independent of potential outcomes **by construction**.
+
+:::
+
+## Design-based vs. model-based
+
+::: {.incremental}
+
+- The standard estimand is the **AMCE** [@hainmueller2014causal] -- the average change in the probability of selection from changing one attribute, marginalizing over the others.
+  - Estimated by OLS of the choice indicator on attribute dummies. No distributional assumptions at all.
+- The RUM gives us a **model-based** alternative: a conditional logit over the profiles in each task.
+  - Buys us a utility interpretation and lets us model interactions and heterogeneity more cleanly.
+  - Costs us the extreme value assumption on $\epsilon_{ij}$ -- and IIA comes along with it.
+- Worth asking every time: what does the **extra structure** buy, and what would go wrong if it's false?
+
+:::
+
 ## Example: (TBD)
 
-<!-- TODO: pick a running example with alternative-specific covariates.
-     Candidates:
-       - vote choice with party positions (alternative-specific ideological distance)
-       - conjoint / forced-choice experiment (natural long format, clean design)
-       - the Puig & Strezhnev arbitration data if we can get it into long form
-     Estimate with survival::clogit() or mlogit::mlogit(). -->
+<!-- TODO: full worked conjoint example.
+     Need: a long-format conjoint dataset (one row per respondent-task-profile).
+     Candidates: Hainmueller/Hopkins immigration conjoint (public), or a
+     teaching subset of one of our own studies.
+     Show: (1) AMCE by OLS, (2) conditional logit on the same data,
+     (3) compare, and discuss where they diverge and why. -->
 
 ```{r, echo=T, eval=F}
-# survival::clogit(choice ~ x1 + x2 + strata(respondent_id), data = long_df)
+# AMCE, design-based
+# lm_robust(chosen ~ educ + origin + job, data = conjoint, clusters = respondent_id)
+
+# conditional logit, model-based
+# survival::clogit(chosen ~ educ + origin + job + strata(task_id), data = conjoint)
 ```
 
 ## Duration models
