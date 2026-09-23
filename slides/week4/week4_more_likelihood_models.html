@@ -1126,6 +1126,7 @@ Anton Strezhnev
 <li class="fragment"><strong>Random utility and conditional logit</strong>
 <ul>
 <li class="fragment">Choice data, alternative-specific covariates, and the RUM foundation</li>
+<li class="fragment"><strong>Conjoint experiments</strong> and model-based approaches to analyzing them</li>
 </ul></li>
 <li class="fragment"><strong>Duration models</strong>
 <ul>
@@ -1504,16 +1505,46 @@ Comparison: Appointed by Winner - Appointed by Loser</code></pre>
 </ul></li>
 </ul>
 </section>
+<section id="conjoint-experiments" class="slide level2">
+<h2>Conjoint experiments</h2>
+<ul>
+<li class="fragment">A <strong>conjoint</strong> experiment shows respondents two (or more) profiles with <strong>randomly assigned</strong> attributes and asks them to pick one.
+<ul>
+<li class="fragment">Immigrants differing in education, country of origin, job; candidates differing in party, gender, experience.</li>
+</ul></li>
+<li class="fragment">This is a forced choice between alternatives described by <strong>alternative-specific</strong> covariates – exactly the conditional logit data structure.</li>
+<li class="fragment">Randomization of the attributes is what makes the design so attractive: the attributes are independent of potential outcomes <strong>by construction</strong>.</li>
+</ul>
+</section>
+<section id="design-based-vs.-model-based" class="slide level2">
+<h2>Design-based vs. model-based</h2>
+<ul>
+<li class="fragment">The standard estimand is the <strong>AMCE</strong> <span class="citation" data-cites="hainmueller2014causal">(<a href="#/references" role="doc-biblioref" onclick>Hainmueller, Hopkins, and Yamamoto 2014</a>)</span> – the average change in the probability of selection from changing one attribute, marginalizing over the others.
+<ul>
+<li class="fragment">Estimated by OLS of the choice indicator on attribute dummies. No distributional assumptions at all.</li>
+</ul></li>
+<li class="fragment">The RUM gives us a <strong>model-based</strong> alternative: a conditional logit over the profiles in each task.
+<ul>
+<li class="fragment">Buys us a utility interpretation and lets us model interactions and heterogeneity more cleanly.</li>
+<li class="fragment">Costs us the extreme value assumption on <span class="math inline">\(\epsilon_{ij}\)</span> – and IIA comes along with it.</li>
+</ul></li>
+<li class="fragment">Worth asking every time: what does the <strong>extra structure</strong> buy, and what would go wrong if it’s false?</li>
+</ul>
+</section>
 <section id="example-tbd" class="slide level2">
 <h2>Example: (TBD)</h2>
-<!-- TODO: pick a running example with alternative-specific covariates.
-     Candidates:
-       - vote choice with party positions (alternative-specific ideological distance)
-       - conjoint / forced-choice experiment (natural long format, clean design)
-       - the Puig & Strezhnev arbitration data if we can get it into long form
-     Estimate with survival::clogit() or mlogit::mlogit(). -->
+<!-- TODO: full worked conjoint example.
+     Need: a long-format conjoint dataset (one row per respondent-task-profile).
+     Candidates: Hainmueller/Hopkins immigration conjoint (public), or a
+     teaching subset of one of our own studies.
+     Show: (1) AMCE by OLS, (2) conditional logit on the same data,
+     (3) compare, and discuss where they diverge and why. -->
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="co"># survival::clogit(choice ~ x1 + x2 + strata(respondent_id), data = long_df)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="co"># AMCE, design-based</span></span>
+<span id="cb12-2"><a></a><span class="co"># lm_robust(chosen ~ educ + origin + job, data = conjoint, clusters = respondent_id)</span></span>
+<span id="cb12-3"><a></a></span>
+<span id="cb12-4"><a></a><span class="co"># conditional logit, model-based</span></span>
+<span id="cb12-5"><a></a><span class="co"># survival::clogit(chosen ~ educ + origin + job + strata(task_id), data = conjoint)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="duration-models" class="slide level2">
@@ -1671,6 +1702,9 @@ Comparison: Appointed by Winner - Appointed by Loser</code></pre>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-cox1972regression" class="csl-entry" role="listitem">
 Cox, David R. 1972. <span>“Regression Models and Life-Tables.”</span> <em>Journal of the Royal Statistical Society, Series B</em> 34 (2): 187–202. <a href="https://doi.org/10.1111/j.2517-6161.1972.tb00899.x">https://doi.org/10.1111/j.2517-6161.1972.tb00899.x</a>.
+</div>
+<div id="ref-hainmueller2014causal" class="csl-entry" role="listitem">
+Hainmueller, Jens, Daniel J. Hopkins, and Teppei Yamamoto. 2014. <span>“Causal Inference in Conjoint Analysis: Understanding Multidimensional Choices via Stated Preference Experiments.”</span> <em>Political Analysis</em> 22 (1): 1–30. <a href="https://doi.org/10.1093/pan/mpt024">https://doi.org/10.1093/pan/mpt024</a>.
 </div>
 <div id="ref-mcfadden1974conditional" class="csl-entry" role="listitem">
 McFadden, Daniel. 1974. <span>“Conditional Logit Analysis of Qualitative Choice Behavior.”</span> In <em>Frontiers in Econometrics</em>, edited by Paul Zarembka, 105–42. New York: Academic Press.

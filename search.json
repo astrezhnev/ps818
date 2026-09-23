@@ -95,7 +95,7 @@
     "href": "slides/week4/week4_more_likelihood_models.html#this-week",
     "title": "Week 4: More Likelihood Models",
     "section": "This week",
-    "text": "This week\n\nLatent variables and discrete choice (finishing up from last week)\n\nThe latent-variable representation of the logit and probit\nOrdinal logit and the proportional odds assumption\nMultinomial logit and independence of irrelevant alternatives (IIA)\n\nRandom utility and conditional logit\n\nChoice data, alternative-specific covariates, and the RUM foundation\n\nDuration models\n\nThe survival function, the hazard, and censoring\nParametric, semi-parametric (Cox), and non-parametric (Kaplan-Meier) approaches"
+    "text": "This week\n\nLatent variables and discrete choice (finishing up from last week)\n\nThe latent-variable representation of the logit and probit\nOrdinal logit and the proportional odds assumption\nMultinomial logit and independence of irrelevant alternatives (IIA)\n\nRandom utility and conditional logit\n\nChoice data, alternative-specific covariates, and the RUM foundation\nConjoint experiments and model-based approaches to analyzing them\n\nDuration models\n\nThe survival function, the hazard, and censoring\nParametric, semi-parametric (Cox), and non-parametric (Kaplan-Meier) approaches"
   },
   {
     "objectID": "slides/week4/week4_more_likelihood_models.html#latent-variables-and-logit",
@@ -273,11 +273,25 @@
     "text": "IIA, revisited\n\nThe i.i.d. extreme value assumption buys us the closed form, but it also imposes IIA\n\\[\\frac{\\Pr(Y_i = j)}{\\Pr(Y_i = k)} = \\exp\\big((X_{ij} - X_{ik})^{\\prime}\\beta\\big)\\]\n\nThe relative odds of \\(j\\) vs. \\(k\\) depend only on \\(j\\) and \\(k\\) – adding or removing other alternatives changes nothing.\n\nThe red bus/blue bus problem again, now with a name for the culprit: the errors are independent across alternatives.\nWays out:\n\nNested logit – group similar alternatives and allow correlation within nests\nMixed logit / random coefficients – let \\(\\beta\\) vary across individuals (Train 2009)\nMultinomial probit – a full covariance matrix for \\(\\epsilon\\), at real computational cost"
   },
   {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#conjoint-experiments",
+    "href": "slides/week4/week4_more_likelihood_models.html#conjoint-experiments",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Conjoint experiments",
+    "text": "Conjoint experiments\n\nA conjoint experiment shows respondents two (or more) profiles with randomly assigned attributes and asks them to pick one.\n\nImmigrants differing in education, country of origin, job; candidates differing in party, gender, experience.\n\nThis is a forced choice between alternatives described by alternative-specific covariates – exactly the conditional logit data structure.\nRandomization of the attributes is what makes the design so attractive: the attributes are independent of potential outcomes by construction."
+  },
+  {
+    "objectID": "slides/week4/week4_more_likelihood_models.html#design-based-vs.-model-based",
+    "href": "slides/week4/week4_more_likelihood_models.html#design-based-vs.-model-based",
+    "title": "Week 4: More Likelihood Models",
+    "section": "Design-based vs. model-based",
+    "text": "Design-based vs. model-based\n\nThe standard estimand is the AMCE (Hainmueller, Hopkins, and Yamamoto 2014) – the average change in the probability of selection from changing one attribute, marginalizing over the others.\n\nEstimated by OLS of the choice indicator on attribute dummies. No distributional assumptions at all.\n\nThe RUM gives us a model-based alternative: a conditional logit over the profiles in each task.\n\nBuys us a utility interpretation and lets us model interactions and heterogeneity more cleanly.\nCosts us the extreme value assumption on \\(\\epsilon_{ij}\\) – and IIA comes along with it.\n\nWorth asking every time: what does the extra structure buy, and what would go wrong if it’s false?"
+  },
+  {
     "objectID": "slides/week4/week4_more_likelihood_models.html#example-tbd",
     "href": "slides/week4/week4_more_likelihood_models.html#example-tbd",
     "title": "Week 4: More Likelihood Models",
     "section": "Example: (TBD)",
-    "text": "Example: (TBD)\n\n\n# survival::clogit(choice ~ x1 + x2 + strata(respondent_id), data = long_df)"
+    "text": "Example: (TBD)\n\n\n# AMCE, design-based\n# lm_robust(chosen ~ educ + origin + job, data = conjoint, clusters = respondent_id)\n\n# conditional logit, model-based\n# survival::clogit(chosen ~ educ + origin + job + strata(task_id), data = conjoint)"
   },
   {
     "objectID": "slides/week4/week4_more_likelihood_models.html#duration-models",
@@ -368,7 +382,7 @@
     "href": "slides/week4/week4_more_likelihood_models.html#references",
     "title": "Week 4: More Likelihood Models",
     "section": "References",
-    "text": "References\n\n\nCox, David R. 1972. “Regression Models and Life-Tables.” Journal of the Royal Statistical Society, Series B 34 (2): 187–202. https://doi.org/10.1111/j.2517-6161.1972.tb00899.x.\n\n\nMcFadden, Daniel. 1974. “Conditional Logit Analysis of Qualitative Choice Behavior.” In Frontiers in Econometrics, edited by Paul Zarembka, 105–42. New York: Academic Press.\n\n\nPuig, Sergio, and Anton Strezhnev. 2017. “Affiliation Bias in Arbitration: An Experimental Approach.” Journal of Legal Studies 46 (2): 371–89. https://doi.org/10.1086/694254.\n\n\nStensrud, Mats J., and Miguel A. Hernán. 2020. “Why Test for Proportional Hazards?” JAMA 323 (14): 1401–2. https://doi.org/10.1001/jama.2020.1267.\n\n\nTrain, Kenneth E. 2009. Discrete Choice Methods with Simulation. 2nd ed. Cambridge: Cambridge University Press. https://doi.org/10.1017/CBO9780511805271."
+    "text": "References\n\n\nCox, David R. 1972. “Regression Models and Life-Tables.” Journal of the Royal Statistical Society, Series B 34 (2): 187–202. https://doi.org/10.1111/j.2517-6161.1972.tb00899.x.\n\n\nHainmueller, Jens, Daniel J. Hopkins, and Teppei Yamamoto. 2014. “Causal Inference in Conjoint Analysis: Understanding Multidimensional Choices via Stated Preference Experiments.” Political Analysis 22 (1): 1–30. https://doi.org/10.1093/pan/mpt024.\n\n\nMcFadden, Daniel. 1974. “Conditional Logit Analysis of Qualitative Choice Behavior.” In Frontiers in Econometrics, edited by Paul Zarembka, 105–42. New York: Academic Press.\n\n\nPuig, Sergio, and Anton Strezhnev. 2017. “Affiliation Bias in Arbitration: An Experimental Approach.” Journal of Legal Studies 46 (2): 371–89. https://doi.org/10.1086/694254.\n\n\nStensrud, Mats J., and Miguel A. Hernán. 2020. “Why Test for Proportional Hazards?” JAMA 323 (14): 1401–2. https://doi.org/10.1001/jama.2020.1267.\n\n\nTrain, Kenneth E. 2009. Discrete Choice Methods with Simulation. 2nd ed. Cambridge: Cambridge University Press. https://doi.org/10.1017/CBO9780511805271."
   },
   {
     "objectID": "slides/week2/week2_likelihood_inference.html#likelihood-inference",
@@ -1663,7 +1677,7 @@
     "href": "slides/week3/week3_generalized_linear_models.html#next-week",
     "title": "Week 3: Generalized Linear Models",
     "section": "Next week",
-    "text": "Next week\n\nLatent variables and discrete choice – we’ll pick up where we ran out of time\n\nThe latent-variable representation of logit and probit\nOrdinal logit and proportional odds; multinomial logit and IIA\n\nRandom utility and conditional logit\n\nModelling the attributes of the choices, not just the chooser\n\nDuration models\n\nThe survival function, the hazard, and censoring\nParametric (exponential, Weibull), semi-parametric (Cox), and non-parametric (Kaplan-Meier) approaches\n\nReadings: Chapter 15 of Gelman, Hill, and Vehtari (2020); Clark et al. (2003); Stensrud and Hernán (2020)"
+    "text": "Next week\n\nLatent variables and discrete choice\n\nThe latent-variable representation of logit and probit\nOrdinal logit and proportional odds; multinomial logit and IIA\n\nRandom utility and conditional logit\n\nModelling the attributes of the choices\nAnalyzing “conjoint” experiments with model-based approaches.\n\nDuration models\n\nThe survival function, the hazard, and censoring\nParametric (exponential, Weibull), semi-parametric (Cox), and non-parametric (Kaplan-Meier) approaches\n\nReadings: Chapter 15 of Gelman, Hill, and Vehtari (2020); Clark et al. (2003); Stensrud and Hernán (2020)"
   },
   {
     "objectID": "slides/week3/week3_generalized_linear_models.html#references",
