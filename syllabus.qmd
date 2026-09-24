@@ -74,7 +74,7 @@ Problem sets will be distributed as HTML and Quarto files (`.qmd`). You should s
 
 ### In-person Midterms (40%)
 
-We will have two in-person midterm examinations on **Wednesday, October 7th, 2026** and on **Wednesday, November 4th, 2026**. Each exam will take the form of a standard pen-and-paper timed examination involving both theory and practical analysis of sample code and results.
+We will have two in-person midterm examinations on **Wednesday, October 7th, 2026** and on **Wednesday, November 11th, 2026**. Each exam will take the form of a standard pen-and-paper timed examination involving both theory and practical analysis of sample code and results.
 
 ### Replication project (30%)
 

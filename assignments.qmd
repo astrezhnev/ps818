@@ -12,7 +12,7 @@ title: "Assignments"
 | Problem Set 3                | Oct 7 (Week 5)    | Oct 21 (Week 7)    |
 | Replication project memo     | --                | Oct 21 (Week 7)    |
 | Problem Set 4                | Oct 21 (Week 7)   | Nov 4 (Week 9)     |
-| **Midterm 2**                | --                | **In class, Nov 4 (Week 9)** |
+| **Midterm 2**                | --                | **In class, Nov 11 (Week 10)** |
 | **Replication poster**       | --                | **MEAD poster session, Fri Dec 4** |
 
 All problem sets are assigned and due on Wednesdays. The replication project memo is ungraded; see the [Syllabus](syllabus.qmd) for what it should contain.
@@ -60,4 +60,4 @@ Links become active as each problem set is assigned.
 Both exams are **in person**, closed-book, pen-and-paper examinations involving both theory questions and practical interpretation of sample code and results. Together they are worth 40% of the course grade. There is no final exam during the university exam period.
 
 - **Midterm 1:** in class on Wednesday, October 7, covering material through Week 4.
-- **Midterm 2:** in class on Wednesday, November 4, covering material from Weeks 5-8.
+- **Midterm 2:** in class on Wednesday, November 11, covering material from Weeks 5-8.

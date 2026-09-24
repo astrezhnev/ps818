@@ -69,7 +69,7 @@ options(digits=3)
 - **Logistics**:
   - **Lectures** Mon/Wed - 9:30am-10:45am, Sterling Hall 1339
   - *4* Problem Sets (~ 2 weeks each)
-  - *2* in-class midterms (October 7, November 4)
+  - *2* in-class midterms (October 7, November 11)
   - Replication project poster (December 4th)
 
 :::
@@ -138,7 +138,7 @@ options(digits=3)
 
 - **Two in-class midterms** (20% of your grade each)
   - **October 7** -- material through Week 4 (likelihood inference and GLMs)
-  - **November 4** -- material from Weeks 5-8 (Bayesian inference, multilevel models, mixtures)
+  - **November 11** -- material from Weeks 5-8 (Bayesian inference, multilevel models, mixtures)
   - Closed-book, pen-and-paper, in class. Both theory and interpretation of sample code/output.
   - This is a change from previous years -- no more take-home exams.
 
@@ -180,7 +180,7 @@ options(digits=3)
 - **Problem Set 3:** Assigned October 7, due October 21
 - **Replication memo:** Due October 21
 - **Problem Set 4:** Assigned October 21, due November 4
-- **Midterm 2:** In class, Wednesday, November 4
+- **Midterm 2:** In class, Wednesday, November 11
 - **Replication poster:** MEAD poster session, Friday, December 4
 
 :::
@@ -257,7 +257,6 @@ options(digits=3)
   - Multilevel regression and post-stratification (MRP)
 - **Week 8:** Mixture models and the EM algorithm
 - **Week 9:** Item response theory and ideal point models
-  - *Second midterm: Wednesday, November 4*
 
 :::
 
@@ -266,6 +265,7 @@ options(digits=3)
 ::: {.incremental}
 
 - **Week 10:** Regularization and model selection (ridge, LASSO, cross-fitting)
+  - *Second midterm: Wednesday, November 11*
 - **Week 11:** Flexible regression -- trees, forests and BART
 - **Week 12:** Flexible regression -- kernels and Gaussian processes
 - **Week 13:** Causal inference with flexible regression

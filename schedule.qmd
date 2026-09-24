@@ -173,7 +173,7 @@ There is **no class during the first week of instruction** due to APSA and Labor
 
 ## Week 9: Item Response Theory and Ideal Point Models
 
-*Monday, November 2*
+*Monday, November 2 & Wednesday, November 4*
 
 **Topics:**
 
@@ -190,15 +190,9 @@ There is **no class during the first week of instruction** due to APSA and Labor
 **Problem Set 4** due Wednesday, November 4.
 :::
 
-::: {.callout-important appearance="simple"}
-**Midterm 2** In-Class, Wednesday, November 4th
-:::
-
----
-
 ## Week 10: Regularization and Model Selection
 
-*Monday, November 9 & Wednesday, November 11*
+*Monday, November 9*
 
 **Topics:**
 
@@ -208,6 +202,12 @@ There is **no class during the first week of instruction** due to APSA and Labor
 **Readings:**
 
 - Chapters 6-7; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. [*An Introduction to Statistical Learning*.](https://www.statlearning.com/) New York: Springer.
+
+---
+
+::: {.callout-important appearance="simple"}
+**Midterm 2** In-Class, Wednesday, November 11th
+:::
 
 ---
 
