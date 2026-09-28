@@ -261,12 +261,12 @@ logistic_dens
 
 - It turns out that if the error terms $\epsilon_{ik}$ have i.i.d. "Type I extreme value" distributions, we can write the choice probabilities in closed form
 
-  $$\Pr(Y_i = k \,|\, X_i) = \frac{\exp(X_i^{\prime}\beta_{k})}{\sum_{l=1}^K \exp(X_i^{\prime}\beta_{l})}$$
+  $$\Pr(Y_i = k \,|\, X_i) = \frac{\exp(X_i^{\prime}\beta_{k})}{\sum_{k^\prime=1}^K \exp(X_i^{\prime}\beta_{k^\prime})}$$
 
 - This is sometimes referred to as the "softmax" function in machine learning.
 - **Note**: with the normalized baseline category $\beta_1 = 0$, we can write this equivalently as
 
-  $$\Pr(Y_i = k \,|\, X_i) = \frac{\exp(X_i^{\prime}\beta_{k})}{1 + \sum_{l=2}^K \exp(X_i^{\prime}\beta_{l})}$$
+  $$\Pr(Y_i = k \,|\, X_i) = \frac{\exp(X_i^{\prime}\beta_{k})}{1 + \sum_{k^\prime=2}^K \exp(X_i^{\prime}\beta_{k^\prime})}$$
 
 - The i.i.d. error assumption implies **independence of irrelevant alternatives** (IIA).
   - The relative odds of choice $k$ vs. $l$ don't depend on what *other* options are available.
@@ -282,14 +282,13 @@ logistic_dens
 
 ## Example: Appointer Affiliation Bias
 
-- Read in the responses -- `-99` is the survey platform's missing-value code
+- Read in the responses -- `-99` is a missing-value code
 
 ```{r, echo=T, message = F}
 study1 <- read_csv("data/experiment1_cleaned.csv", na = c("", "NA", "-99"))
 ```
 
 - The outcome is stored as an integer, so recode it into an **ordered factor**
-  - The ordering is what makes this an ordinal outcome rather than a nominal one
 
 ```{r, echo=T}
 study1 <- study1 %>%
@@ -309,7 +308,7 @@ study1$isReimbursementFolded_Factor <- factor(
 ## Example: Appointer Affiliation Bias
 
 - Keep the completed responses, and drop the two "winner pays" categories
-  - Essentially no one chose them, so we're left with the **three** options in the vignette
+  - Winner pays is basically an error, so we're left with the **three** options in the vignette
 
 ```{r, echo=T}
 study1_complete <- study1 %>%
@@ -328,7 +327,7 @@ study1_complete %>% ggplot(aes(x=isReimbursementFolded_Factor)) + geom_bar() + x
 
 ## Example: Appointer Affiliation Bias
 
-- It would seem like an ordinal logit regression would be appropriate here -- a three-category discrete outcome with a clear ordering
+- It would seem like an ordinal logit regression would be appropriate -- a three-category discrete outcome with a clear ordering
   - Implemented in the `ordinal` package
 
 ```{r, echo=T}
@@ -507,7 +506,7 @@ tibble(level = sub("governance", "", gov), part_worth = coef(cl_fit)[gov],
        pr_vs_baseline = plogis(part_worth)) %>% kable(digits = 3)
 ```
 
-- Codetermination: a firm with workers on the board beats an otherwise identical private corporation about **`r round(100 * plogis(coef(cl_fit)["governanceWorkers on the board"]))`%** of the time
+- Codetermination (**Workers on the board**) beats an otherwise identical firm that is privately owned by non-worker shareholders (the baseline) about **`r round(100 * plogis(coef(cl_fit)["governanceWorkers on the board"]))`%** of the time
 
 ```{r, echo = F}
 # Part-worths for every level, baselines included at zero, for the plots below
@@ -574,9 +573,6 @@ Conditional logit with all 19 attributes; hollow points are baselines. 95% CIs c
 cj <- cj %>% mutate(log_salary = log(as.numeric(gsub("[^0-9]", "", income))))
 log_formula <- as.formula(paste("chosen ~", paste(c(setdiff(attributes, "income"), "log_salary"), collapse = " + "), "| 0"))
 log_fit <- mlogit(log_formula, data = dfidx(cj, idx = list(c("task_id", "rid"), "profile")))
-lr_salary <- as.numeric(2 * (logLik(cl_fit) - logLik(log_fit)))   # 27 dummies vs. 1 log term
-c(LR = lr_salary, df = length(coef(cl_fit)) - length(coef(log_fit)),
-  p = pchisq(lr_salary, length(coef(cl_fit)) - length(coef(log_fit)), lower.tail = FALSE))
 ```
 
 ```{r, echo = F, fig.width = 10, fig.height = 2.9, fig.align = "center"}
@@ -613,7 +609,7 @@ Red: salary dummies with 95% CIs. Blue: log-salary fit with 95% CI, centered on 
 :::
 
 ::: {.attribution}
-Conditional logit part-worths and respondent-clustered covariance from @mazumder2024workplace. CIs: delta method on the log-odds scale.
+Conditional logit with salary as log(salary); respondent-clustered covariance. Data from @mazumder2024workplace. CIs: delta method on the log-odds scale.
 :::
 
 ```{=html}
@@ -701,7 +697,7 @@ Conditional logit part-worths and respondent-clustered covariance from @mazumder
   
   $$S(t) = Pr(T_i > t | T_i > t_{(j)}) \times Pr(T_i > t_{(j)} | T_i > t_{(j-1)}) \times \dotsc \times Pr(T_i > t_{(2)} | T_i  > t_{(1)}) \times Pr(T_i > t_{(1)})$$
 
-- The **Kaplan-Meier** estimator $\hat{S}(t)$ can be understood as a "plug-in" estimator for each of these probabilities.
+- The **Kaplan-Meier** estimator $\hat{S}(t)$ is a "plug-in" estimator for each of these probabilities.
 
   $$\hat{S}(t) = \prod_{j: t_{(j)} \le t} \bigg(1 - \frac{d_j}{r_j} \bigg)$$
 
@@ -722,9 +718,9 @@ Conditional logit part-worths and respondent-clustered covariance from @mazumder
 - In the numerator, our "plug-in" estimator is just the share of units that have events occurring at $t_{(j)}$.
 - In the denominator we have the share of units that we know for sure are still "active" in the interval after $t_{(j-1)}$
 
-- Hence our plug-in estimator:
+- Hence our overall "plug-in" estimator:
 
-  $$\widehat{Pr(T_i > t_{(j)} | T_i > t_{(j-1)})} = 1 - \frac{d_j}{r_j}$$
+  $$\widehat{Pr}(T_i > t_{(j)} | T_i > t_{(j-1)}) = 1 - \frac{d_j}{r_j}$$
 
 - Taking the product across all of the $j$ where $t_{(j)} \le t$ yields the Kaplan-Meier estimator.
 
@@ -788,8 +784,8 @@ legend(750, .9, c("Male", "Female"), col=c("indianred", "dodgerblue"), lwd=2, bt
 
 ::: {.incremental}
 
-- When we want to model the survival function using covariates, we run into a clear constraint using purely non-parametric methods -- with continuous covariates, we may only have one observation that has a unique covariate value
-  - Splitting the sample and constructing separate K-M curves quickly becomes infeasible.
+- When we want to model the survival function using covariates, we run into a clear constraint using purely non-parametric methods 
+  - Splitting the sample and constructing separate K-M curves for each unique covariate profile quickly becomes infeasible.
 
 - We may want to assume a **model** for the event time. We can write that density in terms of the *hazard* and the *survival* function
 
@@ -827,7 +823,8 @@ legend(750, .9, c("Male", "Female"), col=c("indianred", "dodgerblue"), lwd=2, bt
 
   $$E[T_i | X_i] = \exp(X_i^{\prime}\beta)$$
 
-- Note that the constant hazard assumption is a strong one -- the exponential distribution is "memoryless" in that knowing that a unit has survived up until time $t$ tells you nothing about its instantaneous probability of failure.
+- Note that the constant hazard assumption is strong
+  - The exponential distribution is "memoryless" in that knowing that a unit has survived up until time $t$ tells you nothing about its instantaneous probability of failure.
   - More flexible distributions like the Weibull allow for a time-varying hazard.
 
 ## Exponential Model

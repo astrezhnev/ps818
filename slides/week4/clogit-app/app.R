@@ -7,9 +7,12 @@
 #
 #   Pr(A over B) = logistic((x_A - x_B)' beta)
 #
+# Salary enters as log(salary) rather than as 27 dummies; the other 18
+# attributes are dummies.
+#
 # with a 95% CI from the delta method on the log-odds scale, using the
 # respondent-clustered (CR1) covariance of beta-hat, mapped through the
-# logistic function. Comparisons can be saved to plot side by side.
+# logistic function.
 #
 # beta-hat and V-hat come from prepare_fit.R. Deliberately base R + shiny
 # only: every extra package is another wasm download when this runs in the
@@ -20,12 +23,13 @@ library(shiny)
 
 pw <- read.csv("part_worths.csv", stringsAsFactors = FALSE)
 V  <- as.matrix(read.csv("vcov.csv", row.names = 1, check.names = FALSE))
-beta  <- setNames(pw$estimate[!pw$baseline], pw$term[!pw$baseline])[rownames(V)]
+has_term <- pw$term != ""
+beta  <- tapply(pw$coef[has_term], pw$term[has_term], `[`, 1)[rownames(V)]
 ATTRS <- unique(pw$attribute)
 LABEL <- setNames(pw$label[!duplicated(pw$attribute)], ATTRS)
 LEVELS <- lapply(setNames(ATTRS, ATTRS), function(a) pw$level[pw$attribute == a])
 
-RED <- "#c5050c"; BLUE <- "#0479A8"; INK <- "#333333"; MAX_SAVED <- 6
+RED <- "#c5050c"; BLUE <- "#0479A8"
 
 # Starting point: two otherwise identical mid-range jobs that differ only in
 # governance, so the first number on screen is a governance effect.
@@ -35,14 +39,17 @@ DEFAULT[c("income", "healthcare", "retirement", "sick_leave", "hours", "culture"
 START_A <- replace(DEFAULT, "governance", "Workers on the board")
 START_B <- DEFAULT
 
-# Difference in design vectors, x_A - x_B, over the non-baseline terms
+# Each attribute level adds `value` to coefficient `term` (baselines add nothing)
+LOOKUP <- split(pw[, c("term", "value")], paste(pw$attribute, pw$level, sep = "\r"))
+
+# Difference in design vectors, x_A - x_B
 x_diff <- function(a, b) {
   d <- setNames(numeric(length(beta)), names(beta))
   for (at in ATTRS) {
     if (a[[at]] == b[[at]]) next
-    ta <- paste0(at, a[[at]]); tb <- paste0(at, b[[at]])
-    if (ta %in% names(d)) d[ta] <- d[ta] + 1
-    if (tb %in% names(d)) d[tb] <- d[tb] - 1
+    la <- LOOKUP[[paste(at, a[[at]], sep = "\r")]]; lb <- LOOKUP[[paste(at, b[[at]], sep = "\r")]]
+    if (nzchar(la$term)) d[la$term] <- d[la$term] + la$value
+    if (nzchar(lb$term)) d[lb$term] <- d[lb$term] - lb$value
   }
   d
 }
@@ -87,17 +94,12 @@ body > .container-fluid { height:100%; padding:0; }
 .grid select.form-control { height:22px; padding:0 4px; font-size:12px; border-radius:4px; }
 .btns { display:flex; gap:6px; margin-top:6px; flex:none; }
 .btns .btn { font-size:12px; padding:3px 9px; border-radius:4px; }
-.btn-save { background:#c5050c; border-color:#c5050c; color:#fff; }
-.btn-save:hover { background:#9B0000; border-color:#9B0000; color:#fff; }
 .now { flex:none; border-bottom:1px solid #e2e2e2; padding-bottom:8px; margin-bottom:6px; }
 .now .big { font-family:'Red Hat Display',sans-serif; font-size:30px; font-weight:700; color:#333; }
 .now .ci { font-size:15px; color:#555; margin-left:6px; }
 .now .sub { font-size:12px; color:#777; margin-top:2px; }
-.now .what { font-size:12px; color:#333; margin-top:4px; max-height:34px; overflow-y:auto; }
+.now .what { font-size:12px; color:#333; margin-top:4px; max-height:52px; overflow-y:auto; }
 .plotbox { flex:1 1 auto; min-height:0; }
-.saved { flex:none; font-size:11.5px; color:#555; max-height:92px; overflow-y:auto; margin-top:4px; }
-.saved div { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.saved b { color:#0479A8; }
 .note { flex:none; font-size:11px; color:#888; margin-top:4px; }
 "
 
@@ -129,19 +131,16 @@ ui <- fluidPage(
         lapply(ATTRS, row_ui)
       ),
       div(class = "btns",
-        actionButton("save", "Save comparison", class = "btn-save"),
         actionButton("copy", "Copy A to B"),
-        actionButton("swap", "Swap A and B"),
-        actionButton("clear", "Clear saved")
+        actionButton("swap", "Swap A and B")
       )
     ),
     div(class = "card results",
       uiOutput("now", class = "now"),
       div(class = "plotbox", plotOutput("plot", height = "100%")),
-      uiOutput("saved", class = "saved"),
       div(class = "note",
           "95% CIs: delta method on the log-odds scale, respondent-clustered (CR1) covariance. ",
-          "Conditional logit fit to 3,886 tasks from 993 respondents.")
+          "Conditional logit (salary as log salary) fit to 3,886 tasks from 993 respondents.")
     )
   )
 )
@@ -157,18 +156,11 @@ server <- function(input, output, session) {
     c(predict_ab(jobA(), jobB()), what = describe(jobA(), jobB()))
   })
 
-  saved <- reactiveVal(list())
-
   observe({
     req(ready())
     session$sendCustomMessage("diffs", as.list(ATTRS[jobA() != jobB()]))
   })
 
-  observeEvent(input$save, {
-    s <- c(saved(), list(current()))
-    saved(tail(s, MAX_SAVED))
-  })
-  observeEvent(input$clear, saved(list()))
   observeEvent(input$copy, for (a in ATTRS) updateSelectInput(session, paste0("B_", a), selected = jobA()[[a]]))
   observeEvent(input$swap, {
     a0 <- jobA(); b0 <- jobB()
@@ -190,32 +182,22 @@ server <- function(input, output, session) {
     )
   })
 
+  # Pr(A) and Pr(B) = 1 - Pr(A) as two bars with their 95% CIs
   output$plot <- renderPlot({
-    rows <- c(list(current()), rev(saved()))
-    n <- length(rows)
-    labs <- c("Current", if (length(saved())) paste0("#", rev(seq_along(saved()))))
-    cols <- c(RED, rep(BLUE, n - 1))
-    y <- rev(seq_len(n))
-    par(mar = c(3, 5.2, 0.8, 1), mgp = c(1.9, 0.5, 0), tcl = -0.25, las = 1,
+    r <- current()
+    p  <- c(r$p, 1 - r$p); lo <- c(r$lo, 1 - r$hi); hi <- c(r$hi, 1 - r$lo)
+    x <- c(1, 2); w <- 0.32
+    par(mar = c(2.2, 4, 0.8, 1), mgp = c(2.4, 0.5, 0), tcl = -0.25, las = 1,
         col.axis = "#555", family = "sans")
-    plot(NA, xlim = c(0, 1), ylim = c(0.4, max(n, 4) + 0.6), yaxt = "n", xaxs = "i",
-         xlab = "Pr(Job A chosen over Job B)", ylab = "", bty = "l", fg = "#999")
-    abline(v = 0.5, lty = 2, col = "#999")
-    abline(v = seq(0, 1, 0.1), col = "#eeeeee", lwd = 0.8)
-    axis(2, at = y, labels = labs, fg = "#999", cex.axis = 0.95)
-    for (i in seq_len(n)) {
-      segments(rows[[i]]$lo, y[i], rows[[i]]$hi, y[i], col = cols[i], lwd = 3)
-      points(rows[[i]]$p, y[i], pch = 21, bg = "#fff", col = cols[i], cex = 1.5, lwd = 2)
-    }
+    plot(NA, xlim = c(0.4, 2.6), ylim = c(0, 1), xaxt = "n", yaxs = "i",
+         xlab = "", ylab = "Probability of being chosen", bty = "l", fg = "#999")
+    abline(h = seq(0.1, 0.9, 0.1), col = "#eeeeee", lwd = 0.8)
+    abline(h = 0.5, lty = 2, col = "#999")
+    rect(x - w, 0, x + w, p, col = c(RED, BLUE), border = NA)
+    arrows(x, lo, x, hi, angle = 90, code = 3, length = 0.08, lwd = 2, col = "#333333")
+    text(x, pmin(hi + 0.04, 0.97), sprintf("%.2f", p), font = 2, col = "#333333")
+    axis(1, at = x, labels = c("Job A", "Job B"), fg = "#999", font = 2, cex.axis = 1.05)
   }, res = 96)
-
-  output$saved <- renderUI({
-    s <- saved()
-    if (!length(s)) return(div("Save a comparison to keep it on the plot (up to 6)."))
-    lapply(rev(seq_along(s)), function(i)
-      div(title = s[[i]]$what, tags$b(paste0("#", i)),
-          sprintf(" %.2f [%.2f, %.2f]  ", s[[i]]$p, s[[i]]$lo, s[[i]]$hi), s[[i]]$what))
-  })
 }
 
 shinyApp(ui, server)

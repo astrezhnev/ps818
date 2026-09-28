@@ -3,8 +3,7 @@
 An R Shiny app for the Mazumder and Yan (2024) workplace-democracy conjoint.
 Build two hypothetical jobs from the 19 randomized attributes and see the
 conditional logit's predicted probability that a respondent picks Job A over
-Job B, with a 95% confidence interval. Comparisons can be saved and plotted
-side by side.
+Job B, with a 95% confidence interval.
 
 It runs **in the browser** through [shinylive](https://posit-dev.github.io/r-shinylive/),
 compiled to WebAssembly, so it works on the static course site.
@@ -15,8 +14,8 @@ compiled to WebAssembly, so it works on the static course site.
 | --- | --- |
 | `app.R` | The app itself. **Edit this.** |
 | `prepare_fit.R` | Fits the conditional logit with `mlogit` and writes `part_worths.csv` and `vcov.csv`. |
-| `part_worths.csv` | One row per attribute level: label, coefficient (0 for baselines) and clustered SE. |
-| `vcov.csv` | Respondent-clustered (CR1) covariance of the 73 coefficients. |
+| `part_worths.csv` | One row per attribute level: label, the coefficient it loads on (`term`), its value on that term, and the coefficient. |
+| `vcov.csv` | Respondent-clustered (CR1) covariance of the 47 coefficients. |
 | `build_app_qmd.R` | Regenerates `../clogit_app.qmd` from `app.R` and the two CSVs. |
 
 The model is fit once in `prepare_fit.R` rather than in the app because
@@ -27,8 +26,9 @@ app only needs β̂ and V̂:
 - The CI is the delta method on the log-odds scale, mapped through the
   logistic function.
 
-The specification is the same as the week 4 deck's: all 19 attributes as
-dummies, no alternative-specific constant, clustered by respondent.
+The specification matches the week 4 deck's salary slide: the other 18
+attributes as dummies, salary as log(salary) rather than 27 noisy dummies, no
+alternative-specific constant, clustered by respondent.
 
 ## Workflow
 
