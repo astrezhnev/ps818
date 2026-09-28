@@ -63,7 +63,7 @@ There is **no class during the first week of instruction** due to APSA and Labor
 - Chapters 13-14; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. [*Regression and Other Stories*.](https://avehtari.github.io/ROS-Examples/index.html) Cambridge: Cambridge University Press.
 
 ::: {.callout-note appearance="simple"}
-**Problem Set 1** due Wednesday, September 23. **Problem Set 2** assigned Wednesday, September 23 -- due Wednesday, October 7.
+**Problem Set 1** due Wednesday, September 23. **Problem Set 2** assigned Sunday, September 27 -- due Friday, October 9.
 :::
 
 ---
@@ -102,7 +102,7 @@ There is **no class during the first week of instruction** due to APSA and Labor
 - Chapters 10-11; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. [*Bayesian Data Analysis*.](http://www.stat.columbia.edu/~gelman/book/) 3rd ed. Boca Raton: Chapman and Hall/CRC.
 
 ::: {.callout-note appearance="simple"}
-**Problem Set 2** due Wednesday, October 7. **Problem Set 3** assigned Wednesday, October 7 -- due Wednesday, October 21.
+**Problem Set 3** assigned Wednesday, October 7 -- due Wednesday, October 21. **Problem Set 2** due Friday, October 9.
 :::
 
 ---

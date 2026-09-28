@@ -7,7 +7,7 @@ title: "Assignments"
 | Assignment                   | Assigned          | Due                |
 |------------------------------|-------------------|--------------------|
 | Problem Set 1                | Sept 9 (Week 1)   | Sept 23 (Week 3)   |
-| Problem Set 2                | Sept 23 (Week 3)  | Oct 7 (Week 5)     |
+| Problem Set 2                | Sun Sept 27       | Fri Oct 9 (Week 5) |
 | **Midterm 1**                | --                | **In class, Oct 7 (Week 5)** |
 | Problem Set 3                | Oct 7 (Week 5)    | Oct 21 (Week 7)    |
 | Replication project memo     | --                | Oct 21 (Week 7)    |
@@ -15,7 +15,7 @@ title: "Assignments"
 | **Midterm 2**                | --                | **In class, Nov 11 (Week 10)** |
 | **Replication poster**       | --                | **MEAD poster session, Fri Dec 4** |
 
-All problem sets are assigned and due on Wednesdays. The replication project memo is ungraded; see the [Syllabus](syllabus.qmd) for what it should contain.
+Problem sets are generally assigned and due on Wednesdays. The replication project memo is ungraded; see the [Syllabus](syllabus.qmd) for what it should contain.
 
 ---
 
@@ -37,9 +37,11 @@ Links become active as each problem set is assigned.
 
 ### Problem Set 2
 
-*Assigned Wednesday, September 23 -- due Wednesday, October 7*
+*Assigned Sunday, September 27 -- due Friday, October 9*
 
-*To be posted*
+- [Problem Set 2 `.html`](https://www.antonstrezhnev.com/ps818/psets/ps2/ps818_problem_set_2.html)
+- [Problem Set 2 Github Repository](https://github.com/astrezhnev/ps818/tree/main/psets/ps2/)
+- [Problem Set 2 `.zip` archive](https://github.com/astrezhnev/ps818/raw/main/psets/ps2/ps818_problem_set_2.zip)
 
 ### Problem Set 3
 
