@@ -1,0 +1,230 @@
+---
+title: "PS 818: Problem Set 2"
+author: "YOUR NAME"
+date: "September 27, 2026"
+format:
+  html:
+    toc: true
+    df-print: paged
+    embed-resources: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Useful packages
+library(tidyverse)
+library(maxLik)
+library(sandwich)
+library(mlogit)
+```
+
+> **Assigned:** Sunday, September 27, 2026. **Due:** Friday, October 9, 2026.
+>
+> Submit your solutions on **Gradescope**. Upload *both* the rendered `.html` file (saved as `Yourlastname_Yourfirstinitial_pset2.html`) and the `.qmd` source file that produced it (saved as `Yourlastname_Yourfirstinitial_pset2.qmd`). We should be able to run your code without error messages. In order to receive credit, homework submissions must be substantially started and all work must be shown.
+>
+> I recommend editing this `.qmd` file directly and rendering it to `.html` when you are done. Problem sets are graded on a (+/✓/-) scale.
+>
+> You are strongly encouraged to discuss the problems with other students, in person or on the course [Slack](https://uw-mpolscimethods.slack.com/), but each student must submit their own write-up and code. See the [Syllabus](https://www.antonstrezhnev.com/ps818/syllabus.html) for the full collaboration policy and for the course policy on generative large language models.
+
+# Introduction
+
+Conjoint experiments are a popular method for learning about how people make choices between alternatives that differ on many dimensions at once. In a forced-choice conjoint, respondents are shown multiple profiles with randomly assigned attributes and are asked to select their most preferred option. While this experimental design has been used in marketing for nearly half a century, it has also become very popular in political science for studying political choices. [Hainmueller and Hopkins (2015)](https://onlinelibrary.wiley.com/doi/10.1111/ajps.12138) ran a conjoint experiment to evaluate preferences over immigration in the U.S., asking respondents to compare two potential immigrants who varied on a wide number of features. Each respondent completed five tasks and attributes were randomized independently of each other (with some constraints imposed for impossible profiles).
+
+The conjoint terminology is:
+  - **Task**: A distinct survey vignette comprised of *profiles* over which a respondent makes a *choice*.
+  - **Profile**: A particular combination of *levels* drawn for each *attribute* presented to a respondent.
+  - **Attribute**: A feature of a profile which can take on one of a defined set of levels (e.g. gender, education)
+  - **Level**: A specific value that an attribute can take (e.g. male, college educated, etc..)
+
+The code below loads in the dataset.
+
+```{r, warning=F, message=F}
+conjoint <- readRDS("data/immigrationconjoint.rds")
+```
+
+Each row of the data is one profile shown to one respondent in one task. The relevant variables are:
+
+- `CaseID`: the respondent identifier. There are 1,396 respondents.
+- `contest_no`: the task number (1 through 5) within a respondent.
+- `profile`: which of the two profiles in the task this row describes (1 or 2).
+- `Chosen_Immigrant`: equals $1$ if this profile was chosen, $0$ otherwise. Exactly one profile is chosen per task.
+- The nine randomized attributes: `Education`, `Gender`, `Country of Origin`, `Reason for Application`, `Job`, `Job Experience`, `Job Plans`, `Prior Entry`, and `Language Skills`. All are factors, and the first level of each factor is its baseline.
+
+Note that several variable names contain spaces, so you will need backticks to refer to them in base R (e.g. ``conjoint$`Language Skills` ``). Feel free to rename them.
+
+In political science, researchers typically treat conjoints like factorial experiments and estimate parameters like the average marginal component effect (AMCE) - the average treatment effect of one level of an attribute against another, marginalizing over the distribution of the non-focal attributes. This is usually done via a simple difference-in-means. In this problem set we will instead write down explicit likelihood models for the choices and use them to learn about respondent preferences. In Problem 1 you will write your own likelihood functions and fit them with `maxLik`. In Problem 2 you will fit a conditional logit model using the `mlogit` package.
+
+# Problem 1
+
+To start, we will focus on a single attribute, `Language Skills`, which was assigned uniformly at random with no restrictions on its combinations with other attributes. It has four levels which we will indicate with a letter.
+
+- F: "fluent English"
+- B: "broken English"
+- T: "tried English but unable"
+- I: "used interpreter"
+
+## Part A
+
+Convert the dataframe such that each row is one **task** rather than profile. Drop all tasks where the language levels are identical across profiles. For each respondent and task $it$, let $a_{it}$ and $b_{it}$ denote the two language levels in the task, ordered so that $a_{it}$ comes first in the order $F, B, T, I$. Define the outcome $Y_{it} = 1$ if the profile with level $a_{it}$ is chosen and $Y_{it} = 0$ if the profile with level $b_{it}$ is chosen. 
+
+Let $\pi_{ab}$ be the parameter denoting the probability that a respondent selects a profile with level $a$ over level $b$. Since order does not matter, we have $\binom{4}{2} = 6$ unique parameters. Collect these into a vector $\pi = (\pi_{FB}, \pi_{FT}, \pi_{FI}, \pi_{BT}, \pi_{BI}, \pi_{TI})^{\prime}$. We'll start with the simplest likelihood model and assume that for all $N$ respondents, across all tasks involving a comparison between two profiles with distinct language skills, the observed outcome $Y_{it}$ is an independent Bernoulli draw. We'll assume independence across tasks and respondents for now.
+
+$$Y_{it} \underset{\text{indep.}}{\sim} \text{Bernoulli}(\pi_{a_{it} b_{it}})$$
+
+Write down the likelihood $\mathcal{L}(\pi \mid \mathbf{Y})$ and the log-likelihood. Derive the maximum likelihood estimator of each $\pi_{ab}$ in closed form.
+
+Hint: `pivot_wider()` is useful for the reshape.
+
+## Part B
+
+Write an R function that takes as input the vector of parameters $\pi$ and returns the log-likelihood contribution of each task. Verify that optimizing this log-likelihood with `maxLik` returns the same result as your closed form estimator. Report the MLEs and their standard errors (use the conventional MLE standard errors) along with the maximized log-likelihood of this model. 
+
+Hint: `maxLik` may propose values outside of $(0, 1)$ - you can fix this either by choosing good starting values or optimizing over transformations of the probabilities (e.g. logits). 
+
+## Part C
+
+For any two levels $a$ and $b$, we can learn about how much respondents prefer $a$ to $b$ in two ways.
+
+- The **direct** comparison $\pi_{ab} - \frac{1}{2}$: This considers only choices involving $a$ against $b$ rescaled against a baseline of "indifference" ($\frac{1}{2}$)
+- The **indirect** comparison through a third level $c$ looks at how much better $a$ does against $c$ than $b$ does against $c$: $\pi_{ac} - \pi_{bc}$.
+
+In each of these, positive values denote greater preference for $a$ while negative values denote a greater preference for $b$.
+
+With four levels, each pair of levels has one direct comparison and two indirect comparisons. Using your estimates from Part B, compute the direct comparison and both indirect comparisons for every pair of levels. Provide standard errors for each estimate.
+
+Hint: Use the delta method! For a difference in two parameters, it's very straightforward. Just recall the definition of the variance of a difference and pull the right values from the variance-covariance matrix.
+
+## Part D
+
+Now impose the null hypothesis that the direct and indirect comparisons agree for **every** pair of levels $a, b$ and every third level $c$:
+
+$$\pi_{ab} - \frac{1}{2} = \pi_{ac} - \pi_{bc}$$
+
+Show that this null is equivalent to
+
+$$\pi_{ab} = \frac{1}{2} + \theta_a - \theta_b$$
+
+for some level-specific parameters $\theta_F, \theta_B, \theta_T, \theta_I$ with the normalization $\theta_F = 0$. How many free parameters does the restricted model have compared to the unrestricted model?
+
+Write an R function that returns the log-likelihood of each task under the restricted model as a function of $\theta = (\theta_B, \theta_T, \theta_I)$, and use `maxLik` to find the restricted MLE. Report the estimates and their standard errors, as well as the maximized log-likelihood of the restricted model. Compare the six probabilities $\hat{\pi}$ implied by the restricted model to the unrestricted estimates from Part B.
+
+## Part E
+
+We now want to test the null hypothesis. Since it constrains multiple $\pi$ simultaneously, we need a technique for constructing a *joint* hypothesis test. That is, we want a single p-value from restricting multiple model parameters.
+
+Here, we will use the **likelihood ratio (LR)** test. 
+
+The LR test compares two **nested** models: an *unrestricted* model and a *restricted* model that imposes the null on the parameters. Our unrestricted model is the six-parameter model from Part B. The restricted model is the level-specific $\theta$ model from Part D. Every value of $\theta$ implies a valid value of $\pi$, but not every $\pi$ can be written in terms of $\theta$. Note that there are two other approaches that are asymptotically equivalent. The **Wald test** uses only the unrestricted fit and asks whether $\hat{\pi}$ is far from the null. The **score test** (or **Lagrange multiplier test**) uses only the *restricted* fit and asks how steep the unrestricted log-likelihood is at this fit (how much further would we need to climb to get to the unrestricted estimate).
+
+Let $\ell_U$ denote the maximized log-likelihood of the unrestricted model and $\ell_R$ the maximized log-likelihood of the restricted model. Because the restricted model searches over a subset of the unrestricted model's parameter space, it can never fit the data better, so $\ell_U \ge \ell_R$. The LR test answers the question of whether this improvement is statistically distinguishable from zero. If the null is true, the unrestricted model should improve the fit only by chance.
+
+The likelihood ratio statistic is
+
+$$LR = -2 \log \left(\frac{\mathcal{L}(\hat{\theta}_R \mid \mathbf{Y})}{\mathcal{L}(\hat{\pi}_U \mid \mathbf{Y})}\right) = 2(\ell_U - \ell_R)$$
+
+Under the null hypothesis, $LR$ is asymptotically $\chi^2_q$ distributed where $q$ is the number of restrictions imposed by the null. This is equivalent to the difference in the number of free parameters between the unrestricted and restricted models. 
+
+We conduct the test by comparing the observed $LR$ to the null distribution and calculating our p-value, the probability that we would observe a value at least this extreme or greater **if** the null were true. Remember, since the $\chi^2_q$ distribution is defined on the positive reals, this is a one-sided hypothesis test.
+
+Conduct the LR test of the null from Part D. Report $\ell_U$, $\ell_R$, the number of restrictions $q$, the test statistic, and the $p$-value, and interpret the result substantively at $\alpha = .05$. Looking back at Part C, which comparisons seem to be driving the result?
+
+Hint: If you saved your `maxLik` fits, `logLik()` returns the maximized log-likelihood.
+
+## Part F
+
+The null from Part D restricts every pair of levels at once. Instead, we could focus on one level at a time. Let's set $F$ "fluent English" to be our **baseline** level (it's the first in our ordering). For another level $a \in \{B, T, I\}$, consider the null that the direct comparison of $a$ with the baseline $F$ equals both of its indirect comparisons:
+
+$$\pi_{aF} - \frac{1}{2} = \pi_{ac} - \pi_{Fc} \quad \text{for both levels } c \notin \{a, F\}$$
+
+This gives three separate tests, one for each non-baseline level, each with two restrictions. Remember that $\pi_{ba} = 1 - \pi_{ab}$.
+
+For each level $a$, this null is equivalent to the restricted model from Part D *except* that the probability for the one pair of levels that involves neither $a$ nor $F$ is left unrestricted. For example, under the null for $a = B$, $\pi_{TI}$ is a free parameter, while each of the other five probabilities takes the form $\pi_{cd} = \frac{1}{2} + \theta_c - \theta_d$ as before.
+
+For each level, write an R function that returns the log-likelihood of each task under this new restricted model and use `maxLik` to find the restricted MLE. Then conduct an LR test of each null against the unrestricted model from Part B at $\alpha = .05$, reporting the test statistic, degrees of freedom, and $p$-value.
+
+Compare these results to the joint test of the full null in Part E. What do you notice?
+
+## Part G
+
+We assumed a model that considered independent tasks and respondents. But respondents' choices are likely correlated across tasks as they share a common underlying latent preference. Independence across respondents is plausible by random sampling, but not *within* respondents. Here we will estimate **cluster-robust** standard errors for your estimates in Part B, clustering on **respondent**.
+
+Recall from lecture that the asymptotic variance of the MLE has a **sandwich** form.
+$$\text{Var}(\hat{\pi}) \approx \underbrace{\big[-\mathbb{E}_{\pi_0}[H_n(\pi_0)]\big]^{-1}}_{\text{bread}} \underbrace{\text{Var}_{\pi_0}\big(S_n(\pi_0)\big)}_{\text{meat}} \underbrace{\big[-\mathbb{E}_{\pi_0}[H_n(\pi_0)]\big]^{-1}}_{\text{bread}}$$
+
+For clustered standard errors, the bread is the same as before: we use the inverse of the sample negative Hessian evaluated at the MLE.
+
+$$\widehat{\mathbb{E}}_{\pi_0}[H_n(\pi_0)] = \sum_{i=1}^{N}\sum_{t} H_{it}(\hat{\pi})$$
+
+However, the meat changes to allow for arbitrary dependence within a respondent. Our estimator first **sums the scores within each respondent** and then takes the **outer products** of those sums. It then sums those matrices across clusters.
+
+$$\widehat{\text{Var}}_{\pi_0}\big(S_n(\pi_0)\big) = \sum_{i=1}^{N} \left(\sum_{t} s_{it}(\hat{\pi})\right)\left(\sum_{t} s_{it}(\hat{\pi})\right)^{\prime}$$
+
+
+It is common to apply a small-sample correction. The $\text{CR1}$ correction multiplies the robust variance-covariance matrix by a factor $\frac{G}{G-1}$ where $G$ is the total number of clusters.
+
+Estimate the **cluster-robust standard errors** for the $\hat{\pi}$ parameters under the unrestricted model from Part B. Compare them to your original estimates. Do they differ by much? Why might the difference be large or small in this case?
+
+Hint: You do not need to derive the score or Hessian analytically. Remember `sandwich::estfun()` returns the matrix of per-task scores from a `maxLik` fit and `maxLik::hessian()` returns the Hessian. You can validate your estimates using `sandwich::vcovCL(fit, cluster = ...)`, which applies the CR1 correction by default.
+
+
+# Problem 2
+
+Now we'll turn to modeling the entire choice process using **all** of the attributes jointly. Return to the original **profile**-level dataset rather than the **task**-level dataset you constructed for Problem 1. We will also use all 9 of the conjoint attributes that were included in the study.
+
+Consider a setting where respondents are given tasks to choose between $J$ different profiles. Our data-generating process assumes that for each respondent $i$, task $t$, and profile $j$, a respondent's latent **utility** from that profile is equal to
+
+$$U_{itj} = X_{itj}^{\prime}\beta + \epsilon_{itj}$$
+
+where $X_{itj}$ is a $k$-length vector of indicator variables for all nine attributes for respondent $i$, task $t$, profile $j$. We omit the baseline level of each as is standard for dummy variable coding (you should have $k=41$). We also omit the intercept.
+
+$X_{itj}^{\prime}\beta$ represents the **systematic** component of a respondent's utility while $\epsilon_{itj}$ represents the **stochastic** component. Assume that respondent $i$ chooses in each task the profile with the highest utility.
+
+If the $\epsilon_{itj}$ are i.i.d. Type-I Extreme Value (the difference between two Type-I Extreme Value distributions is the **logistic**), the probability that profile $j$ is chosen is
+
+$$\Pr(Y_{it} = j \mid \mathbf{X}_{it}) = \frac{\exp(X_{itj}^{\prime}\beta)}{\sum_{j^\prime=1}^J \exp(X_{itj^\prime}^{\prime}\beta)}$$
+
+In other words, it is the exponentiated **systematic** utility of profile $j$ normalized by the exponentiated systematic utilities of all of the profiles on that task. 
+
+## Part A
+
+This model is the **conditional logit**. We will estimate it using the `mlogit` package (version `2.0.0`), which you should install from CRAN. `mlogit` expects data in "long" format, with one row per alternative (profile) in each choice situation (task).
+
+Read the [documentation](https://cran.r-project.org/web/packages/mlogit/) carefully to understand how to use the package to specify a conditional logit model with only **alternative-specific** variables. Do not estimate an intercept for profile 2 (since profile order is randomized, this parameter should be zero in expectation anyway). You will first need to pre-process the data-frame with the `dfidx()` indexing function so that `mlogit()` understands the task and profile structure of the dataset.
+
+Obtain estimates of the coefficients $\hat{\beta}$ for all of the attribute levels as well as the respondent-clustered variance-covariance matrix $\widehat{V}_{\text{CR1}}$ (use `sandwich::vcovCL(fit, cluster = ...)`, it works on `mlogit` objects). Output your coefficient estimates and standard errors (`lmtest::coeftest` works well here) and present them in a nicely-formatted table (`broom::tidy()` on the output + `knitr::kable()` is a good combination).
+
+Interpret your results for the `Language Skills` variable. How do they compare to what you found in Problem 1?
+
+Hint: `vcovCL()` needs the `cluster` argument as a vector with one respondent ID per **task**, in the same order as the tasks in your fit. Specifying the column name does not seem to work with `mlogit` objects. If you indexed your data with `dfidx()`, `idx()` returns the task, respondent, and profile index for every row.
+
+## Part B
+
+Consider the following two immigrant profiles.
+
+| Attribute | Profile A | Profile B |
+|---|---|---|
+| Education | college degree | high school |
+| Gender | female | male |
+| Country of Origin | Germany | Mexico |
+| Reason for Application | seek better job | seek better job |
+| Job | doctor | construction worker |
+| Job Experience | 5+ years | 1-2 years |
+| Job Plans | contract with employer | will look for work |
+| Prior Entry | never | once w/o authorization |
+| Language Skills | fluent English | broken English |
+
+What is the model's predicted probability that a respondent chooses Profile A over Profile B?
+
+Construct a 95% confidence interval for this prediction by **simulation**. Set the random seed to `53706`. Draw 5,000 values of $\beta$ from a multivariate normal distribution with mean $\hat{\beta}$ and variance $\widehat{V}_{\text{CR1}}$, compute the predicted probability for each draw, and take the 2.5th and 97.5th percentiles of the resulting distribution.
+
+Hint: `MASS::mvrnorm()` works for simulation here - don't load the `MASS` library though because of conflicts with `dplyr`.
+
+## Part C
+
+Suppose you change the `Reason for Application` of *both* profiles in Part B to "reunite with family" and recompute the predicted probability. What happens and why? How does this connect to the way this model was specified?
+
+## Part D
+
+Use the model you fit to estimate the **average** predicted probability that a fluent English profile is chosen over a broken English profile. To do this, take every task in the data, set profile 1's language level to fluent English and profile 2's language level to broken English. Leave all other attributes as observed, compute the predicted probability for each task that profile 1 is chosen, and then average across tasks.
+
+Compare the average predicted probability to your estimates of $\pi_{FB}$ from Problem 1: the unrestricted MLE from Part B and the value implied by the restricted model in Part D. Which one is it closest to? What does this tell you about how your conditional logit model specification uses the choice data to estimate the model parameters?
