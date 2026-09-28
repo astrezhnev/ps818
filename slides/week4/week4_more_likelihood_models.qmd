@@ -404,7 +404,7 @@ bind_rows(as_tibble(ord_me) %>% mutate(model = "Ordinal logit"),
 
 - With the same i.i.d. Type I extreme value errors, we get the same "softmax" expression for the choice probability.
 
-  $$\Pr(Y_i = k \,|\, X_{i1}, \dotsc, X_{iK}) = \frac{\exp(X_{ik}^{\prime}\beta)}{\sum_{l=1}^K \exp(X_{il}^{\prime}\beta)}$$
+  $$\Pr(Y_i = k \,|\, X_{i1}, \dotsc, X_{iK}) = \frac{\exp(X_{ik}^{\prime}\beta)}{\sum_{k^\prime=1}^K \exp(X_{ik^\prime}^{\prime}\beta)}$$
 
 :::
 
@@ -449,7 +449,7 @@ bind_rows(as_tibble(ord_me) %>% mutate(model = "Ordinal logit"),
   - YouGov Blue, June 2020: 1,002 respondents, four tasks each, pairwise comparison of two hypothetical employers
   - Outcome: at which firm would you **rather work**? (forced choice)
 - Each firm profile randomizes **19 attributes**: the one emphasized in the paper is **corporate governance**
-  - *Private, non-worker shareholders* (baseline), *Private, one owner*, *Public, shareholders*, *Workers are shareholders*, *Workers on the board*, *Workers elect managers*
+  - *Private, non-worker shareholders* (baseline); *Private, one owner*; *Public, shareholders*; *Workers are shareholders*; *Workers on the board*; *Workers elect managers*
   - Plus pay and benefits, hours, location, owners' race and gender, unionization, political donations, workplace conditions, ...
 - The paper reports **AMCEs** from OLS. We'll fit the **conditional logit** to the same choices.
 
@@ -497,7 +497,6 @@ V_cl <- vcovCL(cl_fit, cluster = task_rid)
 ## Example: Workplace democracy
 
 - The coefficients are **part-worths**: each level's contribution to the systematic component of utility, relative to its attribute's baseline
-- For two firms that are **identical except for governance**, $\Pr(\text{choose } A) = \text{logit}^{-1}(\beta_{A} - \beta_{B})$
 
 ```{r, echo=T}
 gov <- grep("^governance", names(coef(cl_fit)), value = TRUE)
