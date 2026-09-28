@@ -39,7 +39,7 @@ $$
 $$
 :::
 
-```{r, echo = F, message=F, warnings=F}
+```{r, echo = F, message=F, warning=F}
 library(tidyverse)
 library(knitr)
 library(broom)
@@ -50,14 +50,15 @@ options(digits=3)
 
 ::: {.incremental}
 
-- **Generalized linear models**: a link function $g()$ relating the CEF to the linear predictor
+- **Generalized linear models**
 
   $$g(\mathbb{E}[Y_i|X_i]) = X_i^{\prime}\beta$$
 
-- **Binary outcome models**: the logit and probit, estimated by maximum likelihood
-  - Interpretation is harder than OLS -- $\beta_k$ is a change in **log-odds**, and $\frac{\partial \pi_i}{\partial X_{ik}} = \beta_k\pi_i(1-\pi_i)$ depends on every covariate.
-- **Inference on transformations**: invariance gives us the point estimate, the **delta method** gives us the standard error.
-- We used all of this to estimate **propensity scores** and construct an IPTW estimator.
+- **Binary outcome models**
+  - Careful with interpreting the raw model coefficients
+  - For a logit, $\beta_k$ is a change in **log-odds**, and $\frac{\partial \pi_i}{\partial X_{ik}} = \beta_k\pi_i(1-\pi_i)$
+- **Inference on transformations**:
+  - Invariance + **delta method**
 
 :::
 
@@ -65,15 +66,15 @@ options(digits=3)
 
 ::: {.incremental}
 
-- **Latent variables and discrete choice** (finishing up from last week)
+- **Latent variables and discrete choice**
   - The latent-variable representation of the logit and probit
   - **Ordinal** logit and the proportional odds assumption
   - **Multinomial** logit and independence of irrelevant alternatives (IIA)
 - **Random utility and conditional logit**
-  - Choice data, alternative-specific covariates, and the RUM foundation
-  - **Conjoint experiments** and model-based approaches to analyzing them
+  - Choice data and alternative-specific covariates
+  - The **model based** approach to **conjoint experiments**
 - **Duration models**
-  - The survival function, the hazard, and censoring
+  - Survival functions, the hazard, and censoring
   - Parametric, semi-parametric (Cox), and non-parametric (Kaplan-Meier) approaches
 
 :::
@@ -228,7 +229,8 @@ logistic_dens
   $$\log\left(\frac{\Pr(Y_i \le l)}{1 - \Pr(Y_i \le l)}\right) = \kappa_l - X_i^{\prime}\beta$$
 
   - The same $\beta$ appears for *every* $l$; only the intercept $\kappa_l$ changes.
-- **Intuitively**: the $\beta$ parameters are shared across all the possible outcome levels. Information about whether someone responds "strongly agree" *also* tells us something about how likely they would be to respond "agree", "neutral", "disagree", or "strongly disagree".
+- **Intuitively**: the $\beta$ parameters are shared across all the possible outcome levels. 
+  - Information about whether someone responds "strongly agree" *also* tells us something about how likely they would be to respond "agree", "neutral", "disagree", or "strongly disagree".
   - Not innocuous if there's non-monotonicity or heterogeneous effects.
   - Be careful with these models!
 
@@ -343,8 +345,29 @@ summary(ordered_logit)
 - The model implies that arbitrators appointed by the winning party shift mostly from **splitting the costs** to making the loser pay for **everything**
   - But is this real or an artifact of the proportional odds assumption? Is there a "constant effect" on the latent variable scale?
 
-```{r}
-marginaleffects::avg_comparisons(ordered_logit)
+```{r, echo=T}
+ord_me <- marginaleffects::avg_comparisons(ordered_logit)
+```
+
+```{r, echo=F}
+# Bar plot of the change in each category's probability (winner- vs. loser-appointed), with 95% CIs
+plot_me <- function(me) {
+  me %>%
+    mutate(group = factor(group, levels = c("Split costs", "Loser pays some", "Loser pays all"))) %>%
+    ggplot(aes(x = group, y = estimate, fill = model)) +
+    geom_hline(yintercept = 0, color = "grey40") +
+    geom_col(position = position_dodge(width = 0.75), width = 0.7) +
+    geom_errorbar(aes(ymin = conf.low, ymax = conf.high), position = position_dodge(width = 0.75), width = 0.15) +
+    scale_fill_manual(values = c("Ordinal logit" = "#c5050c", "Multinomial logit" = "#0479A8"), name = NULL) +
+    labs(x = NULL, y = "Change in Pr(category)
+winner- vs. loser-appointed") +
+    theme_minimal(base_size = 13) +
+    theme(legend.position = "top", panel.grid.major.x = element_blank())
+}
+```
+
+```{r, echo=F, fig.width=7, fig.height=2.6, fig.align="center"}
+plot_me(as_tibble(ord_me) %>% mutate(model = "Ordinal logit"))
 ```
 
 ## Example: Appointer Affiliation Bias
@@ -357,75 +380,50 @@ multinom_logit <- nnet::multinom(isReimbursementFolded_Factor ~ isAppointerSide,
 ```
 
 ```{r, echo=T}
-marginaleffects::avg_comparisons(multinom_logit)
+mnl_me <- marginaleffects::avg_comparisons(multinom_logit)
+```
+
+```{r, echo=F, fig.width=7, fig.height=3, fig.align="center"}
+bind_rows(as_tibble(ord_me) %>% mutate(model = "Ordinal logit"),
+          as_tibble(mnl_me) %>% mutate(model = "Multinomial logit")) %>%
+  mutate(model = factor(model, levels = c("Ordinal logit", "Multinomial logit"))) %>%
+  plot_me()
 ```
 
 - Running the ordinal logit (as a reviewer asked us to do!) would have given us the **wrong result**
   - Remember, don't just fixate on the outcome when choosing a modeling strategy - think about what your entire bundle of assumptions implies!
 
-## Random utility and conditional logit
-
-## From latent variables to utility
+## Conditional logit
 
 ::: {.incremental}
 
-- The latent-variable story generalizes naturally: let $U_{ij}$ be the **utility** individual $i$ gets from alternative $j$
+- Same latent utility setup as the multinomial logit, but now the covariates are **attribute-specific** but their types are **shared** across alternatives
+  - Price of each mode of transportation, the attributes of each profile in a conjoint
+- $X_{ik}$ varies across categories, but all categories share a common $\beta$ vector
 
-  $$U_{ij} = V_{ij} + \epsilon_{ij} = X_{ij}^{\prime}\beta + \epsilon_{ij}$$
+  $$Y_{ik}^* = X_{ik}^{\prime}\beta + \epsilon_{ik}$$
 
-- Individual $i$ chooses the alternative with the highest utility
+- With the same i.i.d. Type I extreme value errors, we get the same "softmax" expression for the choice probability.
 
-  $$Y_i = \argmax_{j \in \{1, \dotsc, J\}} U_{ij}$$
-
-- The **systematic** component $V_{ij}$ is what we model; $\epsilon_{ij}$ is everything we don't observe.
-- This is the **random utility model** (RUM) -- the microeconomic foundation for discrete choice [@mcfadden1974conditional].
+  $$\Pr(Y_i = k \,|\, X_{i1}, \dotsc, X_{iK}) = \frac{\exp(X_{ik}^{\prime}\beta)}{\sum_{l=1}^K \exp(X_{il}^{\prime}\beta)}$$
 
 :::
 
-## The conditional logit
+
+## IIA
 
 ::: {.incremental}
 
-- @mcfadden1974conditional showed that if the $\epsilon_{ij}$ are i.i.d. **Type-I Extreme Value** (Gumbel), the choice probabilities have a closed form
-
-  $$\Pr(Y_i = j \,|\, X_i) = \frac{\exp(X_{ij}^{\prime}\beta)}{\sum_{k=1}^J \exp(X_{ik}^{\prime}\beta)}$$
-
-- Compare this to the **multinomial** logit we just derived:
-  - Multinomial logit: covariates vary over **individuals** $(X_i)$, and we estimate a separate $\beta_j$ per alternative.
-  - Conditional logit: covariates vary over **alternatives** $(X_{ij})$, and we estimate a *single* $\beta$.
-- Conditional logit lets us model the **attributes of the choices themselves** -- price, distance, ideological position -- not just the attributes of the chooser.
-
-:::
-
-## Multinomial vs. conditional logit
-
-<!-- TODO: a small worked table showing the two data layouts side by side.
-     Multinomial = one row per respondent (wide); conditional = one row per
-     respondent-alternative (long). This is the thing students get wrong. -->
-
-::: {.incremental}
-
-- The practical difference is the **shape of the data**
-  - Multinomial logit wants one row per **respondent**
-  - Conditional logit wants one row per **respondent-alternative** pair
-- The two can be combined -- alternative-specific covariates *and* individual-specific covariates in one model (sometimes called the "mixed" or "universal" logit).
-
-:::
-
-## IIA, revisited
-
-::: {.incremental}
-
-- The i.i.d. extreme value assumption buys us the closed form, but it also imposes **IIA**
+- We still have the independence of irrelevant alternatives assumption: the relative odds of two choices only depend on those two choices' attributes.
 
   $$\frac{\Pr(Y_i = j)}{\Pr(Y_i = k)} = \exp\big((X_{ij} - X_{ik})^{\prime}\beta\big)$$
 
-  - The relative odds of $j$ vs. $k$ depend *only* on $j$ and $k$ -- adding or removing other alternatives changes nothing.
-- The red bus/blue bus problem again, now with a name for the culprit: the errors are independent **across alternatives**.
-- Ways out:
-  - **Nested logit** -- group similar alternatives and allow correlation within nests
+- Extensions involve imposing additional **hierarchical** structure:
+  - **Nested logit** - group similar alternatives and allow correlation within groupings 
+    - A random effect common to every alternative in the same **group** $g(k)$: $Y_{ik}^* = X_{ik}^{\prime}\beta + \zeta_{i,g(k)} + \epsilon_{ik}$
   - **Mixed logit / random coefficients** -- let $\beta$ vary across individuals [@train2009discrete]
-  - **Multinomial probit** -- a full covariance matrix for $\epsilon$, at real computational cost
+    - **Unit-specific** coefficients drawn from a common distribution: $Y_{ik}^* = X_{ik}^{\prime}\beta_i + \epsilon_{ik}$
+  - Increasingly estimated via **Bayesian** methods (for regularization + partial pooling)
 
 :::
 
@@ -434,40 +432,215 @@ marginaleffects::avg_comparisons(multinom_logit)
 ::: {.incremental}
 
 - A **conjoint** experiment shows respondents two (or more) profiles with **randomly assigned** attributes and asks them to pick one.
-  - Immigrants differing in education, country of origin, job; candidates differing in party, gender, experience.
-- This is a forced choice between alternatives described by **alternative-specific** covariates -- exactly the conditional logit data structure.
-- Randomization of the attributes is what makes the design so attractive: the attributes are independent of potential outcomes **by construction**.
+  - e.g. choosing between two candidates with different backgrounds, partisan affiliation, policy positions, etc...
+- Often designed as a forced choice between alternatives described by **alternative-specific** covariates 
+- In **political science**: analyzed as a factorial experiment
+  - Estimand is the **AMCE** [@hainmueller2014causal] -- the average change in the probability of selection from changing one attribute, marginalizing over the others.
+  - Estimated by OLS, no distributional assumptions, "causal" interpretation.
+- In literally every other field that does conjoints: analyzed with a **random utility model**
+  - Model latent utilities and simulate choice probabilities.
 
 :::
 
-## Design-based vs. model-based
+## Example: Workplace democracy
 
 ::: {.incremental}
 
-- The standard estimand is the **AMCE** [@hainmueller2014causal] -- the average change in the probability of selection from changing one attribute, marginalizing over the others.
-  - Estimated by OLS of the choice indicator on attribute dummies. No distributional assumptions at all.
-- The RUM gives us a **model-based** alternative: a conditional logit over the profiles in each task.
-  - Buys us a utility interpretation and lets us model interactions and heterogeneity more cleanly.
-  - Costs us the extreme value assumption on $\epsilon_{ij}$ -- and IIA comes along with it.
-- Worth asking every time: what does the **extra structure** buy, and what would go wrong if it's false?
+- @mazumder2024workplace ask whether Americans want to work at **democratically governed** firms
+  - YouGov Blue, June 2020: 1,002 respondents, four tasks each, pairwise comparison of two hypothetical employers
+  - Outcome: at which firm would you **rather work**? (forced choice)
+- Each firm profile randomizes **19 attributes**: the one emphasized in the paper is **corporate governance**
+  - *Private, non-worker shareholders* (baseline), *Private, one owner*, *Public, shareholders*, *Workers are shareholders*, *Workers on the board*, *Workers elect managers*
+  - Plus pay and benefits, hours, location, owners' race and gender, unionization, political donations, workplace conditions, ...
+- The paper reports **AMCEs** from OLS. We'll fit the **conditional logit** to the same choices.
 
 :::
 
-## Example: (TBD)
+## Example: Workplace democracy
 
-<!-- TODO: full worked conjoint example.
-     Need: a long-format conjoint dataset (one row per respondent-task-profile).
-     Candidates: Hainmueller/Hopkins immigration conjoint (public), or a
-     teaching subset of one of our own studies.
-     Show: (1) AMCE by OLS, (2) conditional logit on the same data,
-     (3) compare, and discuss where they diverge and why. -->
+- One row per respondent-task-**profile**: exactly the long format the conditional logit wants
+  - We drop the 122 tasks where the respondent picked neither firm, leaving 3,886 tasks from 993 respondents
 
-```{r, echo=T, eval=F}
-# AMCE, design-based
-# lm_robust(chosen ~ educ + origin + job, data = conjoint, clusters = respondent_id)
+```{r, echo=T}
+library(mlogit)
+library(sandwich)
+cj <- readRDS("data/mazumder_yan_conjoint.rds")
+cj %>% select(rid, task, profile, chosen, governance, income, hours) %>% head(4)
+```
 
-# conditional logit, model-based
-# survival::clogit(chosen ~ educ + origin + job + strata(task_id), data = conjoint)
+- `dfidx()` tells `mlogit` which rows form a choice situation (`task_id`, nested in respondent `rid`) and which alternative each row is (`profile`)
+
+```{r, echo=T}
+cj <- cj %>% mutate(task_id = paste(rid, task, sep = "_"))
+cj_idx <- dfidx(cj, idx = list(c("task_id", "rid"), "profile"))
+```
+
+## Example: Workplace democracy
+
+- All 19 attributes are **alternative-specific** with a **generic** coefficient: the first part of the `mlogit` formula
+  - `| 0` drops the alternative-specific constant (a preference for whichever profile is listed second)
+
+```{r, echo=T}
+attributes <- names(cj)[5:23]
+cl_formula <- as.formula(paste("chosen ~", paste(attributes, collapse = " + "), "| 0"))
+cl_fit <- mlogit(cl_formula, data = cj_idx)
+length(coef(cl_fit))
+```
+
+- Respondents complete four tasks each, so cluster by respondent
+  - `estfun()` has one row per **task** (one likelihood contribution each), so the cluster vector needs one entry per task
+
+```{r, echo=T}
+task_rid <- idx(cj_idx)$rid[idx(cj_idx)$profile == 1]
+V_cl <- vcovCL(cl_fit, cluster = task_rid)
+```
+
+## Example: Workplace democracy
+
+- The coefficients are **part-worths**: each level's contribution to the systematic component of utility, relative to its attribute's baseline
+- For two firms that are **identical except for governance**, $\Pr(\text{choose } A) = \text{logit}^{-1}(\beta_{A} - \beta_{B})$
+
+```{r, echo=T}
+gov <- grep("^governance", names(coef(cl_fit)), value = TRUE)
+tibble(level = sub("governance", "", gov), part_worth = coef(cl_fit)[gov],
+       se = sqrt(diag(V_cl))[gov], odds_ratio = exp(part_worth),
+       pr_vs_baseline = plogis(part_worth)) %>% kable(digits = 3)
+```
+
+- Codetermination: a firm with workers on the board beats an otherwise identical private corporation about **`r round(100 * plogis(coef(cl_fit)["governanceWorkers on the board"]))`%** of the time
+
+```{r, echo = F}
+# Part-worths for every level, baselines included at zero, for the plots below
+attr_labels <- c(governance = "Corporate governance", csr = "Social responsibility", firm_size = "Firm size",
+                 donations = "Political contributions", gender_owned = "Gender of owners", race_owned = "Race of owners",
+                 union = "Unionization", training = "Job training", income = "Salary",
+                 healthcare = "Health insurance\n(employer pays)", retirement = "401k matching",
+                 sick_leave = "Paid sick leave", parental_leave = "Parental leave", hours = "Hours per week",
+                 location = "Location", remote = "Work from home", work_type = "Type of task",
+                 teamwork = "Work with others", culture = "Workplace\nconditions")
+part_worths <- map_dfr(attributes, function(a) {
+  lv <- levels(cj[[a]]); term <- paste0(a, lv)
+  tibble(attribute = a, label = attr_labels[[a]], level = lv, baseline = seq_along(lv) == 1,
+         estimate = ifelse(baseline, 0, coef(cl_fit)[term]),
+         se = ifelse(baseline, 0, sqrt(diag(V_cl))[term]))
+}) %>% mutate(conf.low = estimate - 1.96 * se, conf.high = estimate + 1.96 * se)
+
+plot_part_worths <- function(attrs) {
+  part_worths %>%
+    filter(attribute %in% attrs) %>%
+    # Levels repeat across attributes ("None", "Mix"), so key each row on
+    # attribute + level and strip the attribute only for the axis labels
+    mutate(label = factor(label, levels = attr_labels[attrs]),
+           row = factor(paste(attribute, level), levels = rev(paste(attribute, level)))) %>%
+    ggplot(aes(x = estimate, y = row)) +
+    scale_y_discrete(labels = function(x) sub("^\\S+ ", "", x)) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
+    geom_errorbar(aes(xmin = conf.low, xmax = conf.high), width = 0, color = "#c5050c", linewidth = 0.7) +
+    geom_point(aes(shape = baseline), color = "#c5050c", fill = "white", size = 2) +
+    scale_shape_manual(values = c(`FALSE` = 19, `TRUE` = 21), guide = "none") +
+    facet_grid(label ~ ., scales = "free_y", space = "free_y", switch = "y") +
+    labs(x = "Part-worth (log-odds, relative to baseline) with 95% CI", y = NULL) +
+    theme_minimal(base_size = 11) +
+    theme(strip.placement = "outside", strip.text.y.left = element_text(angle = 0, hjust = 1, face = "bold"),
+          panel.spacing = unit(2, "pt"), panel.grid.minor = element_blank())
+}
+```
+
+## Part-worths: the firm
+
+```{r, echo = F, fig.width = 10, fig.height = 5.6, fig.align = "center"}
+plot_part_worths(c("governance", "csr", "firm_size", "donations", "gender_owned", "race_owned", "union", "training"))
+```
+
+::: {.attribution}
+Conditional logit with all 19 attributes; hollow points are baselines. 95% CIs clustered by respondent. Data from @mazumder2024workplace.
+:::
+
+## Part-worths: the job
+
+```{r, echo = F, fig.width = 10, fig.height = 5.6, fig.align = "center"}
+plot_part_worths(c("healthcare", "retirement", "sick_leave", "parental_leave", "hours", "location", "remote", "work_type", "teamwork", "culture"))
+```
+
+::: {.attribution}
+Conditional logit with all 19 attributes; hollow points are baselines. 95% CIs clustered by respondent. Data from @mazumder2024workplace.
+:::
+
+## Part-worths: salary
+
+- 28 salary levels, so each dummy is noisy. A single **log-salary** term seems to fit well:
+
+```{r, echo=T}
+cj <- cj %>% mutate(log_salary = log(as.numeric(gsub("[^0-9]", "", income))))
+log_formula <- as.formula(paste("chosen ~", paste(c(setdiff(attributes, "income"), "log_salary"), collapse = " + "), "| 0"))
+log_fit <- mlogit(log_formula, data = dfidx(cj, idx = list(c("task_id", "rid"), "profile")))
+lr_salary <- as.numeric(2 * (logLik(cl_fit) - logLik(log_fit)))   # 27 dummies vs. 1 log term
+c(LR = lr_salary, df = length(coef(cl_fit)) - length(coef(log_fit)),
+  p = pchisq(lr_salary, length(coef(cl_fit)) - length(coef(log_fit)), lower.tail = FALSE))
+```
+
+```{r, echo = F, fig.width = 10, fig.height = 2.9, fig.align = "center"}
+V_log <- vcovCL(log_fit, cluster = task_rid)
+b_log <- coef(log_fit)["log_salary"]; se_log <- sqrt(V_log["log_salary", "log_salary"])
+# Part-worths are only identified up to a constant within an attribute, so center the
+# log-salary curve on the dummies' average level (and pivot its CI at the mean log salary)
+salary_pw <- part_worths %>% filter(attribute == "income") %>%
+  mutate(salary = as.numeric(gsub("[^0-9]", "", level)))
+center <- mean(log(salary_pw$salary)); level0 <- mean(salary_pw$estimate)
+salary_curve <- tibble(salary = seq(30, 300, 1)) %>%
+  mutate(fit = level0 + b_log * (log(salary) - center),
+         lo = level0 + (b_log - 1.96 * se_log * sign(log(salary) - center)) * (log(salary) - center),
+         hi = level0 + (b_log + 1.96 * se_log * sign(log(salary) - center)) * (log(salary) - center))
+salary_pw %>%
+  ggplot(aes(x = salary)) +
+  geom_ribbon(data = salary_curve, aes(ymin = lo, ymax = hi), fill = "#0479A8", alpha = 0.15) +
+  geom_line(data = salary_curve, aes(y = fit), color = "#0479A8", linewidth = 1) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0, color = "#c5050c", alpha = 0.6) +
+  geom_point(aes(y = estimate, shape = baseline), color = "#c5050c", fill = "white", size = 2) +
+  scale_shape_manual(values = c(`FALSE` = 19, `TRUE` = 21), guide = "none") +
+  scale_x_continuous(labels = function(x) paste0("$", x, "k"), breaks = seq(50, 300, 50)) +
+  labs(x = "Salary offer", y = "Part-worth\n(relative to $30k)") +
+  theme_minimal(base_size = 12)
+```
+
+::: {.attribution}
+Red: salary dummies with 95% CIs. Blue: log-salary fit with 95% CI, centered on the dummies' average level. Both clustered by respondent.
+:::
+
+## Predicted choices {.app-slide}
+
+::: {.app-frame data-app="clogit_app.html" data-title="Conditional logit predictions: Mazumder and Yan (2024)"}
+:::
+
+::: {.attribution}
+Conditional logit part-worths and respondent-clustered covariance from @mazumder2024workplace. CIs: delta method on the log-odds scale.
+:::
+
+```{=html}
+<script>
+// The widget is a separate page framed here. The <iframe> is built at runtime
+// because `embed-resources: true` would otherwise inline the target into a
+// data: URI, breaking the app's relative asset paths and its service worker.
+// Mounting only once the slide is reached also delays the webR download.
+(function () {
+  function mount() {
+    document.querySelectorAll("section.present .app-frame[data-app]").forEach(function (el) {
+      if (el.dataset.mounted) return;
+      el.dataset.mounted = "1";
+      var f = document.createElement("iframe");
+      f.src = el.dataset.app;
+      f.title = el.dataset.title || "Interactive widget";
+      f.setAttribute("allow", "clipboard-write");
+      el.appendChild(f);
+    });
+  }
+  // Reveal is not defined while this script is parsed, so wire up after load.
+  window.addEventListener("load", function () {
+    if (window.Reveal && typeof Reveal.on === "function") Reveal.on("slidechanged", mount);
+    mount();
+  });
+})();
+</script>
 ```
 
 ## Survival models
@@ -481,7 +654,7 @@ marginaleffects::avg_comparisons(multinom_logit)
   - From the medical literature, this is often the number of days before a patient suffers some adverse event (e.g. death).
   - But lots of other applications (e.g. time to treaty ratification)
 
-- Assume we observe N i.i.d. event times $T_1, T_2, \dotsc, T_n$
+- Assume we observe $n$ i.i.d. event times $T_1, T_2, \dotsc, T_n$
 
 - Define the "survival function"
 
@@ -505,8 +678,8 @@ marginaleffects::avg_comparisons(multinom_logit)
 
 ::: {.incremental}
 
-- The easiest way to estimate $S(t) = 1 - F(t)$ is to just plug in $\hat{F(t)}$ - our empirical CDF in the sample
-  - At any given value $t$, how many events occur *after* $t$
+- The easiest way to estimate $S(t) = 1 - F(t)$ is to just plug in $\hat{F}(t)$ - our empirical CDF in the sample
+  - At any given value $t$, what share of events occur *after* $t$
 
 - **Problem**: This doesn't address *censoring* of observations -- sometimes we stop observing a unit at time $t^*$ rather than observing an actual event.
   - We know that $T_i > t^*$ but not what $T_i$ actually equals
@@ -528,12 +701,12 @@ marginaleffects::avg_comparisons(multinom_logit)
   
   $$S(t) = Pr(T_i > t | T_i > t_{(j)}) \times Pr(T_i > t_{(j)} | T_i > t_{(j-1)}) \times \dotsc \times Pr(T_i > t_{(2)} | T_i  > t_{(1)}) \times Pr(T_i > t_{(1)})$$
 
-- The **Kaplan-Meier** estimator $\hat{S(t)}$ can be understood as a "plug-in" estimator for each of these probabilities.
+- The **Kaplan-Meier** estimator $\hat{S}(t)$ can be understood as a "plug-in" estimator for each of these probabilities.
 
   $$\hat{S}(t) = \prod_{j: t_{(j)} \le t} \bigg(1 - \frac{d_j}{r_j} \bigg)$$
 
 - $d_j$ denotes the number of units that experience an event at time $t_{(j)}$ 
-- $r_j$ is the number of units that are still in the risk set up to time $j$
+- $r_j$ is the number of units that are still in the risk set just before $t_{(j)}$
   - Units drop out of the risk set $r$ over time by either experiencing an event or being censored
 
 :::
@@ -544,7 +717,7 @@ marginaleffects::avg_comparisons(multinom_logit)
 
 - **Intuition**: Consider one of the terms in the product. Using the definition of conditional probability:
 
-  $$Pr(T_i > t_{(j)} | T_i > t_{(j-1)}) = 1 - Pr(T_i < t_{(j)}|T_i > t_{j-1}) = 1 - \frac{Pr(T_i \le t_{(j)}, T_i > t_{(j-1)})}{Pr(T_i > t_{(j-1)})}$$
+  $$Pr(T_i > t_{(j)} | T_i > t_{(j-1)}) = 1 - Pr(T_i \le t_{(j)}|T_i > t_{(j-1)}) = 1 - \frac{Pr(T_i \le t_{(j)}, T_i > t_{(j-1)})}{Pr(T_i > t_{(j-1)})}$$
 
 - In the numerator, our "plug-in" estimator is just the share of units that have events occurring at $t_{(j)}$.
 - In the denominator we have the share of units that we know for sure are still "active" in the interval after $t_{(j-1)}$
@@ -553,7 +726,7 @@ marginaleffects::avg_comparisons(multinom_logit)
 
   $$\widehat{Pr(T_i > t_{(j)} | T_i > t_{(j-1)})} = 1 - \frac{d_j}{r_j}$$
 
-- Taking the product across all of the $j$ where $t_{(j)} < t$ yields the Kaplan-Meier estimator.
+- Taking the product across all of the $j$ where $t_{(j)} \le t$ yields the Kaplan-Meier estimator.
 
 :::
 
@@ -561,7 +734,7 @@ marginaleffects::avg_comparisons(multinom_logit)
 
 - Let's look at a sample dataset from the `survival` R package on survival times for patients with advanced lung cancer.
 
-```{r}
+```{r, echo=T}
 library(survival)
 data(cancer, package="survival")
 as_tibble(lung)
@@ -574,7 +747,7 @@ as_tibble(lung)
 
 - In the `survival` package, we need to define a "survival" outcome in terms of the event time and the censoring indicator
 
-```{r}
+```{r, echo=T}
 surv_model <- survfit(Surv(time, status) ~ 1, data=lung)
 ```
 
@@ -594,7 +767,7 @@ plot(surv_model, xlab="Survival Time", conf.int=T, ylab="Survival Rate", mark.ti
 
 - Now let's do this for gender
 
-```{r}
+```{r, echo=T}
 surv_model_sex <- survfit(Surv(time, status) ~ I(sex==2), data=lung)
 ```
 
@@ -631,7 +804,7 @@ legend(750, .9, c("Male", "Female"), col=c("indianred", "dodgerblue"), lwd=2, bt
 ## Parametric inference
 
 - Depending on the assumptions we make about the nature of the hazard, we can obtain different distributions for $f(t)$.
-  - In the simplest case, lets assume that the hazard does not vary over time: $h(t) = \lambda$. $\lambda > 0$
+  - In the simplest case, let's assume that the hazard does not vary over time: $h(t) = \lambda$, with $\lambda > 0$
   - And the cumulative hazard is $H(t) = \int_{0}^{t} \lambda du = \lambda t$
 
 
@@ -648,13 +821,13 @@ legend(750, .9, c("Male", "Female"), col=c("indianred", "dodgerblue"), lwd=2, bt
 
 - $\theta$ is strictly greater than $0$, so we'll use a log-link to incorporate the covariates:
 
-  $$\log(E[Y_i | X_i]) = \log(\theta_i) = X_i^{\prime}\beta$$
+  $$\log(E[T_i | X_i]) = \log(\theta_i) = X_i^{\prime}\beta$$
 
 - Alternatively, we can write 
 
-  $$E[Y_i | X_i] = \exp(X_i^{\prime}\beta)$$
+  $$E[T_i | X_i] = \exp(X_i^{\prime}\beta)$$
 
-- Note that the constant hazard assumption is a strong one -- the exponential distribution is "memoryless" in that knowing that a unit has survived up until time $t$ tells you nothing about its instantenous probability of failure.
+- Note that the constant hazard assumption is a strong one -- the exponential distribution is "memoryless" in that knowing that a unit has survived up until time $t$ tells you nothing about its instantaneous probability of failure.
   - More flexible distributions like the Weibull allow for a time-varying hazard.
 
 ## Exponential Model
@@ -673,13 +846,14 @@ legend(750, .9, c("Male", "Female"), col=c("indianred", "dodgerblue"), lwd=2, bt
 
 - Let's compare our parametric fit to the non-parametric Kaplan-Meier estimates
  
-```{r}
-exp_model_sex <- survreg(Surv(time, status) ~ I(sex==2), dist="exponential", data=lung) # sex = 2 is a dummy variable for female
+```{r, echo=T}
+# sex = 2 is a dummy variable for female
+exp_model_sex <- survreg(Surv(time, status) ~ I(sex==2), dist="exponential", data=lung)
 ```
 
 - Get the survival curves for men and women
 
-```{r}
+```{r, echo=T}
 exp_surv_men <- function(x) pexp(x, rate = 1/exp(coef(exp_model_sex)%*%c(1,0)), lower.tail = F)
 exp_surv_women <- function(x) pexp(x, rate = 1/exp(coef(exp_model_sex)%*%c(1,1)), lower.tail=F)
 ```
@@ -697,21 +871,43 @@ curve(exp_surv_women, from = 0, to = 1000, lwd=2, col="dodgerblue", add=T)
 ```
 
 
-## Semi-parametric
-
+## Application: Weibull
 
 ::: {.incremental}
 
-- You'll notice that the fit is okay, but there is some discrepancy 
+- The fit seems to be off.
   - This is because the hazard appears to be **time-varying**.
-  - You can see a kind of "s-curve" which the exponential by construction cannot capture.
+  - You can see a kind of "s-curve" which the exponential cannot capture.
+- The **Weibull** adds a shape parameter $k$ that lets the hazard change over time
 
-- Other parametric models allow for more flexibility in the hazard rate's evolution over time
-  - For example, the **Weibull** model, which adds an additional shape parameter to the hazard to allow it to vary over time actually fits the data quite well!
+  $$h(t) = \frac{k}{\lambda}\left(\frac{t}{\lambda}\right)^{k-1}\qquad S(t) = \exp\left(-\left(\frac{t}{\lambda}\right)^{k}\right)$$
 
-- But suppose that we want to make very minimal assumptions about the structure of the hazard function -- can we still estimate the relationship between covariates and the hazard?
+  - $k = 1$ is the exponential; $k > 1$ is a **rising** hazard, $k < 1$ a falling one
 
 :::
+
+```{r, echo=T}
+weib_model_sex <- survreg(Surv(time, status) ~ I(sex==2), dist="weibull", data=lung)
+```
+
+## Application: Weibull
+
+- Get the Weibull survival curves ($\lambda_i = \exp(X_i^{\prime}\beta)$) and overlay them on Kaplan-Meier
+
+```{r, echo=T}
+weib_surv_men <- function(x) pweibull(x, shape = 1/weib_model_sex$scale,
+                                       scale = exp(coef(weib_model_sex)%*%c(1,0)), lower.tail = F)
+weib_surv_women <- function(x) pweibull(x, shape = 1/weib_model_sex$scale,
+                                         scale = exp(coef(weib_model_sex)%*%c(1,1)), lower.tail = F)
+```
+
+```{r, fig.width=8, fig.height=4.3, fig.align='center', warning=F}
+plot(surv_model_sex, col=c("indianred", "dodgerblue"), xlab="Survival Time", conf.int=T, ylab="Survival Rate", mark.time=T)
+legend(750, .9, c("Male", "Female"), col=c("indianred", "dodgerblue"), lwd=2, bty='n')
+curve(weib_surv_men, from = 0, to = 1000, lwd=2, col="indianred", add=T)
+curve(weib_surv_women, from = 0, to = 1000, lwd=2, col="dodgerblue", add=T)
+```
+
 
 ## Cox Proportional Hazards
 
@@ -725,7 +921,7 @@ $$h_i(t) =  h_0(t)\exp(X_i^{\prime}\beta)$$
   $$\frac{h_i(t)}{h_j(t)} = \frac{\exp(X_i^{\prime}\beta)}{\exp(X_j^{\prime}\beta)}$$
 
 - The model is **semi-parametric** in that some components are left entirely unspecified...
-  - ... but others are not -- we assume that the covariates act **proportionally** on the hazard irrespective of time.
+  - ...but others are not -- we assume that the covariates act **proportionally** on the hazard irrespective of time.
 
 ## Cox Proportional Hazards
 
@@ -747,14 +943,12 @@ $$h_i(t) =  h_0(t)\exp(X_i^{\prime}\beta)$$
 
 ::: {.incremental}
 
-- Look again at the individual partial likelihood -- it has exactly the form of the **conditional logit** from earlier today
+- The individual partial likelihood should look familiar - it has exactly the form of the **conditional logit**
 
   $$L_i(\beta) = \frac{\exp(X_i^{\prime}\beta)}{\sum_{k; Y_k \ge Y_i} \exp(X_k^{\prime}\beta)}$$
 
 - At each event time we are asking: given that **one** unit in the risk set failed, which one was it?
   - The "choice set" is the risk set $\{k: Y_k \ge Y_i\}$, and the "chosen alternative" is the unit that failed.
-
-- This isn't an analogy -- it's the same likelihood. `survival::clogit()` rewrites its call and hands it to `coxph()`.
 
 :::
 
@@ -762,8 +956,9 @@ $$h_i(t) =  h_0(t)\exp(X_i^{\prime}\beta)$$
 
 - What does the Cox fit look like
 
-```{r}
-cox_model_sex <- coxph(Surv(time, status) ~ I(sex==2), data=lung) # sex = 2 is a dummy variable for female
+```{r, echo=T}
+# sex = 2 is a dummy variable for female
+cox_model_sex <- coxph(Surv(time, status) ~ I(sex==2), data=lung)
 print(cox_model_sex)
 ```
 
@@ -772,22 +967,26 @@ print(cox_model_sex)
 
 ## Application
 
-- Calculate the baseline hazard via Kaplan-Meier and overlay the Cox predicted hazards for men and women
+- Estimate the baseline cumulative hazard non-parametrically (the Breslow estimator) and get the Cox-predicted survival curves for men and women
 
-```{r, fig.width=8, fig.height=6, fig.align='center', warning=F}
-plot(survfit(cox_model_sex, newdata = data.frame(sex=c(1,2))), col=c("indianred", "dodgerblue"), xlab="Survival Time", conf.int=T, ylab="Survival Rate", mark.time=T)
+```{r, echo=T}
+cox_surv_sex <- survfit(cox_model_sex, newdata = data.frame(sex = c(1, 2)))
+```
+
+```{r, fig.width=8, fig.height=5, fig.align='center', warning=F}
+plot(cox_surv_sex, col=c("indianred", "dodgerblue"), xlab="Survival Time", conf.int=T, ylab="Survival Rate", mark.time=T)
 ```
 
 ## Next week
 
 ::: {.incremental}
 
-- **Bayesian inference**
-  - Priors, posteriors, and how this differs from what we've been doing
-  - Conjugate models and the Beta-Binomial
-  - Credible intervals vs. confidence intervals
-- **Readings:** TBD
-
+- **Introduction to Bayesian inference**
+  - What happens if we assume parameters are not fixed but carry uncertainty?
+  - The **posterior distribution** $p(\theta | \mathbf{Y})$ as a target of inference
+  - The **prior distribution** and how it shapes the posterior.
+- **Midterm Exam**
+  
 :::
 
 ## References {.refs-slide}

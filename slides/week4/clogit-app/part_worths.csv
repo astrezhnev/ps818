@@ -1,0 +1,93 @@
+"attribute","label","level","baseline","term","estimate","se"
+"governance","Corporate governance","Private, non-worker shareholders",TRUE,"",0,0
+"governance","Corporate governance","Private, one owner",FALSE,"governancePrivate, one owner",0.0609660757136909,0.0883308051001687
+"governance","Corporate governance","Public, shareholders",FALSE,"governancePublic, shareholders",0.283142677349936,0.0881999678117259
+"governance","Corporate governance","Workers are shareholders",FALSE,"governanceWorkers are shareholders",0.420188140183471,0.0908426897172652
+"governance","Corporate governance","Workers on the board",FALSE,"governanceWorkers on the board",0.358760963398483,0.090163059123947
+"governance","Corporate governance","Workers elect managers",FALSE,"governanceWorkers elect managers",0.192023242966952,0.0891150497361186
+"csr","Social responsibility","No CSR commitment",TRUE,"",0,0
+"csr","Social responsibility","CSR commitment",FALSE,"csrCSR commitment",0.00153003489079147,0.0510053528610687
+"firm_size","Firm size (co-workers)","50",TRUE,"",0,0
+"firm_size","Firm size (co-workers)","250",FALSE,"firm_size250",0.127337996634042,0.0783553251889576
+"firm_size","Firm size (co-workers)","500",FALSE,"firm_size500",0.0262689505200091,0.0789085648977059
+"firm_size","Firm size (co-workers)","1,000",FALSE,"firm_size1,000",-0.0217690579071852,0.0800736229598856
+"firm_size","Firm size (co-workers)","5,000",FALSE,"firm_size5,000",-0.0459877468759267,0.0786814161804694
+"donations","Political contributions","Both parties",TRUE,"",0,0
+"donations","Political contributions","Mostly Democrats",FALSE,"donationsMostly Democrats",-0.189784836589696,0.0659806750976699
+"donations","Political contributions","Mostly Republicans",FALSE,"donationsMostly Republicans",-0.198936240038148,0.0645958107272453
+"gender_owned","Gender of owners","Men",TRUE,"",0,0
+"gender_owned","Gender of owners","Majority men",FALSE,"gender_ownedMajority men",0.0391149753630354,0.0730281997574476
+"gender_owned","Gender of owners","Majority women",FALSE,"gender_ownedMajority women",0.118058646536015,0.0724906077914564
+"gender_owned","Gender of owners","Women",FALSE,"gender_ownedWomen",0.157256509098153,0.0723684899918744
+"race_owned","Race of owners","All white",TRUE,"",0,0
+"race_owned","Race of owners","Majority white",FALSE,"race_ownedMajority white",0.251678047181873,0.0728568462448193
+"race_owned","Race of owners","Majority people of color",FALSE,"race_ownedMajority people of color",0.274758069878599,0.074167043539995
+"race_owned","Race of owners","All people of color",FALSE,"race_ownedAll people of color",0.235292016475938,0.0773673870619903
+"union","Unionization","Not unionized",TRUE,"",0,0
+"union","Unionization","Unionized",FALSE,"unionUnionized",-0.0842223279368146,0.0535085473738431
+"training","Job training program","None",TRUE,"",0,0
+"training","Job training program","Ex-felons",FALSE,"trainingEx-felons",-0.089790354238666,0.0761893120892513
+"training","Job training program","Veterans",FALSE,"trainingVeterans",0.297576439763851,0.071536383592367
+"training","Job training program","Mentally disabled",FALSE,"trainingMentally disabled",0.110993872438748,0.0698635048163875
+"income","Salary","$30k",TRUE,"",0,0
+"income","Salary","$40k",FALSE,"income$40k",0.551425220949704,0.219328860107061
+"income","Salary","$50k",FALSE,"income$50k",0.821993810966089,0.218367626475768
+"income","Salary","$60k",FALSE,"income$60k",0.630631109771739,0.219110685316253
+"income","Salary","$70k",FALSE,"income$70k",1.16486914599562,0.226951295385201
+"income","Salary","$80k",FALSE,"income$80k",1.04319181699328,0.212195668693894
+"income","Salary","$90k",FALSE,"income$90k",0.922698397822817,0.214867615798158
+"income","Salary","$100k",FALSE,"income$100k",1.21318612169669,0.218746989649537
+"income","Salary","$110k",FALSE,"income$110k",1.37119213305106,0.211260338255631
+"income","Salary","$120k",FALSE,"income$120k",1.35729381442362,0.216385861749793
+"income","Salary","$130k",FALSE,"income$130k",1.45411388667821,0.212089296282122
+"income","Salary","$140k",FALSE,"income$140k",1.41415096276401,0.213571933067401
+"income","Salary","$150k",FALSE,"income$150k",1.57297846176558,0.206729721133605
+"income","Salary","$160k",FALSE,"income$160k",1.50853237652365,0.217228982960413
+"income","Salary","$170k",FALSE,"income$170k",1.3204529637096,0.21414873754007
+"income","Salary","$180k",FALSE,"income$180k",1.62121663722586,0.214747093607135
+"income","Salary","$190k",FALSE,"income$190k",1.73638525420738,0.222364899179428
+"income","Salary","$200k",FALSE,"income$200k",1.79379846966329,0.220518520032602
+"income","Salary","$210k",FALSE,"income$210k",1.45492620103198,0.217752661789839
+"income","Salary","$220k",FALSE,"income$220k",1.76977158834109,0.219042212271482
+"income","Salary","$230k",FALSE,"income$230k",1.84126696770178,0.237516445265222
+"income","Salary","$240k",FALSE,"income$240k",1.87399589054129,0.216166097715284
+"income","Salary","$250k",FALSE,"income$250k",1.6910313687863,0.207587368606605
+"income","Salary","$260k",FALSE,"income$260k",1.87935274072716,0.218814906098641
+"income","Salary","$270k",FALSE,"income$270k",1.91742226493475,0.22311438506248
+"income","Salary","$280k",FALSE,"income$280k",1.89132774535233,0.220399133082442
+"income","Salary","$290k",FALSE,"income$290k",1.91935103052736,0.224829040619761
+"income","Salary","$300k",FALSE,"income$300k",2.09065527951985,0.230189700507479
+"healthcare","Health insurance (employer pays)","50%",TRUE,"",0,0
+"healthcare","Health insurance (employer pays)","75%",FALSE,"healthcare75%",0.278815949929089,0.0629686567722242
+"healthcare","Health insurance (employer pays)","100%",FALSE,"healthcare100%",0.370936694212694,0.0651048708986861
+"retirement","401k matching","0%",TRUE,"",0,0
+"retirement","401k matching","25%",FALSE,"retirement25%",-0.0151057652131381,0.0818648272184571
+"retirement","401k matching","50%",FALSE,"retirement50%",0.212588047431944,0.0805914028453117
+"retirement","401k matching","75%",FALSE,"retirement75%",0.307255406083767,0.0800606030252878
+"retirement","401k matching","100%",FALSE,"retirement100%",0.370577509003989,0.0818593702021718
+"sick_leave","Paid sick leave","None",TRUE,"",0,0
+"sick_leave","Paid sick leave","Two weeks",FALSE,"sick_leaveTwo weeks",0.244698856351034,0.0638480634945379
+"sick_leave","Paid sick leave","Unlimited",FALSE,"sick_leaveUnlimited",0.469420530764521,0.0625562293233001
+"parental_leave","Parental leave","None",TRUE,"",0,0
+"parental_leave","Parental leave","Generous",FALSE,"parental_leaveGenerous",0.142710832225484,0.0536481626137849
+"hours","Hours per week","40",TRUE,"",0,0
+"hours","Hours per week","50",FALSE,"hours50",-0.273948105291225,0.0827714225359651
+"hours","Hours per week","60",FALSE,"hours60",-0.432564387356047,0.0823067595255323
+"hours","Hours per week","70",FALSE,"hours70",-0.624475959325447,0.0828222842577327
+"hours","Hours per week","80",FALSE,"hours80",-0.89000194079692,0.08636623169661
+"location","Location","Your city",TRUE,"",0,0
+"location","Location","Different city",FALSE,"locationDifferent city",-0.244599042420408,0.0620770646108465
+"location","Location","Different city, pays to relocate",FALSE,"locationDifferent city, pays to relocate",-0.114039068913622,0.0590737578249611
+"remote","Work from home","Never",TRUE,"",0,0
+"remote","Work from home","Sometimes",FALSE,"remoteSometimes",0.0931791479421231,0.0617716344029996
+"remote","Work from home","Primarily",FALSE,"remotePrimarily",0.248531508337876,0.0623633092234394
+"work_type","Type of task","Repetitive",TRUE,"",0,0
+"work_type","Type of task","Mix",FALSE,"work_typeMix",0.0983722528402396,0.0637128739094589
+"work_type","Type of task","Creative",FALSE,"work_typeCreative",0.0718074111139237,0.0623464503651906
+"teamwork","Work with others","Mostly alone",TRUE,"",0,0
+"teamwork","Work with others","Mix",FALSE,"teamworkMix",0.061495016862185,0.0631755563904284
+"teamwork","Work with others","Mostly team",FALSE,"teamworkMostly team",0.0357358270789207,0.0650165441662827
+"culture","Workplace conditions","Generally unfriendly",TRUE,"",0,0
+"culture","Workplace conditions","Somewhat unfriendly",FALSE,"cultureSomewhat unfriendly",0.0588728427893365,0.0709274328605057
+"culture","Workplace conditions","Somewhat friendly",FALSE,"cultureSomewhat friendly",0.526884528386717,0.0721251189150365
+"culture","Workplace conditions","Generally friendly",FALSE,"cultureGenerally friendly",0.560393277206449,0.0750624910814678
