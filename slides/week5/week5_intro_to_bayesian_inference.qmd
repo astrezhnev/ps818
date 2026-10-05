@@ -151,7 +151,6 @@ knitr::opts_chunk$set(echo = T)
 
 - A voter who returns an absentee ballot can still have it **rejected** - In Wisconsin, these decisions are made by **municipal clerks**
   - This has been the subject of some controversy when municipalities are **overly strict** [@votebeat2026mequon]
-  - Can we identify problematic municipalities?
 
 - The EAC's *Election Administration and Voting Survey* (EAVS) reports how many mail ballots were returned and rejected in every election jurisdiction [@eac2023eavs]
 
@@ -344,7 +343,9 @@ beta_55
 
   $$f(\pi_i | \mathbf{Y}) \propto \pi_i^{Y_i + \alpha_0 - 1}(1- \pi_i)^{n_i - Y_i + \beta_0 - 1}$$
 
-- And we can recognize this as the **kernel** of the beta distribution with parameters $\alpha = Y_i + \alpha_0$ and $\beta = n_i - Y_i + \beta_0$
+- And we can recognize this as the **kernel** of the beta distribution with parameters 
+  - $\alpha = Y_i + \alpha_0$ 
+  - $\beta = n_i - Y_i + \beta_0$
 
 :::
 
@@ -395,7 +396,8 @@ state_rate
 wi %>% arrange(desc(mle)) %>% select(municipality, n, y, mle) %>% head(5)
 ```
 
-- All tiny towns! And at the other end, `r round(100*mean(wi$y == 0))`% of municipalities have a rejection rate of *exactly* zero.
+- All tiny towns! 
+- And at the other end, `r round(100*mean(wi$y == 0))`% of municipalities have a rejection rate of *exactly* zero.
 
 ## Application
 
@@ -459,7 +461,8 @@ others_rate
 ```
 
 - Our posterior mean under the uniform prior (`r round(posterior_mean, 3)`) is about `r round(posterior_mean/others_rate)` times the rate in the rest of the state!
-  - The "uninformative" prior isn't actually uninformative - it expects that municipalities reject **half** of all ballots!
+  - The "uninformative" prior isn't actually uninformative 
+  - It expects that municipalities reject **half** of all ballots!
 
 - What if we instead constructed our prior such that its mean was centered on the rejection rate in the rest of the state?
 
@@ -633,7 +636,7 @@ wi_map %>% ggplot() + geom_sf(aes(fill=rate), color=NA) + facet_wrap(~estimate) 
   theme_void() + theme(strip.text = element_text(size=14))
 ```
 
-- Note that maps of shrunken estimates can mislead too - the highest *adjusted* rates end up in the best-sampled places [@gelman1999allmaps]
+- Note that maps of shrunken estimates can mislead too - the highest *adjusted* rates end up in more populated places [@gelman1999allmaps]
 
 ## Application
 
@@ -686,7 +689,7 @@ wi_map %>% ggplot() + geom_sf(aes(fill=rate), color=NA) + facet_wrap(~estimate) 
   - Putting priors on regression coefficients and the error variance
 
 - **Introduction to Stan**
-  - Write down the model -- let Stan do the sampling
+  - Write down the model -- let Stan implement the MCMC sampler
 
 - **Readings:** Chapters 3 and 9 of @mcelreath2020rethinking
 
