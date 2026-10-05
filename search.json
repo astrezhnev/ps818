@@ -221,7 +221,7 @@
     "href": "slides/week5/week5_intro_to_bayesian_inference.html#the-posterior-density",
     "title": "Week 5: Intro to Bayesian Inference",
     "section": "The posterior density",
-    "text": "The posterior density\n\nWe’ve mentioned that \\(f(\\pi_i | Y_i)\\) is a beta distribution – let’s show that!\n\\[f(\\pi_i | \\mathbf{Y}) \\propto f(Y_i | \\pi_i) f(\\pi_i)\\]\nPlug in the densities (we’ll drop any multiplicative constants that don’t depend on \\(\\pi_i\\))\n\\[f(\\pi_i | \\mathbf{Y}) \\propto \\left[\\pi_i^{Y_i}(1- \\pi_i)^{n_i - Y_i}\\right]\\times\\left[\\pi_i^{\\alpha_0 - 1}(1- \\pi_i)^{\\beta_0 - 1}\\right]\\]\nAdding the exponents\n\\[f(\\pi_i | \\mathbf{Y}) \\propto \\pi_i^{Y_i + \\alpha_0 - 1}(1- \\pi_i)^{n_i - Y_i + \\beta_0 - 1}\\]\nAnd we can recognize this as the kernel of the beta distribution with parameters \\(\\alpha = Y_i + \\alpha_0\\) and \\(\\beta = n_i - Y_i + \\beta_0\\)"
+    "text": "The posterior density\n\nWe’ve mentioned that \\(f(\\pi_i | Y_i)\\) is a beta distribution – let’s show that!\n\\[f(\\pi_i | \\mathbf{Y}) \\propto f(Y_i | \\pi_i) f(\\pi_i)\\]\nPlug in the densities (we’ll drop any multiplicative constants that don’t depend on \\(\\pi_i\\))\n\\[f(\\pi_i | \\mathbf{Y}) \\propto \\left[\\pi_i^{Y_i}(1- \\pi_i)^{n_i - Y_i}\\right]\\times\\left[\\pi_i^{\\alpha_0 - 1}(1- \\pi_i)^{\\beta_0 - 1}\\right]\\]\nAdding the exponents\n\\[f(\\pi_i | \\mathbf{Y}) \\propto \\pi_i^{Y_i + \\alpha_0 - 1}(1- \\pi_i)^{n_i - Y_i + \\beta_0 - 1}\\]\nAnd we can recognize this as the kernel of the beta distribution with parameters\n\n\\(\\alpha = Y_i + \\alpha_0\\)\n\\(\\beta = n_i - Y_i + \\beta_0\\)"
   },
   {
     "objectID": "slides/week5/week5_intro_to_bayesian_inference.html#quantities-of-interest",
@@ -242,7 +242,7 @@
     "href": "slides/week5/week5_intro_to_bayesian_inference.html#application-1",
     "title": "Week 5: Intro to Bayesian Inference",
     "section": "Application",
-    "text": "Application\n\nOur baseline approach – just take the mean everywhere. Which municipalities reject the most ballots?\n\n\nwi %&gt;% arrange(desc(mle)) %&gt;% select(municipality, n, y, mle) %&gt;% head(5)\n\n# A tibble: 5 × 4\n  municipality                               n     y   mle\n  &lt;chr&gt;                                  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n1 TOWN OF CLEVELAND - TAYLOR COUNTY         10     4 0.4  \n2 TOWN OF SPOONER - WASHBURN COUNTY         58    18 0.310\n3 TOWN OF NORTHFIELD - JACKSON COUNTY       15     4 0.267\n4 TOWN OF ROCKBRIDGE - RICHLAND COUNTY      41    10 0.244\n5 TOWN OF COOKS VALLEY - CHIPPEWA COUNTY    17     4 0.235\n\n\n\nAll tiny towns! And at the other end, 64% of municipalities have a rejection rate of exactly zero."
+    "text": "Application\n\nOur baseline approach – just take the mean everywhere. Which municipalities reject the most ballots?\n\n\nwi %&gt;% arrange(desc(mle)) %&gt;% select(municipality, n, y, mle) %&gt;% head(5)\n\n# A tibble: 5 × 4\n  municipality                               n     y   mle\n  &lt;chr&gt;                                  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n1 TOWN OF CLEVELAND - TAYLOR COUNTY         10     4 0.4  \n2 TOWN OF SPOONER - WASHBURN COUNTY         58    18 0.310\n3 TOWN OF NORTHFIELD - JACKSON COUNTY       15     4 0.267\n4 TOWN OF ROCKBRIDGE - RICHLAND COUNTY      41    10 0.244\n5 TOWN OF COOKS VALLEY - CHIPPEWA COUNTY    17     4 0.235\n\n\n\nAll tiny towns!\nAnd at the other end, 64% of municipalities have a rejection rate of exactly zero."
   },
   {
     "objectID": "slides/week5/week5_intro_to_bayesian_inference.html#application-2",
@@ -277,7 +277,7 @@
     "href": "slides/week5/week5_intro_to_bayesian_inference.html#application-6",
     "title": "Week 5: Intro to Bayesian Inference",
     "section": "Application",
-    "text": "Application\n\nBut we have a lot more information from the other 1833 municipalities in the state\n\n\nothers_rate &lt;- wi %&gt;% filter(municipality != cleveland$municipality) %&gt;% summarize(rate = sum(y)/sum(n)) %&gt;% pull(rate)\nothers_rate\n\n[1] 0.00923\n\n\n\nOur posterior mean under the uniform prior (0.417) is about 45 times the rate in the rest of the state!\n\nThe “uninformative” prior isn’t actually uninformative - it expects that municipalities reject half of all ballots!\n\nWhat if we instead constructed our prior such that its mean was centered on the rejection rate in the rest of the state?"
+    "text": "Application\n\nBut we have a lot more information from the other 1833 municipalities in the state\n\n\nothers_rate &lt;- wi %&gt;% filter(municipality != cleveland$municipality) %&gt;% summarize(rate = sum(y)/sum(n)) %&gt;% pull(rate)\nothers_rate\n\n[1] 0.00923\n\n\n\nOur posterior mean under the uniform prior (0.417) is about 45 times the rate in the rest of the state!\n\nThe “uninformative” prior isn’t actually uninformative\nIt expects that municipalities reject half of all ballots!\n\nWhat if we instead constructed our prior such that its mean was centered on the rejection rate in the rest of the state?"
   },
   {
     "objectID": "slides/week5/week5_intro_to_bayesian_inference.html#application-7",
@@ -361,7 +361,7 @@
     "href": "slides/week5/week5_intro_to_bayesian_inference.html#mapping-rejection-rates-1",
     "title": "Week 5: Intro to Bayesian Inference",
     "section": "Mapping rejection rates",
-    "text": "Mapping rejection rates\n\n\nNote that maps of shrunken estimates can mislead too - the highest adjusted rates end up in the best-sampled places (Gelman and Price 1999)"
+    "text": "Mapping rejection rates\n\n\nNote that maps of shrunken estimates can mislead too - the highest adjusted rates end up in more populated places (Gelman and Price 1999)"
   },
   {
     "objectID": "slides/week5/week5_intro_to_bayesian_inference.html#application-13",
@@ -382,7 +382,7 @@
     "href": "slides/week5/week5_intro_to_bayesian_inference.html#next-week",
     "title": "Week 5: Intro to Bayesian Inference",
     "section": "Next week",
-    "text": "Next week\n\nEstimating Bayesian models\n\nMost posteriors don’t have a nice closed form\n\nBeta-binomial is the classic conjugate prior.\nNormal-Normal is also common (you’ll see a variation on this on the problem set)\n\nMarkov Chain Monte Carlo (MCMC): drawing samples from a posterior that we can only evaluate up to a proportionality constant\nThe Metropolis-Hastings algorithm and Gibbs sampling\n\nBayesian regression\n\nPutting priors on regression coefficients and the error variance\n\nIntroduction to Stan\n\nWrite down the model – let Stan do the sampling\n\nReadings: Chapters 3 and 9 of McElreath (2020)"
+    "text": "Next week\n\nEstimating Bayesian models\n\nMost posteriors don’t have a nice closed form\n\nBeta-binomial is the classic conjugate prior.\nNormal-Normal is also common (you’ll see a variation on this on the problem set)\n\nMarkov Chain Monte Carlo (MCMC): drawing samples from a posterior that we can only evaluate up to a proportionality constant\nThe Metropolis-Hastings algorithm and Gibbs sampling\n\nBayesian regression\n\nPutting priors on regression coefficients and the error variance\n\nIntroduction to Stan\n\nWrite down the model – let Stan implement the MCMC sampler\n\nReadings: Chapters 3 and 9 of McElreath (2020)"
   },
   {
     "objectID": "slides/week5/week5_intro_to_bayesian_inference.html#references",
