@@ -149,8 +149,8 @@ knitr::opts_chunk$set(echo = T)
 
 ::: {.incremental}
 
-- A voter who returns an absentee ballot can still have it **rejected** - In Wisconsin, these calls are made by **municipal clerks**
-  - This has been the subject of some controversy when clerks "go rogue" and apply potentially illegal standards for adjudication! [@votebeat2026mequon]
+- A voter who returns an absentee ballot can still have it **rejected** - In Wisconsin, these decisions are made by **municipal clerks**
+  - This has been the subject of some controversy when municipalities are **overly strict** [@votebeat2026mequon]
   - Can we identify problematic municipalities?
 
 - The EAC's *Election Administration and Voting Survey* (EAVS) reports how many mail ballots were returned and rejected in every election jurisdiction [@eac2023eavs]
