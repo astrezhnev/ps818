@@ -650,7 +650,6 @@ wi_map <- wi_map %>% left_join(wi_est, by = c("COUSUBFP" = "FIPSCode")) %>%
 
 ```{r, echo=F, fig.width=10, fig.height=6, fig.align="center"}
 wi_map %>% ggplot() + geom_sf(aes(fill=rate), color=NA) +
-  geom_sf(data=filter(wi_map, COUSUBFP == mequon$FIPSCode), fill=NA, color="dodgerblue", linewidth=.8) + # Outline Mequon
   facet_wrap(~estimate) +
   scale_fill_viridis_c(option="magma", direction=-1, limits=c(0, .015), oob=scales::squish, labels=scales::percent,
                        na.value="grey85", name="Rejection rate\n(capped at 1.5%)") +
