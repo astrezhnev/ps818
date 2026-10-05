@@ -1,0 +1,698 @@
+---
+title: "Week 5: Intro to Bayesian Inference"
+subtitle: "PS 818 - Data Analysis with Statistical Models"
+author:
+  - name: "Anton Strezhnev"
+    affiliation: "University of Wisconsin-Madison"
+    email: strezhnev@wisc.edu
+date: "October 5, 2026"
+date-format: "MMMM D, YYYY"
+editor: 
+  render-on-save: true
+format: 
+  revealjs:
+    theme: [default, custom.scss]
+    slide-number: true
+    overview: true
+    navigation-mode: vertical
+    progress: false
+    controls: true
+    link-external-newwindow: true
+    footer: "PS 818 - University of Wisconsin-Madison"
+    html-math-method:
+      method: mathjax
+      url: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+execute: 
+  cache: false
+embed-resources: true
+bibliography: ../ps818.bib
+link-citations: true
+
+---
+
+## Intro to Bayesian Inference {.title-slide}
+
+::: {style="display: none"}
+$$
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+$$
+:::
+
+```{r, echo = F, message=F, warning=F}
+library(tidyverse)
+library(knitr)
+library(broom)
+options(digits=3)
+knitr::opts_chunk$set(echo = T)
+```
+
+## Previously
+
+::: {.incremental}
+
+- **Wrapping up MLE**
+  - **Latent variables** and discrete choice: ordinal logit, multinomial logit, and the conditional logit
+  - **Duration models**: modelling the hazard, censoring, and the Cox proportional hazards model
+  - Estimated via Maximum Likelihood 
+    - $\theta$ is a fixed, unknown constant 
+    - Uncertainty comes from **repeated sampling** - the *sampling distribution* of $\hat{\theta}$
+
+:::
+
+## This week
+
+::: {.incremental}
+
+- **Bayesian inference**
+  - What if we treat $\theta$ as having **uncertainty**
+  - We want the **posterior** distribution conditioning on our observed data $\theta | \mathbf{Y}$
+  - But Bayes' rule tells us that the likelihood is only half of this.
+    - We also need a **prior** on $\theta$. 
+
+- **Defining a Bayesian Model**
+  - Writing down the data-generating process
+  - "Plate notation" for concise model summaries
+
+:::
+
+## Intro to Bayesian Inference
+
+## Bayesian inference
+
+::: {.incremental}
+
+- In the **frequentist** paradigm, we took a particular approach to thinking about *randomness* when trying to learn about an unknown parameter $\theta$ using observed data $\mathbf{Y}$
+  - $\theta$ is an unknown **constant**
+  - $\mathbf{Y}$ are random variables
+  - $\hat{\theta}$ is our estimator of $\theta$ - it's a function of random variables
+  - Probabilities reflect behavior in *repeated samples*
+
+- **Bayesian** inference takes a different approach to the problem. Rather than treating $\theta$ as a constant, we consider it to be **random** as well!
+  - Probabilities reflect **beliefs** about a particular quantity
+  - $f(\theta)$ denotes our *prior* beliefs about the value of $\theta$
+  - $f(\theta | \mathbf{Y})$ is the *posterior* distribution given the observed data. This is our target of inference
+  - $\mathbf{Y}$ are still random variables...but the posterior distribution *conditions* on them
+
+- We derive the posterior using **Bayes rule**
+
+  $$f(\theta | \mathbf{Y}) = \frac{f(\mathbf{Y} | \theta)}{f(\mathbf{Y})} f(\theta)$$
+
+:::
+
+## Bayesian inference
+
+::: {.incremental}
+
+- The denominator can be written as an integral over all of the possible values of $\theta$ (marginalizing over $\theta$)
+
+  $$f(\mathbf{Y}) = \int f(\mathbf{Y},\theta)d\theta = \int f(\mathbf{Y}|\theta)f(\theta)d\theta$$
+
+- So often we'll write the posterior distribution *up to a proportionality constant* as
+
+  $$\underbrace{f(\theta | \mathbf{Y})}_{\text{posterior}} \propto \underbrace{f(\mathbf{Y} | \theta)}_{\text{likelihood}} \times \underbrace{f(\theta)}_{\text{prior}}$$
+
+:::
+
+## Bayesian inference
+
+::: {.incremental}
+
+- In addition to the posterior distribution of the parameters $\theta$, we'll often want to generate "forecasts" of an out-of-sample $\tilde{Y}$ conditional on what we have observed
+  - This involves integrating over the posterior values of the parameter $\theta$
+
+  $$\begin{align*}f(\tilde{Y}|\mathbf{Y}) &= \int f(\tilde{Y}, \theta | \mathbf{Y}) d\theta\\
+  &= \int f(\tilde{Y}| \theta, \mathbf{Y}) f(\theta | \mathbf{Y}) d\theta\\
+  &= \int f(\tilde{Y}| \theta) f(\theta | \mathbf{Y}) d\theta\end{align*}$$
+  
+:::
+
+## Bayesian inference
+
+::: {.incremental}
+
+- We also might reason about two different values of $\theta$: $\{\theta_1, \theta_2\}$ and their relative odds. This has a nice expression in terms of the *prior* times a *likelihood ratio* 
+
+  $$\frac{f(\theta_1|\mathbf{Y})}{f(\theta_2|\mathbf{Y})} = \frac{f(\theta_1)}{f(\theta_2)} \times  \frac{f(\mathbf{Y}|\theta_1)}{f(\mathbf{Y}|\theta_2)}$$
+
+- Inference on the posterior is often referred to as **updating** the prior and often can be conceptualized in terms of *sequential* changes to our beliefs about the parameter. 
+
+- Suppose we have two samples $\mathbf{Y}_1$ and $\mathbf{Y}_2$. Our posterior can be written as:
+  
+  $$\begin{align*}f(\theta | \mathbf{Y}_1, \mathbf{Y}_2) &\propto f(\mathbf{Y}_2, \mathbf{Y}_1 | \theta) \times f(\theta) \\ &\propto f(\mathbf{Y}_2 | \mathbf{Y}_1, \theta) \times f(\mathbf{Y}_1 | \theta) \times f(\theta) \\ &\propto f(\mathbf{Y}_2 | \mathbf{Y}_1, \theta) \times f(\theta | \mathbf{Y}_1) \end{align*}$$
+
+- The posterior becomes the new "prior"!
+
+:::
+
+## Application: Absentee Ballot Rejection
+
+::: {.incremental}
+
+- A voter who returns an absentee ballot can still have it **rejected** - In Wisconsin, these calls are made by **municipal clerks**
+  - This has been the subject of some controversy when clerks "go rogue" and apply potentially illegal standards for adjudication! [@votebeat2026mequon]
+  - Can we identify problematic municipalities?
+
+- The EAC's *Election Administration and Voting Survey* (EAVS) reports how many mail ballots were returned and rejected in every election jurisdiction [@eac2023eavs]
+
+- For each municipality $i$, $i \in \{1, 2, \dotsc, N\}$, we observe (November 2022 general election):
+  - $Y_i$: The number of returned absentee ballots that were rejected
+  - $n_i$: The number of absentee ballots returned by voters
+
+- We'll start with a simple model
+  - Assume $Y_i$ is a draw from a binomial distribution with a total number of trials $n_i$ and "rejection" probability $\pi_i$.
+  - $\pi_i$ comes from a **Beta** distribution with *hyperparameters* $\alpha_0$ and $\beta_0$
+
+  $$Y_i \sim \text{Binomial}(n_i, \pi_i)$$
+  $$\pi_i \sim \text{Beta}(\alpha_0, \beta_0)$$
+
+:::
+
+## Plate notation
+
+- A common method of writing statistical models is via **plate notation** 
+  - These encode independence and dependence assumptions across parameters and data.
+
+```{tikz, dag, echo=F, fig.align='center'}
+\usetikzlibrary{arrows}
+\usetikzlibrary{bayesnet}
+\begin{tikzpicture}
+\node[obs] (y) {$Y_i$};
+\node[const, above=of y, xshift=-.5cm] (k) {$n_i$};
+\node[latent, above=of y, xshift=.5cm] (pi) {$\pi_i$};
+\node[const, right=of pi, yshift=.5cm] (alpha) {$\alpha_0$};
+\node[const, right=of pi, yshift=-.5cm] (beta) {$\beta_0$};
+\edge{k}{y};
+\edge{pi}{y};
+\edge{alpha}{pi};
+\edge{beta}{pi};
+\plate [inner sep=.3cm] {plate1} {(k) (y) (pi)} {$N$};
+\end{tikzpicture}
+```
+
+
+
+## Features of a Bayesian model
+
+::: {.incremental}
+
+- There are four types of variables in a Bayesian model
+  - **Observed Data**: Variables that have a probability distribution but on whose observed values we condition - $Y_i$
+  - **Known Constants**: Fixed quantities that do not have probability distributions (e.g. regressors or other features of the nodes) - $n_i$, $N$, $\alpha_0$, $\beta_0$
+  - **Deterministic quantities**: Transformations of other variables
+  - **Latent parameters**: Variables that have a probability distribution that we do not observe - $\pi_i$
+
+:::
+
+## Features of a Bayesian model
+
+::: {.incremental}
+
+- Sometimes the known constants are *actually* known by us (e.g. $N$ or $n_i$) and in other cases they are *assumed to be known*
+  - These are typically parameters of the prior distribution which are called **hyperparameters** (here: $\alpha_0$ and $\beta_0$)
+  - The hyperparameters govern the distribution of the prior
+
+- In Bayesian inference, we are interested in either obtaining the **posterior** of the latent parameters *or* integrating them out (in the latter case, they are sometimes referred to as "nuisance" parameters)
+  - Here, we want to obtain $f(\pi_i | \mathbf{Y})$
+  - When writing the posterior, we'll often omit the implicit conditioning on the observed constants.
+
+:::
+
+## The Likelihood
+
+::: {.incremental}
+
+- Remember the posterior distribution is proportional to the **likelihood** times the **prior**
+
+  $$\underbrace{f(\pi_i | \mathbf{Y})}_{\text{posterior}} \propto \underbrace{f(\mathbf{Y} | \pi_i)}_{\text{likelihood}} \times \underbrace{f(\pi_i)}_{\text{prior}}$$
+
+- First, let's derive the **likelihood** $f(\mathbf{Y} | \pi_i)$
+- Since the $Y_i$ are independent conditional on $\pi_i$, we can write:
+  
+  $$f(\mathbf{Y} | \pi_i) = \prod_{j=1}^N f(Y_j | \pi_i)$$
+
+- Next, for $j \neq i$, we have $f(Y_j | \pi_i) = f(Y_j)$ since $Y_j$ only depends on $\pi_j$. That's just a constant term and drops out of the posterior distribution, leaving
+
+  $$f(\pi_i | \mathbf{Y}) = f(\pi_i | Y_i) \propto f(Y_i | \pi_i) f(\pi_i)$$
+
+:::
+
+## The Likelihood and Prior
+
+::: {.incremental}
+
+- What's $f(Y_i | \pi_i)$? We've defined it as the binomial PMF
+
+  $$f(Y_i | \pi_i) = {n_i \choose Y_i} \pi_i^{Y_i}(1- \pi_i)^{n_i - Y_i}$$
+
+- What about the prior? $f(\pi_i)$? We've chosen the **beta** distribution
+
+  $$f(\pi_i) = \frac{\Gamma(\alpha_{0} + \beta_{0})}{\Gamma(\alpha_0)\Gamma(\beta_0)} \pi_i^{\alpha_0 - 1}(1- \pi_i)^{\beta_0 - 1}$$
+
+- The Beta distribution has some notable features.
+  - Its mean: $E[\pi_i] = \frac{\alpha_0}{\alpha_0 + \beta_0}$
+  - Its variance $Var(\pi_i) = \frac{\alpha_0\beta_0}{(\alpha_0 + \beta_0)^2(\alpha_0 + \beta_0 + 1)}$
+
+:::
+
+## The Beta Distribution
+
+- Let's see how the parameters influence the shape of the beta. $\text{Beta}(2,2)$:
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+beta_22 <- ggplot() + xlim(0, 1) + geom_function(fun=dbeta, args=list(shape1=2, shape2=2)) + theme_bw() + xlab("Value") + 
+  ylab("Density") + ggtitle("Beta(2,2)") 
+beta_22
+```
+
+## The Beta Distribution
+
+- $\text{Beta}(100,200)$:
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+beta_100200 <- ggplot() + xlim(0, 1) + geom_function(fun=dbeta, args=list(shape1=100, shape2=200)) + theme_bw() + xlab("Value") + 
+  ylab("Density") + ggtitle("Beta(100,200)") 
+beta_100200
+```
+
+## Choosing a prior
+
+::: {.incremental}
+
+- There are two ways to think about choosing a prior distribution
+  - **Informative** prior - Use the prior to encode our existing beliefs about the parameter
+  - **Uninformative/Diffuse** prior - Pick a prior that will have the least impact on the posterior distribution
+
+- We also need to consider the *shape* of the prior distribution $f(\pi_i)$
+  - Why did we pick the Beta distribution?
+  - Because it has a special property when combined with a binomial likelihood. 
+  - It is a **conjugate** prior to the binomial likelihood.
+
+- **Conjugate prior**: A prior distribution is *conjugate* to a particular likelihood if the posterior distribution is of the same form as the prior
+  - $f(\theta)$ is beta; $f(\mathbf{Y} | \theta)$ is binomial; $f(\theta | \mathbf{Y})$ is beta
+  
+:::
+
+## Choosing a prior
+
+::: {.incremental}
+
+- In this case, $\pi_i$ must be between $0$ and $1$, so we already have some information.
+- One possible choice for an *uninformative* prior is the uniform distribution - each parameter value is equally likely: $$f(\pi_i) \propto 1$$
+  - In settings where the parameter takes on values $(-\infty, \infty)$, we could still consider a "uniform" prior but it will be **improper** as it's not a density that integrates to $1$
+
+- For $\pi_i \in (0, 1)$, the uniform prior corresponds to the $\text{Beta}(1,1)$ distribution
+  - Originally proposed by Bayes.
+
+:::
+
+## Choosing a prior
+
+- Haldane proposed instead $\text{Beta}(0,0)$ - notably this is *improper* $\pi_i^{-1}(1-\pi_i)^{-1}$)
+
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+beta_00<- ggplot() + xlim(0.001, 0.999) + geom_function(fun=function(x) 1/(x*(1-x)), n=1001) + coord_cartesian(ylim=c(0, 40)) + theme_bw() + xlab("Value") +
+  ylab("Density (unnormalized)") + ggtitle("Beta(0,0)")
+beta_00
+```
+
+## Choosing a prior
+
+- And Jeffreys proposed $\text{Beta}(.5, .5)$
+  
+```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
+beta_55 <- ggplot() + xlim(0, 1) + ylim(0, 4) + geom_function(fun=dbeta, args=list(shape1=1/2, shape2=1/2)) + theme_bw() + xlab("Value") + 
+  ylab("Density") + ggtitle("Beta(.5,.5)") 
+beta_55
+```
+
+
+## The posterior density
+
+::: {.incremental}
+
+- We've mentioned that $f(\pi_i | Y_i)$ is a beta distribution -- let's show that!
+
+  $$f(\pi_i | \mathbf{Y}) \propto f(Y_i | \pi_i) f(\pi_i)$$
+
+- Plug in the densities (we'll drop any multiplicative constants that don't depend on $\pi_i$)
+
+  $$f(\pi_i | \mathbf{Y}) \propto \left[\pi_i^{Y_i}(1- \pi_i)^{n_i - Y_i}\right]\times\left[\pi_i^{\alpha_0 - 1}(1- \pi_i)^{\beta_0 - 1}\right]$$
+
+
+- Adding the exponents
+
+  $$f(\pi_i | \mathbf{Y}) \propto \pi_i^{Y_i + \alpha_0 - 1}(1- \pi_i)^{n_i - Y_i + \beta_0 - 1}$$
+
+- And we can recognize this as the **kernel** of the beta distribution with parameters $\alpha = Y_i + \alpha_0$ and $\beta = n_i - Y_i + \beta_0$
+
+:::
+
+## Quantities of interest
+
+::: {.incremental}
+
+- Once we have a posterior distribution, we typically will report **summaries**
+
+- **Point** summaries
+  - *Posterior Mean*: $\hat{\theta} = E[\theta | \mathbf{Y}]$
+  - *Posterior Mode*: $\hat{\theta} = \argmax_{\theta} f(\theta | \mathbf{Y})$
+
+- **Credible interval**: A $95\%$ credible interval $(l_{95}, h_{95})$ is a range of values that contains $95\%$ of the posterior probability
+
+  $$\int_{l_{95}}^{h_{95}} f(\theta | \mathbf{Y})d\theta = .95$$
+
+- There is no one unique credible interval! As a result, there are a few common choices for how to construct a credible interval
+  - **Highest Density** interval (HDI) - no values outside of the interval have higher density than values *inside* the interval
+  - **Equal-tailed** interval (ETI) - the probability of being below the lower limit is equal to the probability above the upper limit
+  
+:::
+
+## Application
+
+- Let's take a look at the EAVS data for Wisconsin. Start by loading it in (see `data/README.md` for the details)
+
+```{r, message = F, warning=F, echo=T}
+# EAVS 2022, Wisconsin municipalities (C1b = mail ballots returned by voters, C9a = mail ballots rejected)
+wi <- read_csv("data/eavs_2022_wi.csv")
+wi <- wi %>% filter(C1b > 0) %>% # Drop municipalities where no absentee ballots were returned
+  transmute(FIPSCode, municipality = Jurisdiction_Name, n = C1b, y = C9a, mle = y/n)
+head(wi)
+```
+
+- The statewide rejection rate
+
+```{r, echo=T}
+state_rate <- sum(wi$y)/sum(wi$n)
+state_rate
+```
+
+## Application
+
+- Our baseline approach -- just take the mean everywhere. Which municipalities reject the most ballots?
+
+```{r, echo=T}
+wi %>% arrange(desc(mle)) %>% select(municipality, n, y, mle) %>% head(5)
+```
+
+- All tiny towns! And at the other end, `r round(100*mean(wi$y == 0))`% of municipalities have a rejection rate of *exactly* zero.
+
+## Application
+
+- The most extreme rejection rates come from the municipalities with the fewest ballots
+
+```{r, echo=F, fig.width=8, fig.height=4.5, fig.align="center"}
+wi %>% ggplot(aes(x=n, y=mle)) + geom_point(alpha=.3) + scale_x_log10(labels=scales::comma) +
+  geom_hline(yintercept=state_rate, lty=2, lwd=1, col="indianred") + theme_bw() +
+  xlab("Absentee ballots returned (log scale)") + ylab("Rejection rate (MLE)")
+```
+
+
+## Application
+
+- Consider the "worst" municipality in the state: the **Town of Cleveland** in Taylor County
+
+```{r, echo=T}
+cleveland <- wi %>% filter(municipality == "TOWN OF CLEVELAND - TAYLOR COUNTY")
+cleveland
+```
+
+- `r cleveland$y` of `r cleveland$n` returned ballots were rejected
+  - Do we *really* believe that the Town of Cleveland rejects `r round(100*cleveland$mle)`% of its absentee ballots?
+
+## Application
+
+- Let's get the posterior distribution for $\pi_i$ for the Town of Cleveland under an uninformative uniform prior
+
+```{r, fig.width=5, fig.height = 3, fig.align="center"}
+posterior_alpha <- cleveland$y + 1
+posterior_beta <- cleveland$n - cleveland$y + 1
+# Plot the posterior
+cle_posterior <- ggplot() + xlim(0, 1)  + geom_function(fun=dbeta, args=list(shape1=posterior_alpha, shape2=posterior_beta), n=1001) + theme_bw() + xlab(expression(pi)) + 
+  ylab("Density")
+cle_posterior
+```
+
+## Application
+
+- We know the form of the beta mean, so our posterior mean estimate is 
+
+```{r, echo=T}
+posterior_mean <- posterior_alpha/(posterior_alpha + posterior_beta)
+posterior_mean
+```
+
+- And we can obtain an equal-tailed 95% credible interval simply via the quantile function
+
+```{r, echo=T}
+posterior_ci <- c(qbeta(.025, shape1=posterior_alpha, shape2=posterior_beta), qbeta(.975, shape1=posterior_alpha, shape2=posterior_beta))
+posterior_ci
+```
+
+## Application
+
+- But we have a lot more information from the other `r nrow(wi) - 1` municipalities in the state
+
+```{r, echo=T}
+others_rate <- wi %>% filter(municipality != cleveland$municipality) %>% summarize(rate = sum(y)/sum(n)) %>% pull(rate)
+others_rate
+```
+
+- Our posterior mean under the uniform prior (`r round(posterior_mean, 3)`) is about `r round(posterior_mean/others_rate)` times the rate in the rest of the state!
+  - The "uninformative" prior isn't actually uninformative - it expects that municipalities reject **half** of all ballots!
+
+- What if we instead constructed our prior such that its mean was centered on the rejection rate in the rest of the state?
+
+## Application
+
+- We can interpret the hyperparameters as "previously observed" counts
+  - $\frac{\alpha_0}{\alpha_0 + \beta_0}$ is the prior mean -- set it to the rejection rate in the rest of the state
+  - $\alpha_0 + \beta_0$ controls the strength of the prior -- set it to $500$: the prior is "worth" 500 ballots
+
+```{r, echo=T}
+prior_mean <- others_rate
+prior_strength <- 500
+# Convert these to alpha/beta 
+prior_alpha <- prior_mean*prior_strength
+prior_beta <- (1 - prior_mean)*prior_strength
+c(prior_alpha, prior_beta)
+```
+
+## Application
+
+- Let's plug-in the new prior parameters
+
+```{r, echo=T}
+posterior2_alpha <- cleveland$y + prior_alpha
+posterior2_beta <- cleveland$n - cleveland$y + prior_beta
+# Plot the posterior (cutting off the y-axis - the new posterior is much more concentrated)
+cle_posterior2 <- ggplot() + xlim(0, .8)  +  geom_function(fun=dbeta, args=list(shape1=posterior_alpha, shape2=posterior_beta), n=1001, lty=2, lwd=1.5, col="dodgerblue") + 
+  theme_bw() + xlab(expression(pi)) + 
+  ylab("Density") + geom_vline(xintercept=prior_mean, lty=2, lwd=1.5, col="indianred") +
+  geom_function(fun=dbeta, args=list(shape1=posterior2_alpha, shape2=posterior2_beta), n=1001,lwd=1.5) +
+  coord_cartesian(ylim=c(0, 10))
+```
+
+## Application
+
+- Uniform prior posterior (blue, dashed), prior mean (red, dashed), and statewide prior posterior (black)
+
+```{r, fig.width=7, fig.height = 5, fig.align="center", warning=F}
+cle_posterior2
+```
+
+## Application
+
+- Our new posterior mean
+
+```{r, echo=T}
+posterior2_mean <- posterior2_alpha/(posterior2_alpha + posterior2_beta)
+posterior2_mean
+```
+
+- And 95% credible interval
+
+```{r, echo=T}
+posterior2_ci <- c(qbeta(.025, shape1=posterior2_alpha, shape2=posterior2_beta), qbeta(.975, shape1=posterior2_alpha, shape2=posterior2_beta))
+posterior2_ci
+```
+
+- With only `r cleveland$n` ballots, the prior does most of the work: the Town of Cleveland's posterior mean is much closer to the statewide rate than to the MLE: `r round(100*cleveland$mle)`%.
+
+## Application
+
+- Let's do this for every municipality: pull each estimate toward the statewide rate
+
+```{r, echo=T}
+wi <- wi %>% mutate(post_mean = (y + prior_strength*state_rate)/(n + prior_strength))
+```
+
+- Now who rejects the most ballots?
+
+```{r, echo=T}
+wi %>% arrange(desc(post_mean)) %>% select(municipality, n, y, mle, post_mean) %>% head(5)
+```
+
+- The top of the list now includes much bigger places -- a high rate on a lot of ballots is more convincing than 4 out of 10
+
+## Application
+
+- The MLE vs. the posterior mean for every municipality
+
+```{r, echo=F, fig.width=8, fig.height=5, fig.align="center"}
+wi %>% ggplot(aes(x=mle, y=post_mean, size=n)) + geom_abline(intercept=0, slope=1, lty=2) +
+  geom_point(alpha=.3) + scale_size_area(max_size=8, labels=scales::comma) + theme_bw() +
+  xlab("MLE (municipality's own rejection rate)") + ylab("Posterior mean (statewide prior)") + labs(size="Ballots returned") +
+  coord_cartesian(xlim=c(0, .4), ylim=c(0, .4))
+```
+
+- Small municipalities get pulled almost all the way to the statewide rate while big cities barely move.
+
+## Does pooling help?
+
+- How do we know whether this is a good idea? We also have EAVS data from the November 2024 election [@eac2025eavs]
+  - Use each municipality's 2022 data to predict its 2024 rejections
+  - The prior only matters when there's very little data, so focus on the municipalities with fewer than 200 returned ballots in 2022
+
+```{r, message = F, warning=F, echo=T}
+wi_2024 <- read_csv("data/eavs_2024_wi.csv") %>% filter(C1b > 0) %>%
+  transmute(FIPSCode, n_2024 = C1b, y_2024 = C9a)
+oos <- wi %>% filter(n < 200) %>% inner_join(wi_2024, by="FIPSCode") # Municipalities in both years
+nrow(oos)
+```
+
+## Does pooling help?
+
+- Score each set of 2022 estimates by the log-likelihood of the 2024 data (higher is better)
+
+```{r, echo=T}
+# Truncate predictions at .0001 so that a predicted probability of 0 doesn't give log(0)
+pred_loglik <- function(p) sum(dbinom(oos$y_2024, oos$n_2024, prob = pmin(pmax(p, .0001), .9999), log=T))
+strengths <- c(50, 200, 500, 1000)
+pull_loglik <- sapply(strengths, function(k) pred_loglik((oos$y + k*state_rate)/(oos$n + k)))
+best_k <- strengths[which.max(pull_loglik)] # The best-predicting prior strength (we'll map it below)
+tibble(estimator = c("MLE", "Uniform prior", "Statewide rate only", paste("Pull to statewide rate, prior strength", strengths)),
+       loglik = c(pred_loglik(oos$mle), pred_loglik((oos$y + 1)/(oos$n + 2)), pred_loglik(rep(state_rate, nrow(oos))), pull_loglik))
+```
+
+## Does pooling help?
+
+- What happened to the municipalities with the most extreme 2022 rates?
+
+```{r, echo=T}
+oos %>% mutate(group = case_when(rank(-mle, ties.method = "first") <= 50 ~ "Top 50 in 2022",
+                                 y == 0 ~ "No rejections in 2022", TRUE ~ "Everyone else")) %>%
+  group_by(group) %>%
+  summarize(municipalities = n(), rate_2022 = sum(y)/sum(n), rate_2024 = sum(y_2024)/sum(n_2024))
+```
+
+- And the Town of Cleveland? `r oos %>% filter(FIPSCode == cleveland$FIPSCode) %>% pull(y_2024)` rejections out of `r oos %>% filter(FIPSCode == cleveland$FIPSCode) %>% pull(n_2024)` returned ballots in 2024.
+
+## Does pooling help?
+
+::: {.incremental}
+
+- The MLE does terribly for forecasting small areas - the extreme rates of 2022 were mostly noise
+  - The "worst" municipalities of 2022 rejected about 1% of their ballots in 2024, not 12%
+  - The municipalities with no rejections in 2022 didn't stay at zero
+
+- The uniform prior does even worse - it pulls toward rejecting half of all ballots!
+
+- The statewide rate alone -- literally just guessing the mean -- does much better
+
+- But a **combination** of the statewide rate and the local rate does best
+  - There's some additional information in a municipality's own history: the top 50 still rejected about twice the statewide rate in 2024
+
+- We directly manipulated the strength of the prior. Could we instead *estimate* it from the data?
+  - Yes! This is the idea behind **hierarchical** (or multilevel) models - we'll cover this in a few weeks.
+
+:::
+
+## Mapping rejection rates
+
+- Let's map every municipality: the MLE vs. the posterior mean under our "best" prior (prior strength `r best_k`)
+
+```{r, message = F, warning=F, echo=T}
+library(sf)
+wi_map <- st_read("data/wi_municipalities_2022.gpkg", quiet = T)
+wi_est <- wi %>%
+  mutate(FIPSCode = if_else(municipality == "VILLAGE OF GREENVILLE - OUTAGAMIE COUNTY", "31525", FIPSCode), # EAVS 2022 files the village under the old town's code
+         post_best = (y + best_k*state_rate)/(n + best_k))
+wi_map <- wi_map %>% left_join(wi_est, by = c("COUSUBFP" = "FIPSCode")) %>%
+  pivot_longer(c(mle, post_best), names_to = "estimate", values_to = "rate") %>%
+  mutate(estimate = factor(estimate, levels = c("mle", "post_best"),
+                           labels = c("MLE", paste0("Posterior mean (prior strength ", best_k, ")"))))
+```
+
+## Mapping rejection rates
+
+```{r, echo=F, fig.width=10, fig.height=6, fig.align="center"}
+wi_map %>% ggplot() + geom_sf(aes(fill=rate), color=NA) + facet_wrap(~estimate) +
+  scale_fill_viridis_c(option="magma", direction=-1, limits=c(0, .05), oob=scales::squish, labels=scales::percent,
+                       na.value="grey85", name="Rejection rate\n(capped at 5%)") +
+  theme_void() + theme(strip.text = element_text(size=14))
+```
+
+- Note that maps of shrunken estimates can mislead too - the highest *adjusted* rates end up in the best-sampled places [@gelman1999allmaps]
+
+## Application
+
+::: {.incremental}
+
+- The posterior mean can be thought of as a "weighted average" of the prior mean and the MLE
+  - The weights are controlled by the variance of the prior.
+
+  $$E[\pi_i | Y_i] = \frac{Y_i + \alpha_0}{n_i + \alpha_0 + \beta_0} = \underbrace{\frac{n_i}{n_i + \alpha_0 + \beta_0}}_{\text{weight on data}} \times \frac{Y_i}{n_i} + \underbrace{\frac{\alpha_0 + \beta_0}{n_i + \alpha_0 + \beta_0}}_{\text{weight on prior}} \times \frac{\alpha_0}{\alpha_0 + \beta_0}$$
+
+  - Can interpret the hyper-parameters for this case - $\alpha_0$ and $\beta_0$ - as the number of "previously observed" counts.
+
+- Stronger priors $\leadsto$ narrower credible intervals
+  - But it takes a *lot* more data to move the posterior distribution from the prior.
+
+- Often, the prior serves to **regularize** our estimates
+  - We want our estimates to be "pulled" towards a particular value if there's very little data.
+  - A common type of "regularizing" prior is designed to attenuate our estimates to $0$.
+
+:::
+
+## Connections with Frequentism
+
+::: {.incremental}
+
+- You'll notice that for the uninformative uniform prior, our posterior mode is equivalent to the MLE
+  - If $f(\theta) \propto 1$, $f(\theta|\mathbf{Y}) \propto f(\mathbf{Y}|\theta)$
+
+- More generally, for most well-behaved priors and likelihoods, the **Bernstein-von Mises** theorem states that as $n \to \infty$...
+  - ...the posterior distribution $f(\theta | \mathbf{Y})$ will converge to a **normal** distribution
+  - ...centered at the MLE $\hat{\theta}$ (which is itself converging to the true parameter $\theta_0$)
+  - ...with variance-covariance matrix equal to the inverse Fisher information
+
+- Essentially: In large samples, posterior distributions converge to the sampling distribution of the MLEs
+
+:::
+
+## Next week
+
+::: {.incremental}
+
+- **Estimating Bayesian models**
+  - Most posteriors don't have a nice closed form
+    - Beta-binomial is the classic conjugate prior.
+    - Normal-Normal is also common (you'll see a variation on this on the problem set)
+  - **Markov Chain Monte Carlo** (MCMC): drawing samples from a posterior that we can only evaluate up to a proportionality constant
+  - The **Metropolis-Hastings** algorithm and **Gibbs sampling**
+
+- **Bayesian regression**
+  - Putting priors on regression coefficients and the error variance
+
+- **Introduction to Stan**
+  - Write down the model -- let Stan do the sampling
+
+- **Readings:** Chapters 3 and 9 of @mcelreath2020rethinking
+
+:::
+
+## References {.refs-slide}
+
+::: {#refs}
+:::
