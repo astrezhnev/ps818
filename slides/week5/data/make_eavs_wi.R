@@ -19,6 +19,6 @@ for (yr in names(files)) {
   csv <- csv[grepl("\\.csv$", csv)]
   read_csv(csv, col_types = cols(.default = col_character())) %>%
     filter(State_Abbr == "WI") %>%
-    select(FIPSCode, Jurisdiction_Name, State_Abbr, C1a, C1b, C8a, C9a) %>%
+    select(FIPSCode, Jurisdiction_Name, State_Abbr, C1a, C1b, C8a, C9a, C9b, C9m) %>%
     write_csv(paste0("eavs_", yr, "_wi.csv"))
 }

@@ -149,14 +149,23 @@ knitr::opts_chunk$set(echo = T)
 
 ::: {.incremental}
 
-- A voter who returns an absentee ballot can still have it **rejected** - In Wisconsin, these decisions are made by **municipal clerks**
-  - This has been the subject of some controversy when municipalities are **overly strict** [@votebeat2026mequon]
+- A voter who returns an absentee ballot can still have it **rejected** 
+  - In Wisconsin, these decisions are made by **municipal clerks**
+  - This has been the subject of some controversy when municipalities are **overly strict**
+  - Reporting suggests that since 2024, officials in the city of Mequon have been using a particularly strict standard for adjudicating witness addresses [@shur2026mequon].
+  - Let's see if that is detectable in the **data**!
 
-- The EAC's *Election Administration and Voting Survey* (EAVS) reports how many mail ballots were returned and rejected in every election jurisdiction [@eac2023eavs]
+- The EAC's *Election Administration and Voting Survey* (EAVS) reports how many mail ballots were returned and rejected in every election jurisdiction [@eac2025eavs]
 
-- For each municipality $i$, $i \in \{1, 2, \dotsc, N\}$, we observe (November 2022 general election):
-  - $Y_i$: The number of returned absentee ballots that were rejected
-  - $n_i$: The number of absentee ballots returned by voters
+- For each municipality $i$, $i \in \{1, 2, \dotsc, N\}$, we observe (November 2024 general election):
+  - $Y_i$: The number of returned absentee ballots that were rejected for **discretionary** reasons (i.e. not because the ballot arrived late or the voter died)
+  - $n_i$: The number of absentee ballots returned on time by living voters
+
+:::
+
+## Application: Absentee Ballot Rejection
+
+::: {.incremental}
 
 - We'll start with a simple model
   - Assume $Y_i$ is a draw from a binomial distribution with a total number of trials $n_i$ and "rejection" probability $\pi_i$.
@@ -307,7 +316,7 @@ beta_100200
 
 ## Choosing a prior
 
-- Haldane proposed instead $\text{Beta}(0,0)$ - notably this is *improper* $\pi_i^{-1}(1-\pi_i)^{-1}$)
+- Haldane proposed instead $\text{Beta}(0,0)$ - notably this is *improper* $\pi_i^{-1}(1-\pi_i)^{-1}$
 
 ```{r, echo=F, fig.width=5, fig.height = 3, fig.align="center"}
 beta_00<- ggplot() + xlim(0.001, 0.999) + geom_function(fun=function(x) 1/(x*(1-x)), n=1001) + coord_cartesian(ylim=c(0, 40)) + theme_bw() + xlab("Value") +
@@ -374,10 +383,12 @@ beta_55
 - Let's take a look at the EAVS data for Wisconsin. Start by loading it in (see `data/README.md` for the details)
 
 ```{r, message = F, warning=F, echo=T}
-# EAVS 2022, Wisconsin municipalities (C1b = mail ballots returned by voters, C9a = mail ballots rejected)
-wi <- read_csv("data/eavs_2022_wi.csv")
-wi <- wi %>% filter(C1b > 0) %>% # Drop municipalities where no absentee ballots were returned
-  transmute(FIPSCode, municipality = Jurisdiction_Name, n = C1b, y = C9a, mle = y/n)
+# EAVS 2024, Wisconsin municipalities (C1b = mail ballots returned by voters, C9a = mail ballots rejected,
+# C9b = rejected because late, C9m = rejected because the voter died)
+wi <- read_csv("data/eavs_2024_wi.csv")
+wi <- wi %>% mutate(n = C1b - C9b - C9m, y = C9a - C9b - C9m) %>% # Discretionary rejections only
+  filter(n > 0) %>% # Drop municipalities where no absentee ballots were returned
+  transmute(FIPSCode, municipality = Jurisdiction_Name, n, y, mle = y/n)
 head(wi)
 ```
 
@@ -404,35 +415,37 @@ wi %>% arrange(desc(mle)) %>% select(municipality, n, y, mle) %>% head(5)
 - The most extreme rejection rates come from the municipalities with the fewest ballots
 
 ```{r, echo=F, fig.width=8, fig.height=4.5, fig.align="center"}
+mequon <- wi %>% filter(municipality == "CITY OF MEQUON - OZAUKEE COUNTY")
 wi %>% ggplot(aes(x=n, y=mle)) + geom_point(alpha=.3) + scale_x_log10(labels=scales::comma) +
   geom_hline(yintercept=state_rate, lty=2, lwd=1, col="indianred") + theme_bw() +
+  geom_point(data=mequon, col="dodgerblue", size=3) + geom_text(data=mequon, label="City of Mequon", col="dodgerblue", vjust=-1.2) +
   xlab("Absentee ballots returned (log scale)") + ylab("Rejection rate (MLE)")
 ```
 
 
 ## Application
 
-- Consider the "worst" municipality in the state: the **Town of Cleveland** in Taylor County
+- Consider the "worst" municipality in the state: the **Town of Alvin** in Forest County
 
 ```{r, echo=T}
-cleveland <- wi %>% filter(municipality == "TOWN OF CLEVELAND - TAYLOR COUNTY")
-cleveland
+alvin <- wi %>% filter(municipality == "TOWN OF ALVIN - FOREST COUNTY")
+alvin
 ```
 
-- `r cleveland$y` of `r cleveland$n` returned ballots were rejected
-  - Do we *really* believe that the Town of Cleveland rejects `r round(100*cleveland$mle)`% of its absentee ballots?
+- `r alvin$y` of `r alvin$n` returned ballots were rejected
+  - Do we *really* believe that the Town of Alvin rejects `r round(100*alvin$mle)`% of its absentee ballots?
 
-## Application
+## Application {.nostretch}
 
-- Let's get the posterior distribution for $\pi_i$ for the Town of Cleveland under an uninformative uniform prior
+- Let's get the posterior distribution for $\pi_i$ for the Town of Alvin under an uninformative uniform prior
 
-```{r, fig.width=5, fig.height = 3, fig.align="center"}
-posterior_alpha <- cleveland$y + 1
-posterior_beta <- cleveland$n - cleveland$y + 1
+```{r, fig.width=6.5, fig.height = 3.5, fig.align="center"}
+posterior_alpha <- alvin$y + 1
+posterior_beta <- alvin$n - alvin$y + 1
 # Plot the posterior
-cle_posterior <- ggplot() + xlim(0, 1)  + geom_function(fun=dbeta, args=list(shape1=posterior_alpha, shape2=posterior_beta), n=1001) + theme_bw() + xlab(expression(pi)) + 
+alv_posterior <- ggplot() + xlim(0, 1)  + geom_function(fun=dbeta, args=list(shape1=posterior_alpha, shape2=posterior_beta), n=1001) + theme_bw() + xlab(expression(pi)) + 
   ylab("Density")
-cle_posterior
+alv_posterior
 ```
 
 ## Application
@@ -456,7 +469,7 @@ posterior_ci
 - But we have a lot more information from the other `r nrow(wi) - 1` municipalities in the state
 
 ```{r, echo=T}
-others_rate <- wi %>% filter(municipality != cleveland$municipality) %>% summarize(rate = sum(y)/sum(n)) %>% pull(rate)
+others_rate <- wi %>% filter(municipality != alvin$municipality) %>% summarize(rate = sum(y)/sum(n)) %>% pull(rate)
 others_rate
 ```
 
@@ -486,10 +499,10 @@ c(prior_alpha, prior_beta)
 - Let's plug-in the new prior parameters
 
 ```{r, echo=T}
-posterior2_alpha <- cleveland$y + prior_alpha
-posterior2_beta <- cleveland$n - cleveland$y + prior_beta
+posterior2_alpha <- alvin$y + prior_alpha
+posterior2_beta <- alvin$n - alvin$y + prior_beta
 # Plot the posterior (cutting off the y-axis - the new posterior is much more concentrated)
-cle_posterior2 <- ggplot() + xlim(0, .8)  +  geom_function(fun=dbeta, args=list(shape1=posterior_alpha, shape2=posterior_beta), n=1001, lty=2, lwd=1.5, col="dodgerblue") + 
+alv_posterior2 <- ggplot() + xlim(0, 1)  +  geom_function(fun=dbeta, args=list(shape1=posterior_alpha, shape2=posterior_beta), n=1001, lty=2, lwd=1.5, col="dodgerblue") + 
   theme_bw() + xlab(expression(pi)) + 
   ylab("Density") + geom_vline(xintercept=prior_mean, lty=2, lwd=1.5, col="indianred") +
   geom_function(fun=dbeta, args=list(shape1=posterior2_alpha, shape2=posterior2_beta), n=1001,lwd=1.5) +
@@ -501,7 +514,7 @@ cle_posterior2 <- ggplot() + xlim(0, .8)  +  geom_function(fun=dbeta, args=list(
 - Uniform prior posterior (blue, dashed), prior mean (red, dashed), and statewide prior posterior (black)
 
 ```{r, fig.width=7, fig.height = 5, fig.align="center", warning=F}
-cle_posterior2
+alv_posterior2
 ```
 
 ## Application
@@ -520,7 +533,7 @@ posterior2_ci <- c(qbeta(.025, shape1=posterior2_alpha, shape2=posterior2_beta),
 posterior2_ci
 ```
 
-- With only `r cleveland$n` ballots, the prior does most of the work: the Town of Cleveland's posterior mean is much closer to the statewide rate than to the MLE: `r round(100*cleveland$mle)`%.
+- With only `r alvin$n` ballots, the prior dominates. Alvin's posterior mean is much closer to the statewide rate than to the MLE: `r round(100*alvin$mle)`%.
 
 ## Application
 
@@ -536,41 +549,48 @@ wi <- wi %>% mutate(post_mean = (y + prior_strength*state_rate)/(n + prior_stren
 wi %>% arrange(desc(post_mean)) %>% select(municipality, n, y, mle, post_mean) %>% head(5)
 ```
 
-- The top of the list now includes much bigger places -- a high rate on a lot of ballots is more convincing than 4 out of 10
+- The top of the list now includes places with more ballots -- a high rate on a lot of ballots is more convincing than `r alvin$y` out of `r alvin$n`
 
 ## Application
 
-- The MLE vs. the posterior mean for every municipality
+- The MLE vs. the posterior mean for every municipality (note the different y-axes)
 
-```{r, echo=F, fig.width=8, fig.height=5, fig.align="center"}
-wi %>% ggplot(aes(x=mle, y=post_mean, size=n)) + geom_abline(intercept=0, slope=1, lty=2) +
-  geom_point(alpha=.3) + scale_size_area(max_size=8, labels=scales::comma) + theme_bw() +
-  xlab("MLE (municipality's own rejection rate)") + ylab("Posterior mean (statewide prior)") + labs(size="Ballots returned") +
-  coord_cartesian(xlim=c(0, .4), ylim=c(0, .4))
+```{r, echo=F, fig.width=10, fig.height=4.5, fig.align="center"}
+wi_long <- wi %>% pivot_longer(c(mle, post_mean), names_to="estimate", values_to="rate") %>%
+  mutate(estimate = factor(estimate, levels=c("mle", "post_mean"), labels=c("MLE", "Posterior mean (statewide prior)")))
+wi_long %>% ggplot(aes(x=n, y=rate)) + geom_point(alpha=.3) + scale_x_log10(labels=scales::comma) +
+  geom_hline(yintercept=state_rate, lty=2, lwd=1, col="indianred") +
+  geom_point(data=filter(wi_long, municipality == mequon$municipality), col="dodgerblue", size=3) +
+  geom_text(data=filter(wi_long, municipality == mequon$municipality), label="City of Mequon", col="dodgerblue", vjust=-1.2) +
+  facet_wrap(~estimate, scales="free_y") + theme_bw() + theme(strip.text = element_text(size=12)) +
+  xlab("Absentee ballots returned (log scale)") + ylab("Rejection rate")
 ```
 
 - Small municipalities get pulled almost all the way to the statewide rate while big cities barely move.
 
 ## Does pooling help?
 
-- How do we know whether this is a good idea? We also have EAVS data from the November 2024 election [@eac2025eavs]
-  - Use each municipality's 2022 data to predict its 2024 rejections
-  - The prior only matters when there's very little data, so focus on the municipalities with fewer than 200 returned ballots in 2022
+- How do we know whether this is a good idea? We also have EAVS data from the November 2022 election [@eac2023eavs]
+  - Use each municipality's 2024 data to predict its 2022 rejections
+  - The prior only matters when there's very little data, so focus on the municipalities with fewer than 200 returned ballots in 2024
 
 ```{r, message = F, warning=F, echo=T}
-wi_2024 <- read_csv("data/eavs_2024_wi.csv") %>% filter(C1b > 0) %>%
-  transmute(FIPSCode, n_2024 = C1b, y_2024 = C9a)
-oos <- wi %>% filter(n < 200) %>% inner_join(wi_2024, by="FIPSCode") # Municipalities in both years
+wi_2022 <- read_csv("data/eavs_2022_wi.csv") %>%
+  mutate(n_2022 = C1b - C9b - C9m, y_2022 = C9a - C9b - C9m) %>% filter(n_2022 > 0) %>% # Discretionary rejections only
+  transmute(FIPSCode, n_2022, y_2022)
+oos <- wi %>% filter(n < 200) %>% inner_join(wi_2022, by="FIPSCode") # Municipalities in both years
+scale_2022 <- (sum(wi_2022$y_2022)/sum(wi_2022$n_2022))/state_rate # Statewide 2022 rate relative to 2024
 nrow(oos)
 ```
 
 ## Does pooling help?
 
-- Score each set of 2022 estimates by the log-likelihood of the 2024 data (higher is better)
+- Score each set of 2024 estimates by the log-likelihood of the 2022 data (higher is better)
+  - Rejections were `r round(scale_2022, 1)` times as common in 2022, so scale every prediction up by that ratio
 
 ```{r, echo=T}
 # Truncate predictions at .0001 so that a predicted probability of 0 doesn't give log(0)
-pred_loglik <- function(p) sum(dbinom(oos$y_2024, oos$n_2024, prob = pmin(pmax(p, .0001), .9999), log=T))
+pred_loglik <- function(p) sum(dbinom(oos$y_2022, oos$n_2022, prob = pmin(pmax(p*scale_2022, .0001), .9999), log=T))
 strengths <- c(50, 200, 500, 1000)
 pull_loglik <- sapply(strengths, function(k) pred_loglik((oos$y + k*state_rate)/(oos$n + k)))
 best_k <- strengths[which.max(pull_loglik)] # The best-predicting prior strength (we'll map it below)
@@ -580,31 +600,32 @@ tibble(estimator = c("MLE", "Uniform prior", "Statewide rate only", paste("Pull 
 
 ## Does pooling help?
 
-- What happened to the municipalities with the most extreme 2022 rates?
+- How did the municipalities with the most extreme 2024 rates do in 2022?
 
 ```{r, echo=T}
-oos %>% mutate(group = case_when(rank(-mle, ties.method = "first") <= 50 ~ "Top 50 in 2022",
-                                 y == 0 ~ "No rejections in 2022", TRUE ~ "Everyone else")) %>%
+oos %>% mutate(group = case_when(rank(-mle, ties.method = "first") <= 50 ~ "Top 50 in 2024",
+                                 y == 0 ~ "No rejections in 2024", TRUE ~ "Everyone else")) %>%
   group_by(group) %>%
-  summarize(municipalities = n(), rate_2022 = sum(y)/sum(n), rate_2024 = sum(y_2024)/sum(n_2024))
+  summarize(municipalities = n(), times_state_2024 = (sum(y)/sum(n))/state_rate,
+            times_state_2022 = (sum(y_2022)/sum(n_2022))/(state_rate*scale_2022))
 ```
 
-- And the Town of Cleveland? `r oos %>% filter(FIPSCode == cleveland$FIPSCode) %>% pull(y_2024)` rejections out of `r oos %>% filter(FIPSCode == cleveland$FIPSCode) %>% pull(n_2024)` returned ballots in 2024.
+- And the City of Mequon? `r round(mequon$mle/state_rate, 1)` times the statewide rate in 2024, but `r wi_2022 %>% filter(FIPSCode == mequon$FIPSCode) %>% with(round((y_2022/n_2022)/(state_rate*scale_2022), 1))` times the statewide rate in 2022.
 
 ## Does pooling help?
 
 ::: {.incremental}
 
-- The MLE does terribly for forecasting small areas - the extreme rates of 2022 were mostly noise
-  - The "worst" municipalities of 2022 rejected about 1% of their ballots in 2024, not 12%
-  - The municipalities with no rejections in 2022 didn't stay at zero
+- The MLE does terribly for forecasting small areas - the extreme rates of 2024 were mostly noise
+  - The "worst" municipalities of 2024 rejected about 6 times the statewide rate in 2022, not 24 times
+  - The municipalities with no rejections in 2024 weren't at zero in 2022
 
 - The uniform prior does even worse - it pulls toward rejecting half of all ballots!
 
 - The statewide rate alone -- literally just guessing the mean -- does much better
 
 - But a **combination** of the statewide rate and the local rate does best
-  - There's some additional information in a municipality's own history: the top 50 still rejected about twice the statewide rate in 2024
+  - There's some additional information in a municipality's own history: the top 50 still rejected well above the statewide rate in 2022
 
 - We directly manipulated the strength of the prior. Could we instead *estimate* it from the data?
   - Yes! This is the idea behind **hierarchical** (or multilevel) models - we'll cover this in a few weeks.
@@ -617,10 +638,8 @@ oos %>% mutate(group = case_when(rank(-mle, ties.method = "first") <= 50 ~ "Top 
 
 ```{r, message = F, warning=F, echo=T}
 library(sf)
-wi_map <- st_read("data/wi_municipalities_2022.gpkg", quiet = T)
-wi_est <- wi %>%
-  mutate(FIPSCode = if_else(municipality == "VILLAGE OF GREENVILLE - OUTAGAMIE COUNTY", "31525", FIPSCode), # EAVS 2022 files the village under the old town's code
-         post_best = (y + best_k*state_rate)/(n + best_k))
+wi_map <- st_read("data/wi_municipalities_2024.gpkg", quiet = T)
+wi_est <- wi %>% mutate(post_best = (y + best_k*state_rate)/(n + best_k))
 wi_map <- wi_map %>% left_join(wi_est, by = c("COUSUBFP" = "FIPSCode")) %>%
   pivot_longer(c(mle, post_best), names_to = "estimate", values_to = "rate") %>%
   mutate(estimate = factor(estimate, levels = c("mle", "post_best"),
@@ -630,9 +649,11 @@ wi_map <- wi_map %>% left_join(wi_est, by = c("COUSUBFP" = "FIPSCode")) %>%
 ## Mapping rejection rates
 
 ```{r, echo=F, fig.width=10, fig.height=6, fig.align="center"}
-wi_map %>% ggplot() + geom_sf(aes(fill=rate), color=NA) + facet_wrap(~estimate) +
-  scale_fill_viridis_c(option="magma", direction=-1, limits=c(0, .05), oob=scales::squish, labels=scales::percent,
-                       na.value="grey85", name="Rejection rate\n(capped at 5%)") +
+wi_map %>% ggplot() + geom_sf(aes(fill=rate), color=NA) +
+  geom_sf(data=filter(wi_map, COUSUBFP == mequon$FIPSCode), fill=NA, color="dodgerblue", linewidth=.8) + # Outline Mequon
+  facet_wrap(~estimate) +
+  scale_fill_viridis_c(option="magma", direction=-1, limits=c(0, .015), oob=scales::squish, labels=scales::percent,
+                       na.value="grey85", name="Rejection rate\n(capped at 1.5%)") +
   theme_void() + theme(strip.text = element_text(size=14))
 ```
 
