@@ -129,7 +129,7 @@ Plot the posterior distribution of the coefficient on "GOP Governor". Obtain a p
 
 ## Part I
 
-Now implement the model above in Stan without the data augmentation step (define $Y_i$ conventionally using the normal CDF `Phi`). Instead of using a normal prior, use a Cauchy prior with center 0 and scale parameter 6.25 for the intercept and a Cauchy prior with center parameter 0 and scale parameter 1.6 for the rest of the coefficients. Set the seed to $53703$. Obtain the posterior mean and 95% credible interval for the coefficient on "GOP Governor" and compare the results to your analysis above. How does changing the prior change the results?
+Now implement the model above in Stan without the data augmentation step (define $Y_i$ conventionally using the normal CDF `Phi`). Instead of using a normal prior, use a Cauchy prior with center 0 and scale parameter 6.25 for the intercept and a Cauchy prior with center parameter 0 and scale parameter 1.6 for the rest of the coefficients. Set the seed to `53703`. Obtain the posterior mean and 95% credible interval for the coefficient on "GOP Governor" and compare the results to your analysis above. How does changing the prior change the results?
 
 **Hint**: Install RStan following the [RStan Getting Started guide](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started), using the version from the Stan r-universe rather than CRAN: `install.packages("rstan", repos = c("https://stan-dev.r-universe.dev", getOption("repos")))`. Make sure your C++ toolchain is configured first (see the guide).
 
