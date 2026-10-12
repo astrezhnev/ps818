@@ -678,22 +678,6 @@ wi_map %>% ggplot() + geom_sf(aes(fill=rate), color=NA) +
 
 :::
 
-## Connections with Frequentism
-
-::: {.incremental}
-
-- You'll notice that for the uninformative uniform prior, our posterior mode is equivalent to the MLE
-  - If $f(\theta) \propto 1$, $f(\theta|\mathbf{Y}) \propto f(\mathbf{Y}|\theta)$
-
-- More generally, for most well-behaved priors and likelihoods, the **Bernstein-von Mises** theorem states that as $n \to \infty$...
-  - ...the posterior distribution $f(\theta | \mathbf{Y})$ will converge to a **normal** distribution
-  - ...centered at the MLE $\hat{\theta}$ (which is itself converging to the true parameter $\theta_0$)
-  - ...with variance-covariance matrix equal to the inverse Fisher information
-
-- Essentially: In large samples, posterior distributions converge to the sampling distribution of the MLEs
-
-:::
-
 ## Next week
 
 ::: {.incremental}

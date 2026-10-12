@@ -42,7 +42,8 @@ Links become active as the materials for each week are posted.
 
 ### Week 6: Estimating Bayesian Models
 
-*To be posted*
+- [Week 6 Github Repository](https://github.com/astrezhnev/ps818/tree/main/slides/week6/)
+- [Week 6 `.html` slides](https://www.antonstrezhnev.com/ps818/slides/week6/week6_estimating_bayesian_models.html)
 
 ### Week 7: Multilevel Regression Models
 
