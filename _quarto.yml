@@ -9,6 +9,11 @@ project:
   resources:
       - "psets/**"
 
+# Re-run a page's code only when its source changes; full-site renders
+# (including `quarto publish`) reuse the stored results in _freeze/.
+execute:
+  freeze: auto
+
 website:
   title: "PoliSci 818"
   description: "Graduate course in likelihood and Bayesian statistical models for political science"

@@ -22,8 +22,6 @@ format:
     html-math-method:
       method: mathjax
       url: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-execute:
-  cache: false
 embed-resources: true
 bibliography: ../ps818.bib
 link-citations: true
@@ -1091,7 +1089,7 @@ data_source <- list(N = nrow(X_mat), K = ncol(X_mat), X = X_mat, n = wi$n, y = w
 
 - Run Stan! (The first run takes a minute: Stan has to compile the model to C++)
 
-```{r, echo=T, message=F, warning=F, cache=T, results=F}
+```{r stan-fit, echo=T, message=F, warning=F, results=F, cache=T, cache.extra=list(model_structure, data_source)}
 model_fit <- stan(
   model_code = model_structure,  # Stan code
   data = data_source,     # named list of data
