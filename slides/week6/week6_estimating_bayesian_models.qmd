@@ -136,23 +136,10 @@ knitr::opts_chunk$set(echo = T)
 
 ## Metropolis-Hastings Algorithm
 
-::: {.incremental}
+- The foundational MCMC algorithm is **Metropolis-Hastings** [@metropolis1953equation; @hastings1970monte]. To generate a Markov chain of $M$ samples $\{\theta^{(1)}, \theta^{(2)}, \dotsc, \theta^{(M)}\}$, it iterates between two steps:
 
-- The foundational algorithm for generating MCMC samples is the **Metropolis-Hastings** algorithm [@metropolis1953equation; @hastings1970monte]
-  - **Crucially**: We can sample from almost *any* distribution (though some distributions are better than others)
-
-- The algorithm relies on two key concepts to generate another sample $\theta^{(i+1)}$ given the past sample value $\theta^{(i)}$:
-  - The **proposal distribution** - A probability distribution $Q(\theta^* | \theta^{(i)})$ that generates our "proposal" value
-  - The **acceptance probability** - The probability of "accepting" the proposed value rather than rejecting it
-
-:::
-
-## Metropolis-Hastings Algorithm
-
-- To generate a Markov chain of $M$ samples $\{\theta^{(1)}, \theta^{(2)}, \theta^{(3)}, \dotsc, \theta^{(M)}\}$, **Metropolis-Hastings** iterates between two steps:
-
-1. **Proposal**: Conditional on the current value $\theta$, generate a draw $\theta^*$ from $Q(\theta^* | \theta)$ where $Q$ is the proposal distribution.
-2. **Accept/Reject**: With probability $\alpha$, "accept" the proposal and set $\theta^{(i+1)} = \theta^*$ - otherwise "reject" and set $\theta^{(i+1)} = \theta$
+1. **Proposal**: Conditional on the current value $\theta$, generate a draw $\theta^*$ from the **proposal distribution** $Q(\theta^* | \theta)$ -- almost *any* distribution works (though some are better than others)
+2. **Accept/Reject**: With **acceptance probability** $\alpha$, "accept" the proposal and set $\theta^{(i+1)} = \theta^*$ - otherwise "reject" and set $\theta^{(i+1)} = \theta$
 
   $$\alpha = \min\bigg\{1, \frac{f(\mathbf{Y}|\theta^*)f(\theta^*)}{f(\mathbf{Y}|\theta)f(\theta)} \times \frac{Q(\theta | \theta^*)}{Q(\theta^* | \theta)} \bigg\}$$
 
@@ -162,6 +149,22 @@ knitr::opts_chunk$set(echo = T)
   - ...if the unnormalized posterior density is higher at the proposed rather than the current location, **always accept**
   - ...if the unnormalized posterior density is lower at the proposed rather than current location, **maybe accept**
   - Note that $f(\mathbf{Y})$ would appear in both the numerator and the denominator -- it cancels!
+
+:::
+
+## Metropolis-Hastings Algorithm
+
+::: {.incremental}
+
+- To get some intuition, consider the case where somehow we could generate independent samples from the true posterior
+
+  $$Q(\theta^*|\theta) = f(\theta^* | \mathbf{Y})$$
+
+- What is our acceptance probability in this scenario?
+
+  $$\frac{f(\mathbf{Y}|\theta^*)f(\theta^*)}{f(\mathbf{Y}|\theta)f(\theta)} \times \frac{f(\theta|\mathbf{Y})}{f(\theta^*|\mathbf{Y})} = \frac{f(\theta^*|\mathbf{Y})f(\mathbf{Y})}{f(\theta|\mathbf{Y})f(\mathbf{Y})} \times \frac{f(\theta|\mathbf{Y})}{f(\theta^*|\mathbf{Y})} = 1$$
+
+- If we were somehow proposing from the true posterior distribution, Metropolis-Hastings would **always accept** each proposal!
 
 :::
 
@@ -197,21 +200,6 @@ knitr::opts_chunk$set(echo = T)
 
 :::
 
-## Proposal Distribution
-
-::: {.incremental}
-
-- To get some intuition, consider the case where somehow we could generate independent samples from the true posterior
-
-  $$Q(\theta^*|\theta) = f(\theta^* | \mathbf{Y})$$
-
-- What is our acceptance probability in this scenario?
-
-  $$\frac{f(\mathbf{Y}|\theta^*)f(\theta^*)}{f(\mathbf{Y}|\theta)f(\theta)} \times \frac{f(\theta|\mathbf{Y})}{f(\theta^*|\mathbf{Y})} = \frac{f(\theta^*|\mathbf{Y})f(\mathbf{Y})}{f(\theta|\mathbf{Y})f(\mathbf{Y})} \times \frac{f(\theta|\mathbf{Y})}{f(\theta^*|\mathbf{Y})} = 1$$
-
-- If we were somehow proposing from the true posterior distribution, Metropolis-Hastings would **always accept** each proposal!
-
-:::
 
 ## Illustration
 
@@ -428,7 +416,7 @@ $$\alpha = \frac{f(\theta^*_k| \theta^{(i)}_{-k},\mathbf{Y}) \times f(\theta^{(i
 - Everything cancels so that $\alpha = 1$
   - So Gibbs sampling is a special case of Metropolis-Hastings where the proposal distribution choice **guarantees** acceptance.
 
-- The catch: we need to know the conditional distributions $f(\theta_k | \theta_{-k}, \mathbf{Y})$
+- But, we need to know the conditional distributions $f(\theta_k | \theta_{-k}, \mathbf{Y})$
   - This is where **conjugacy** comes back in!
 
 :::
@@ -454,8 +442,6 @@ $$\alpha = \frac{f(\theta^*_k| \theta^{(i)}_{-k},\mathbf{Y}) \times f(\theta^{(i
 - A common simplification is to make $\beta$ and $\sigma^2$ marginally independent
 
   $$\beta \sim \text{Normal}(b_0, B_0^{-1})$$
-
-  - Now there's no closed form for the joint posterior -- but there are closed forms for the **conditionals**
 
 :::
 
@@ -554,17 +540,19 @@ $$\alpha = \frac{f(\theta^*_k| \theta^{(i)}_{-k},\mathbf{Y}) \times f(\theta^{(i
 
 ::: {.incremental}
 
+- The algebra is cleaner in terms of the **precision** $\tau^2 = 1/\sigma^2$ rather than the variance
+
 - To see why the normal is conjugate to the normal, plug in the densities and drop multiplicative constants
 
-  $$f(\beta | \mathbf{Y}, \sigma^2) \propto \bigg[\prod_{i=1}^N \exp\bigg(-\frac{(Y_i - X_i^\prime \beta)^2}{2\sigma^2}\bigg)\bigg]\times \exp\bigg(-\frac{1}{2}(\beta - b_0)^{\prime}B_0(\beta - b_0)\bigg)$$
+  $$f(\beta | \mathbf{Y}, \tau^2) \propto \bigg[\prod_{i=1}^N \exp\bigg(-\frac{\tau^2}{2}(Y_i - X_i^\prime \beta)^2\bigg)\bigg]\times \exp\bigg(-\frac{1}{2}(\beta - b_0)^{\prime}B_0(\beta - b_0)\bigg)$$
 
 - A product of exponentials is the exponential of a sum. Write the sum of squares in matrix form
 
-  $$f(\beta | \mathbf{Y}, \sigma^2) \propto \exp\bigg(-\frac{1}{2\sigma^2}(\mathbf{Y} - \mathbf{X}\beta)^\prime (\mathbf{Y} - \mathbf{X}\beta)\bigg)\times \exp\bigg(-\frac{1}{2}(\beta - b_0)^\prime B_0(\beta - b_0)\bigg)$$
+  $$f(\beta | \mathbf{Y}, \tau^2) \propto \exp\bigg(-\frac{\tau^2}{2}(\mathbf{Y} - \mathbf{X}\beta)^\prime (\mathbf{Y} - \mathbf{X}\beta)\bigg)\times \exp\bigg(-\frac{1}{2}(\beta - b_0)^\prime B_0(\beta - b_0)\bigg)$$
 
 - Expand both quadratic forms and drop the terms that don't involve $\beta$ (they're constants)
 
-  $$f(\beta | \mathbf{Y}, \sigma^2) \propto \exp\bigg(-\frac{1}{2}\bigg[\beta^\prime \bigg(\frac{\mathbf{X}^\prime \mathbf{X}}{\sigma^2}\bigg)\beta - 2\beta^\prime \frac{\mathbf{X}^\prime \mathbf{Y}}{\sigma^2} \bigg]\bigg)\times \exp\bigg(-\frac{1}{2}\bigg[\beta^\prime B_0\beta - 2\beta^\prime B_0 b_0\bigg]\bigg)$$
+  $$f(\beta | \mathbf{Y}, \tau^2) \propto \exp\bigg(-\frac{1}{2}\bigg[\beta^\prime \big(\tau^2\mathbf{X}^\prime \mathbf{X}\big)\beta - 2\beta^\prime \tau^2\mathbf{X}^\prime \mathbf{Y} \bigg]\bigg)\times \exp\bigg(-\frac{1}{2}\bigg[\beta^\prime B_0\beta - 2\beta^\prime B_0 b_0\bigg]\bigg)$$
 
 :::
 
@@ -574,7 +562,7 @@ $$\alpha = \frac{f(\theta^*_k| \theta^{(i)}_{-k},\mathbf{Y}) \times f(\theta^{(i
 
 - Collect terms
 
-  $$f(\beta | \mathbf{Y}, \sigma^2) \propto \exp\bigg(-\frac{1}{2}\bigg[\beta^\prime \bigg(B_0 + \frac{\mathbf{X}^\prime \mathbf{X}}{\sigma^2}\bigg)\beta - 2\beta^\prime \bigg(B_0 b_0 + \frac{\mathbf{X}^\prime \mathbf{Y}}{\sigma^2}\bigg) \bigg]\bigg)$$
+  $$f(\beta | \mathbf{Y}, \tau^2) \propto \exp\bigg(-\frac{1}{2}\bigg[\beta^\prime \big(B_0 + \tau^2\mathbf{X}^\prime \mathbf{X}\big)\beta - 2\beta^\prime \big(B_0 b_0 + \tau^2\mathbf{X}^\prime \mathbf{Y}\big) \bigg]\bigg)$$
 
 - "Completing the square": call the matrix in the first term $V^{-1}$ and write the vector in the second as $V^{-1}\mu$
 
@@ -582,11 +570,11 @@ $$\alpha = \frac{f(\theta^*_k| \theta^{(i)}_{-k},\mathbf{Y}) \times f(\theta^{(i
 
   - The last term doesn't involve $\beta$, so it drops out
 
-  $$f(\beta | \mathbf{Y}, \sigma^2) \propto \exp\bigg(-\frac{1}{2}(\beta - \mu)^\prime V^{-1}(\beta - \mu)\bigg)$$
+  $$f(\beta | \mathbf{Y}, \tau^2) \propto \exp\bigg(-\frac{1}{2}(\beta - \mu)^\prime V^{-1}(\beta - \mu)\bigg)$$
 
 - We recognize this as the kernel of a multivariate normal with **variance-covariance matrix** $V$ and **mean** $\mu$
 
-  $$V = \bigg(B_0 + \frac{\mathbf{X}^{\prime}\mathbf{X}}{\sigma^2}\bigg)^{-1}, \qquad \mu = V\bigg(B_0b_0 + \frac{\mathbf{X}^{\prime}\mathbf{Y}}{\sigma^2}\bigg)$$
+  $$V = \big(B_0 + \tau^2\mathbf{X}^{\prime}\mathbf{X}\big)^{-1}, \qquad \mu = V\big(B_0b_0 + \tau^2\mathbf{X}^{\prime}\mathbf{Y}\big)$$
 
 :::
 
@@ -594,20 +582,21 @@ $$\alpha = \frac{f(\theta^*_k| \theta^{(i)}_{-k},\mathbf{Y}) \times f(\theta^{(i
 
 ::: {.incremental}
 
-- The posterior **precision** (inverse variance) is the prior precision plus the precision from the data
+- The posterior **precision** $V^{-1} = B_0 + \tau^2\mathbf{X}^\prime\mathbf{X}$ is the prior precision plus the precision from the data
   - The mean is a precision-weighted combination of the prior mean $b_0$ and the data
   - Just like the Beta-Binomial: the weight on the prior shrinks as $N$ grows
 
-- As $N \to \infty$, $\mathbf{X}^\prime\mathbf{X}/\sigma^2$ swamps $B_0$...
-  - ...so $\mu \to (\mathbf{X}^\prime\mathbf{X})^{-1}\mathbf{X}^\prime\mathbf{Y}$ (OLS!) and $V \to \sigma^2(\mathbf{X}^\prime\mathbf{X})^{-1}$
-  - Bernstein-von Mises again!
+- As $N \to \infty$, $\tau^2\mathbf{X}^\prime\mathbf{X}$ swamps $B_0$...
+  - ...so $\mu \to (\mathbf{X}^\prime\mathbf{X})^{-1}\mathbf{X}^\prime\mathbf{Y}$ (OLS!) and $V \to (\tau^2\mathbf{X}^\prime\mathbf{X})^{-1}$
 
 - The same steps give the other conditional: with $\text{SSR}(\beta) = (\mathbf{Y} - \mathbf{X}\beta)^\prime(\mathbf{Y} - \mathbf{X}\beta)$
 
-  $$\sigma^2 | \mathbf{Y}, \beta \sim \text{Inverse-Gamma}\bigg(\frac{c_0 + N}{2}, \frac{d_0 + \text{SSR}(\beta)}{2}\bigg)$$
+  $$\tau^2 | \mathbf{Y}, \beta \sim \text{Gamma}\bigg(\frac{c_0 + N}{2}, \frac{d_0 + \text{SSR}(\beta)}{2}\bigg)$$
 
-- So our Gibbs sampler alternates between two easy draws: $\beta$ from a normal, $\sigma^2$ from an inverse-gamma
-  - (Under the conjugate prior $\beta | \sigma^2 \sim \text{Normal}(b_0, \sigma^2 B_0^{-1})$, the conditional instead has $V = \sigma^2(B_0 + \mathbf{X}^\prime\mathbf{X})^{-1}$ and $\mu = (B_0 + \mathbf{X}^\prime\mathbf{X})^{-1}(B_0 b_0 + \mathbf{X}^\prime\mathbf{Y})$)
+  - (shape, rate) -- the $\text{Inverse-Gamma}(c_0/2, d_0/2)$ prior on $\sigma^2$ is a $\text{Gamma}(c_0/2, d_0/2)$ prior on $\tau^2$
+
+- So our Gibbs sampler alternates between two easy draws: $\beta$ from a normal, $\tau^2$ from a gamma
+  - (Under the conjugate prior $\beta | \tau^2 \sim \text{Normal}(b_0, (\tau^2 B_0)^{-1})$, the conditional instead has $V = \big(\tau^2(B_0 + \mathbf{X}^\prime\mathbf{X})\big)^{-1}$ and $\mu = (B_0 + \mathbf{X}^\prime\mathbf{X})^{-1}(B_0 b_0 + \mathbf{X}^\prime\mathbf{Y})$)
 
 :::
 
