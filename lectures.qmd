@@ -47,7 +47,8 @@ Links become active as the materials for each week are posted.
 
 ### Week 7: Multilevel Regression Models
 
-*To be posted*
+- [Week 7 Github Repository](https://github.com/astrezhnev/ps818/tree/main/slides/week7/)
+- [Week 7 `.html` slides](https://www.antonstrezhnev.com/ps818/slides/week7/week7_multilevel_models.html)
 
 ### Week 8: Mixture Models and the EM Algorithm
 

@@ -1,0 +1,1612 @@
+---
+title: "Week 7: Multilevel Models"
+subtitle: "PS 818 - Data Analysis with Statistical Models"
+author:
+  - name: "Anton Strezhnev"
+    affiliation: "University of Wisconsin-Madison"
+    email: strezhnev@wisc.edu
+date: "October 19, 2026"
+date-format: "MMMM D, YYYY"
+editor:
+  render-on-save: true
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    slide-number: true
+    overview: true
+    navigation-mode: vertical
+    progress: false
+    controls: true
+    link-external-newwindow: true
+    footer: "PS 818 - University of Wisconsin-Madison"
+    html-math-method:
+      method: mathjax
+      url: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+embed-resources: true
+bibliography: ../ps818.bib
+link-citations: true
+
+---
+
+## Multilevel Models {.title-slide}
+
+::: {style="display: none"}
+$$
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+$$
+:::
+
+```{r, echo = F, message=F, warning=F}
+library(tidyverse)
+library(knitr)
+library(broom)
+library(rstan)
+library(loo)
+library(bayesplot)
+library(usmap)
+options(digits=3)
+knitr::opts_chunk$set(echo = T)
+```
+
+## Previously
+
+::: {.incremental}
+
+- **Markov Chain Monte Carlo**
+  - Construct a Markov chain whose stationary distribution is the posterior
+  - Metropolis-Hastings, Gibbs sampling
+
+- **Stan**
+  - **Hamiltonian Monte Carlo** - use the gradient of the log posterior to get good M-H proposals
+    - Avoids proposals that are either too auto-correlated or too likely to be rejected
+  - Common structure to statistical modeling: `data`, `parameters`, `model`
+  - Diagnosing convergence: trace plots, $\hat{R}$, effective sample size
+
+:::
+
+## This week
+
+::: {.incremental}
+
+- **Multilevel regression**
+  - Extending the Bayesian GLM by adding additional **grouping** and structure
+  - "Random effects" models/"Partial pooling"
+
+- **Diagnosing model fit**
+  - Posterior predictive checks
+  - **Information criteria** vs. **Cross-validation**
+
+- **Post-stratification**
+  - Adjusting non-representative surveys to match population targets
+  - Combining with multilevel regression: "MrP"
+
+:::
+
+## Hierarchical Models
+
+::: {.incremental}
+
+- In our regression models so far, we assumed a common intercept and slope for all of the data.
+  - The underlying model is the same regardless of which group (e.g. state) an observation is located in.
+
+- We also assumed that observations were completely exchangeable
+  - $Y_i \sim \text{Normal}(X_i^{\prime}\beta, \sigma^2)$ implies no residual correlation in the outcomes across **all** observations.
+
+- This may be a poor modeling choice if states are very heterogeneous and information about the state in which an observation is located would provide additional predictive power beyond knowing $X_i$.
+
+  - Additionally, **exchangeability** of observations may be violated - unobserved factors may lead observations within a particular state to be correlated (e.g. if all respondents in a state are exposed to some common shock).
+
+:::
+
+## Hierarchical Models {.smaller}
+
+::: {.incremental}
+
+- **Hierarchical** or **Multilevel** linear models try to address this by incorporating additional structure on the regression parameters.
+  - Suppose observations belong to a group $j \in \{1, 2, 3, \dotsc, J\}$ (e.g. states, time periods, schools, etc...)
+  - We observe $Y_{ij}$ as the outcome for unit $i$ in grouping $j$.
+
+- We can incorporate group membership into the data-generating process.
+- Instead of a **common prior** on $\beta \sim \text{Normal}(b_0, B_0^{-1})$, we may do something like:
+
+  $$\beta_j \sim \text{Normal}(\mu_{\beta}, \Sigma_{\beta})$$
+
+  $$Y_{ij} \sim \text{Normal}(X_{ij}^{\prime}\beta_{j}, \sigma^2)$$
+
+- This model assumes that each group has its own set of group-level coefficients $\beta_j$ that are drawn from a common distribution centered at $\mu_{\beta}$.
+- The variance $\Sigma_{\beta}$ then dictates the degree of **pooling** across groupings.
+  - Infinite variance (a flat prior on each $\beta_j$): **no pooling** - $\beta_j$ are estimated entirely separately
+  - Zero variance: **complete pooling** (all $\beta_j$ are equal to $\mu_{\beta}$)
+  - In between: **partial pooling** - and we can estimate $\mu_{\beta}$ and $\Sigma_{\beta}$ from the data
+
+:::
+
+
+## Hierarchical Models
+
+::: {.incremental}
+
+- There are lots of choices about how we want to incorporate hierarchy into the model the coefficients across groupings
+  - What levels of aggregation and how many?
+  - Which parameters should be allowed to vary (all of the coefficients or just the intercepts)?
+  - Where does the structure enter into the model (the means? the variances? the covariances?)
+
+:::
+
+## Application: Education polarization
+
+::: {.incremental}
+
+- A growing divide in American politics centers on **education**
+  - Voters with a college degree have moved towards the Democrats over the last decade
+  - Voters without one have moved towards the Republicans
+
+- Is the *education* gap the same everywhere?
+  - @gelman2007rich found that the relationship between **income** and vote choice differs across states: steep in poor states like Mississippi, nearly flat in rich states like Connecticut
+  - Does the relationship between **education** and vote choice differ across states too?
+
+:::
+
+## Data: CES 2016
+
+- The 2016 **Cooperative Congressional Election Study** [@ansolabehere2017cces; via @kuriwaki2025cumulative]
+  - A large (64,600 respondents) opt-in online survey run by YouGov
+  - Respondents matched to state voter files.
+
+- Our sample: respondents with a **validated** vote record who say they voted for Clinton or Trump
+
+```{r, message=F, warning=F}
+ces <- read_csv("data/ces2016.csv")
+voters <- ces %>% filter(!is.na(clinton)) %>%
+  mutate(college = as.integer(educ %in% c("BA", "Postgrad"))) # Has a 4-year degree
+```
+
+- `r format(nrow(voters), big.mark=",")` voters; Clinton won `r round(100*mean(voters$clinton[voters$college == 1]))`% of college graduates and `r round(100*mean(voters$clinton[voters$college == 0]))`% of everyone else
+
+## Data: CES 2016
+
+- The "raw" education gap in each state: Clinton's share among college graduates minus her share among non-graduates
+
+```{r}
+raw_gaps <- voters %>% group_by(state) %>%
+  summarize(n = n(), gap = mean(clinton[college == 1]) - mean(clinton[college == 0]))
+```
+
+```{r, echo=F, fig.align="center", fig.width=9, fig.height=4.2}
+raw_gaps %>% ggplot(aes(x = n, y = gap, label = state)) + geom_text(size = 3.5) +
+  geom_hline(yintercept = mean(voters$clinton[voters$college == 1]) - mean(voters$clinton[voters$college == 0]), lty = 2, col = "indianred") +
+  scale_x_log10() + scale_y_continuous(labels = scales::percent) + theme_bw() +
+  xlab("Number of respondents (log scale)") + ylab("Education gap in Clinton vote share")
+```
+
+- Is this variation real? Or is it **noise** from the small samples in small states?
+
+## Complete pooling
+
+::: {.incremental}
+
+- Let's start with a single logistic regression for everyone.
+  - $Y_{ij} = 1$ if respondent $i$ in state $j$ voted for Clinton, $0$ if Trump.
+
+  $$Y_{ij} \sim \text{Bernoulli}(\pi_{ij})$$
+  $$\log\bigg(\frac{\pi_{ij}}{1 - \pi_{ij}}\bigg) = \beta_0 + \beta_1 \text{college}_{ij}$$
+  $$\beta_0, \beta_1 \sim \text{Normal}(0, 5^2)$$
+
+- Our only predictors are state and education, so every respondent in the same state $\times$ education **cell** has the same $\pi_{ij}$
+  - We'll fit the model to all `r format(nrow(voters), big.mark=",")` respondents
+  - But anything computed *after* estimation (predictions, model checks) only needs to be computed once for each of the `r 2*n_distinct(voters$state)` cells
+
+:::
+
+## Complete pooling
+
+- Set up the respondent-level data, and a table of the cells
+
+```{r, message=F, warning=F}
+voters <- voters %>% mutate(state_num = as.numeric(as.factor(state)))
+X_mat <- model.matrix(~ college, data = voters)
+K <- ncol(X_mat) # Number of beta parameters
+cells <- voters %>% group_by(state, state_num, college) %>%
+  summarize(n = n(), y = sum(clinton), .groups = "drop")
+X_cell <- model.matrix(~ college, data = cells)
+```
+
+```{r, echo=F}
+kable(head(cells, 4))
+```
+
+## Complete pooling
+
+```{r}
+pooled_model <- "
+data {
+  int N; // number of respondents
+  int K; // number of covariates
+  matrix[N, K] X; // covariate matrix
+  array[N] int<lower=0, upper=1> y; // 1 = Clinton, 0 = Trump
+  int M; // number of cells
+  matrix[M, K] X_cell; // covariates for each cell
+  array[M] int n_cell; // number of respondents in each cell
+}
+parameters {
+  vector[K] beta; // regression coefficients
+}
+model {
+  beta ~ normal(0, 5); // normal prior
+  y ~ bernoulli_logit(X * beta); // logistic regression
+}
+generated quantities {
+  vector[M] eta_cell = X_cell * beta; // linear predictor for each cell
+  array[M] int y_rep = binomial_rng(n_cell, inv_logit(eta_cell)); // replicated Clinton voters in each cell
+  vector[M] ll_clinton = log_inv_logit(eta_cell); // log-likelihood of one Clinton voter in each cell
+  vector[M] ll_trump = log1m_inv_logit(eta_cell); // log-likelihood of one Trump voter in each cell
+}
+"
+```
+
+## Complete pooling
+
+- Pass the data as a list and run Stan!
+
+```{r}
+stan_data <- list(N = nrow(voters), K = K, X = X_mat, y = voters$clinton,
+                  J = max(voters$state_num), state = voters$state_num,
+                  M = nrow(cells), X_cell = X_cell, n_cell = cells$n, cell_state = cells$state_num)
+```
+
+```{r pooled-fit, message=F, warning=F, results=F, cache=T, cache.extra=list(pooled_model, stan_data)}
+pooled_fit <- stan(
+  model_code = pooled_model,  # Stan code
+  data = stan_data,       # named list of data (Stan ignores the elements it doesn't use)
+  chains = 4,             # number of Markov chains
+  warmup = 500,           # number of warmup iterations per chain
+  iter = 2500,            # total number of iterations per chain
+  cores = 4,              # number of cores
+  refresh = 0,            # no progress shown
+  seed = 53706
+  )
+```
+
+```{r}
+print(pooled_fit, pars = "beta")
+```
+
+## Diagnosing model fit
+
+## Posterior predictive distribution
+
+- A very useful quantity to obtain is the **predictive** distribution of $y$ given the model.
+
+  $$f(\tilde{y} | \mathbf{Y}) =\int f(\tilde{y}, \theta | \mathbf{Y}) d\theta = \int f(\tilde{y} | \mathbf{Y}, \theta) f(\theta | \mathbf{Y}) d\theta$$
+
+- Suppose our prediction target is the in-sample distribution of the covariates
+  - We can get the posterior predictive distribution directly from our MCMC algorithm by **drawing** a value of $y$ for each value of $\theta$ that we sample.
+
+- (e.g.) for the logit
+
+```stan
+generated quantities {
+  array[N] int y_rep = bernoulli_logit_rng(X * beta); //generate coin flips for each sample
+}
+```
+
+- It is common to use the posterior predictive distribution as a model diagnostic ("posterior predictive checking")
+  1. Check in-sample fit: Does the model actually reproduce the distribution of the data?
+  2. Check against simulated data: Does the model recover the simulated distributions?
+
+
+## Posterior predictive check
+
+- In our model, `y_rep` is a replicated count of Clinton voters for every cell
+  - Drawing $n_m$ Bernoulli outcomes with the same $\pi_m$ and adding them up is the same as one Binomial($n_m$, $\pi_m$) draw
+
+- Our model should be able to reproduce Clinton's share of the vote in each **state**
+
+```{r}
+state_n <- tapply(cells$n, cells$state, sum) # Respondents per state
+state_share_ppc <- function(fit){
+  y_rep <- rstan::extract(fit, "y_rep")$y_rep # draws x cells
+  share_rep <- sweep(t(rowsum(t(y_rep), cells$state)), 2, state_n, "/") # draws x states
+  tibble(state = names(state_n), obs = tapply(cells$y, cells$state, sum)/state_n,
+         lower = apply(share_rep, 2, quantile, .025), upper = apply(share_rep, 2, quantile, .975))
+}
+ppc_pooled <- state_share_ppc(pooled_fit)
+```
+
+## Posterior predictive check
+
+```{r, echo=F}
+ppc_plot <- function(ppc, ylab){
+  ppc %>% mutate(outside = obs < lower | obs > upper, state = fct_reorder(state, obs)) %>%
+    ggplot(aes(x = state)) + geom_linerange(aes(ymin = lower, ymax = upper), col = "dodgerblue", lwd = 1.2) +
+    geom_point(aes(y = obs, col = outside), size = 2) + scale_color_manual(values = c("black", "indianred"), guide = "none") +
+    scale_y_continuous(labels = scales::percent) + theme_bw() + xlab("") + ylab(ylab) +
+    theme(axis.text.x = element_text(angle = 90, vjust = .5, size = 8))
+}
+```
+
+```{r, echo=F, fig.align="center", fig.width=11, fig.height=4.5}
+ppc_plot(ppc_pooled, "Clinton share") + ggtitle("Complete pooling: observed share (points) vs. 95% posterior predictive interval")
+```
+
+- `r sum(ppc_pooled$obs < ppc_pooled$lower | ppc_pooled$obs > ppc_pooled$upper)` of `r nrow(ppc_pooled)` states fall outside their 95% predictive intervals
+  - The model thinks every state looks like the nation (up to its share of college graduates)
+
+## Varying intercepts model
+
+::: {.incremental}
+
+- Our regression from before is an example of a fully pooled regression.
+  - Within individual states though, the regression line may be a poor predictor
+  - The simplest fix is to allow the "intercept" to shift across units.
+
+- Assume:
+
+  $$\log\bigg(\frac{\pi_{ij}}{1 - \pi_{ij}}\bigg) = X_{ij}^{\prime}\beta + \alpha_{j}$$
+  $$\alpha_j \sim \text{Normal}(0, \sigma^2_\alpha)$$
+
+  And keep the same prior as before on $\beta$, which still contains the intercept. For $\sigma_\alpha$ we'll use a Half-Cauchy prior (a Cauchy with the constraint $\sigma_\alpha > 0$).
+
+- $\alpha_j$ can be interpreted as the group-specific "shift" in the intercept from the "grand" intercept $\beta_0$
+  - An equivalent parameterization would be to remove the intercept from $\beta$ and write $\alpha_j \sim \text{Normal}(\mu_\alpha, \sigma^2_\alpha)$
+
+:::
+
+## Varying intercepts model
+
+- Let's implement this in Stan - first, our `data` block
+
+```stan
+data{
+  int N; // number of respondents
+  int K; // number of covariates
+  matrix[N, K] X; //matrix of covariates
+  array[N] int<lower=0, upper=1> y; // 1 = Clinton, 0 = Trump
+  int J; // Number of groups
+  array[N] int state; // group membership indicator
+  int M; // number of cells
+  matrix[M, K] X_cell; // covariates for each cell
+  array[M] int n_cell; // number of respondents in each cell
+  array[M] int cell_state; // group of each cell
+}
+```
+
+## Varying intercepts model
+
+- Next, our parameters.
+
+```stan
+parameters{
+  vector[K] beta; // beta coefficients
+  vector[J] alpha; // random intercepts
+  real<lower=0> sigma_a; // standard deviation of intercepts
+}
+```
+
+- Finally, our model
+
+```stan
+model{
+  beta ~ normal(0, 5); // normal prior on coefficients
+  alpha ~ normal(0, sigma_a); // normal distribution on random intercepts
+  sigma_a ~ cauchy(0, 2.5); // half-Cauchy, since sigma_a is constrained to be positive
+  y ~ bernoulli_logit(alpha[state] + X*beta);
+}
+```
+
+
+## Varying intercepts model
+
+- Put it into Stan! The `generated quantities` block computes the same cell-level quantities as before
+
+```stan
+generated quantities {
+  vector[M] eta_cell = alpha[cell_state] + X_cell*beta;
+  array[M] int y_rep = binomial_rng(n_cell, inv_logit(eta_cell));
+  vector[M] ll_clinton = log_inv_logit(eta_cell);
+  vector[M] ll_trump = log1m_inv_logit(eta_cell);
+}
+```
+
+```{r, echo=F}
+varying_intercepts_model <- "
+data{
+  int N; // number of respondents
+  int K; // number of covariates
+  matrix[N, K] X; //matrix of covariates
+  array[N] int<lower=0, upper=1> y; // 1 = Clinton, 0 = Trump
+  int J; // Number of groups
+  array[N] int state; // group membership indicator
+  int M; // number of cells
+  matrix[M, K] X_cell; // covariates for each cell
+  array[M] int n_cell; // number of respondents in each cell
+  array[M] int cell_state; // group of each cell
+}
+parameters{
+  vector[K] beta; // beta coefficients
+  vector[J] alpha; // random intercepts
+  real<lower=0> sigma_a; // standard deviation of intercepts
+}
+model{
+  beta ~ normal(0, 5); // normal prior on coefficients
+  alpha ~ normal(0, sigma_a); // normal distribution on random intercepts
+  sigma_a ~ cauchy(0, 2.5); // half-Cauchy, since sigma_a is constrained to be positive
+  y ~ bernoulli_logit(alpha[state] + X*beta);
+}
+generated quantities {
+  vector[M] eta_cell = alpha[cell_state] + X_cell*beta;
+  array[M] int y_rep = binomial_rng(n_cell, inv_logit(eta_cell));
+  vector[M] ll_clinton = log_inv_logit(eta_cell);
+  vector[M] ll_trump = log1m_inv_logit(eta_cell);
+}
+"
+```
+
+```{r varint-fit, message=F, warning=F, results=F, cache=T, cache.extra=list(varying_intercepts_model, stan_data)}
+model_var_intercept <- stan(
+  model_code = varying_intercepts_model,  # Stan code
+  data = stan_data,       # named list of data
+  chains = 4,             # number of Markov chains
+  warmup = 500,           # number of warmup iterations per chain
+  iter = 2500,            # total number of iterations per chain
+  cores = 4,              # number of cores (this is much slower if = 1)
+  refresh = 0,            # no progress shown
+  seed = 53706            # random seed
+  )
+```
+
+
+## Varying intercepts model
+
+- Summarize the fit
+
+```{r}
+print(model_var_intercept, pars = c("beta", "sigma_a", "alpha[1]"))
+```
+
+## Varying intercepts model
+
+- Plot the deviations from the "grand mean" intercept by state
+
+```{r, fig.align="center",message=F, warning=F, fig.width=9, fig.height=6.5, echo=F}
+state_num_dict <- levels(as.factor(cells$state))
+names(state_num_dict) <- str_c("alpha[", 1:length(state_num_dict), "]")
+alpha_plot <- mcmc_intervals(model_var_intercept, pars = names(state_num_dict)) + scale_y_discrete(labels=state_num_dict) +
+  geom_vline(xintercept=0, lty=2, col="black") + theme(axis.text.y = element_text(size = 9))
+alpha_plot
+```
+
+## Posterior predictive check
+
+- Does the varying intercepts model reproduce the state shares?
+
+```{r}
+ppc_varint <- state_share_ppc(model_var_intercept)
+```
+
+```{r, echo=F, fig.align="center", fig.width=11, fig.height=4.2}
+ppc_plot(ppc_varint, "Clinton share") + ggtitle("Varying intercepts: observed share (points) vs. 95% posterior predictive interval")
+```
+
+- Now `r sum(ppc_varint$obs < ppc_varint$lower | ppc_varint$obs > ppc_varint$upper)` of `r nrow(ppc_varint)` states fall outside their 95% predictive intervals
+
+## Model Diagnostics
+
+::: {.incremental}
+
+- There are two general approaches to evaluating model quality and comparing the predictive power of two or more statistical models given the same data
+  - **Information criteria**
+  - **Cross-validation**
+
+- Both approaches actually share common goals
+  - **Reward** quality of predictions
+  - **Penalize** model complexity
+
+- We want to avoid models that **overfit** to the observed data
+  - Information criteria address this with an explicit penalty term for the number of parameters
+  - Cross-validation methods do this by evaluating fit on a "held-out" part of the data that's not used to estimate the model.
+
+:::
+
+## Information Criteria
+
+::: {.incremental}
+
+- Frequentist/MLE Inference - the **Akaike Information Criterion**
+
+  $$\text{AIC} = 2k - 2\ell(\hat{\theta})$$
+
+  - $k$ is the number of parameters and $\ell(\hat{\theta})$ is the value of the maximized log-likelihood.
+  - Pick the model with the **lowest** AIC
+
+- Bayesian Inference - the **Deviance Information Criterion**
+
+  $$\text{DIC} = 2p_{DIC} - 2\log p(y | \hat{\theta}_{\text{PM}})$$
+
+  - $\hat{\theta}_{\text{PM}}$ is the posterior mean and
+  - the "effective number of parameters" is $p_{DIC} = 2(\log p(y | \hat{\theta}_{\text{PM}}) - E_{\text{post}}[\log p(y|\theta)])$
+
+:::
+
+## Log-predictive density
+
+::: {.incremental}
+
+- In general, a very common objective function for evaluating the quality of model "fit" in a Bayesian setting is the **log-predictive density**
+  - Think of it as a more general version of criteria like "mean-squared error"
+
+- For a new "out-of-sample" $\tilde{y}_i$, the log posterior predictive density is
+
+  $$\log p_{\text{post}} (\tilde{y}_i) = \log \int p(\tilde{y}_i | \theta) \times p_{\text{post}}(\theta)d\theta$$
+
+
+
+- We want to pick a model that has a high **expected log pointwise-predictive density** -- for a "new" size $n$ sample of observation drawn from a common distribution $f(\tilde{y}_i)$,
+
+  $$\text{elppd} = \sum_{i=1}^n E_f[\log p_{\text{post}} (\tilde{y}_i)] = \sum_{i=1}^n\int \log p_{\text{post}} (\tilde{y}_i)f(\tilde{y}_i)d\tilde{y}_i$$
+
+
+- Our goal is to try to estimate this from the data that we have.
+
+:::
+
+## Estimating elppd
+
+::: {.incremental}
+
+- One approach would be to use the "in-sample" fit criterion using in-sample observations $y_i$
+
+  $$\text{lppd} = \sum_{i=1}^n \log p_{\text{post}} (y_i)$$
+
+
+- We can calculate it by averaging over our $S$ posterior samples
+
+  $$\widehat{\text{lppd}} = \sum_{i=1}^n \log \bigg( \frac{1}{S} \sum_{s=1}^S p(y_i | \theta^s)\bigg)$$
+
+
+- But here we know that it's going to be biased (too optimistic) for the "out-of-sample" predictive accuracy due to over-fitting.
+
+:::
+
+## Estimating elppd
+
+::: {.incremental}
+
+- An improvement would be to correct the "in-sample" fit using a measure of the model complexity
+  - This is the intuition behind AIC, DIC, (and other information criteria like WAIC)
+
+
+- An alternative would be to use **cross-validation**:
+  - Split the sample into $K$ "folds" (typical choice is 10)
+  - For each fold $k$, estimate the model on the $K-1$ other folds
+  - Using that model, calculate the log-predictive density for the observations in the $k$th fold
+  - The $k$th fold is the "held-out" (or "test" set), the $K-1$ remaining folds are the "training" set
+
+- When $K = N$, this is often known as **"leave-one out" cross-validation**
+
+:::
+
+## Leave-one-out CV
+
+::: {.incremental}
+
+- From @vehtari2017practical, our "leave-one-out" estimate of the expected log predictive density is:
+
+  $$\text{elpd}_{\text{loo}} = \sum_{i=1}^n \log p(y_i | y_{-i})$$
+
+- In principle, this requires re-fitting the model to $N$ datasets (with a single observation removed). However, it is possible to obtain an estimate of $\log p(y_i | y_{-i})$ using the full model fit. Note:
+
+  $$p(y_i | y_{-i}) = \int p(y_i | \theta) p(\theta | y_{-i}) d\theta$$
+
+
+
+- We can calculate $p(y_i | \theta)$ for a given draw of theta.
+  - However, we only have draws from $p(\theta | y)$ (our posterior).
+  - The solution is to re-weight our draws such that, averaging over them yields an integral over $p(\theta | y_{-i})$
+
+:::
+
+## Leave-one-out CV {.smaller}
+
+::: {.incremental}
+
+- Ultimately, we need to re-weight by $\frac{p(\theta_s | y_{-i})}{p(\theta_s | y)}$. @gelfand1992model show that under conditional independence in the model:
+
+  $$\frac{p(\theta_s | y_{-i})}{p(\theta_s | y)} =  \frac{p(\theta_s | y_{-i})}{p(\theta_s | y_i, y_{-i})} \propto \frac{p(\theta_s | y_{-i})}{p(y_i | \theta_s)p(\theta_s | y_{-i})} = \frac{1}{p(y_i | \theta_s)}$$
+
+- Let $r^s_i = \frac{1}{p(y_i | \theta^s)}$ or the importance weight calculated for monte carlo sample $s$
+- Then our monte carlo estimate of $p(y_i | y_{-i})$ is
+
+  $$p(y_i | y_{-i}) \approx \frac{\sum_{s=1}^S r_i^s p(y_i | \theta^s)}{\sum_{s=1}^S r_i^s}$$
+
+- Unfortunately, these importance weights are very poorly behaved (high variance).
+- @vehtari2017practical propose an alternative method for estimating the importance weights: **pareto-smoothed-importance-sampling** (PSIS)
+  - Fit a Pareto distribution to the upper tail of the importance ratios to stabilize the variance of the weights.
+
+- This PSIS-LOO cross-validation method is implemented in the `loo` R package.
+
+:::
+
+## Leave-one-out CV
+
+- In order to use `loo`, we need the log-likelihood of each observation $\log p(y_i | \theta^s)$, evaluated at each posterior draw $s$. This comes by default in canned `rstanarm` or `brms` models but for custom models we need to specify to return it in the `generated quantities` block
+- For our logistic regression, each respondent's log-likelihood:
+
+```stan
+generated quantities {
+  vector[N] log_lik;
+  for (i in 1:N) log_lik[i] = bernoulli_logit_lpmf(y[i] | X[i] * beta);
+}
+```
+
+- `loo()` then computes PSIS-LOO from this $N \times S$ matrix, and `loo_compare()` compares models by summing the pointwise differences in $\log p(y_i | y_{-i})$
+
+## Leave-one-out CV
+
+::: {.incremental}
+
+- For our example: $N \times S$ is `r format(nrow(voters), big.mark=",")` respondents $\times$ 8,000 draws $\approx$ 228 million numbers (1.8 GB) for **each** model
+
+- So we'll instead do the same calculation by state x education cell.
+  - Every Clinton voter in cell $m$ has the same log-likelihood, $\log \pi_m$ (`ll_clinton`); every Trump voter has $\log(1 - \pi_m)$ (`ll_trump`)
+  - So they also have the same leave-one-out density
+  - Run `loo` once for each cell $\times$ vote, then replicate each result once per respondent who falls in that cell.
+
+:::
+
+## Leave-one-out CV
+
+```{r}
+loo_respondents <- function(fit){
+  # draws x chains x (cell, vote) combinations
+  ll <- abind::abind(extract_log_lik(fit, "ll_clinton", merge_chains = F),
+                     extract_log_lik(fit, "ll_trump", merge_chains = F), along = 3)
+  loo_types <- loo(ll, r_eff = relative_eff(exp(ll)))
+  rep(loo_types$pointwise[, "elpd_loo"], c(cells$y, cells$n - cells$y)) # one entry per respondent
+}
+elpd_summary <- function(pointwise) c(elpd_loo = sum(pointwise), se = sqrt(length(pointwise)*var(pointwise)))
+```
+
+```{r loo-pooled, cache=T, dependson="pooled-fit"}
+loo_pooled <- loo_respondents(pooled_fit)
+elpd_summary(loo_pooled)
+```
+
+```{r loo-varint, cache=T, dependson="varint-fit"}
+loo_varint <- loo_respondents(model_var_intercept)
+elpd_summary(loo_varint)
+```
+
+## Leave-one-out CV
+
+- Compare the two models:
+
+```{r}
+elpd_summary(loo_varint - loo_pooled)
+```
+
+- The varying intercepts model predicts held-out respondents **much** better
+
+## Posterior predictive check
+
+- The varying intercepts model still assumes the same education gap (on the logit scale) in every state. Does it reproduce the **gap** in each state?
+
+```{r}
+state_gap_ppc <- function(fit){
+  y_rep <- rstan::extract(fit, "y_rep")$y_rep
+  col <- cells$college == 1
+  gap_rep <- sweep(y_rep[, col], 2, cells$n[col], "/") - sweep(y_rep[, !col], 2, cells$n[!col], "/")
+  tibble(state = cells$state[col], obs = cells$y[col]/cells$n[col] - cells$y[!col]/cells$n[!col],
+         lower = apply(gap_rep, 2, quantile, .025), upper = apply(gap_rep, 2, quantile, .975))
+}
+gap_varint <- state_gap_ppc(model_var_intercept)
+```
+
+```{r, echo=F, fig.align="center", fig.width=11, fig.height=3.8}
+ppc_plot(gap_varint, "Education gap") + ggtitle("Varying intercepts: observed gap (points) vs. 95% posterior predictive interval")
+```
+
+- `r sum(gap_varint$obs < gap_varint$lower | gap_varint$obs > gap_varint$upper)` states fall outside: `r paste(gap_varint$state[gap_varint$obs < gap_varint$lower | gap_varint$obs > gap_varint$upper], collapse=", ")`
+
+## Varying slopes model
+
+::: {.incremental}
+
+- What if we allow all of the parameters to vary by group?
+
+  $$\beta_j \sim \text{Normal}(\mu_{\beta}, \Sigma_{\beta})$$
+  $$\log\bigg(\frac{\pi_{ij}}{1 - \pi_{ij}}\bigg) = X_{ij}^{\prime}\beta_{j}$$
+
+- This is a more general and flexible hierarchical model
+  - But introduces a slight complication -- we now need a prior distribution on an entire **matrix** $\Sigma_{\beta}$ (the variances and covariances of the parameters).
+
+- The conjugate prior is the inverse-Wishart, the multivariate extension of the inverse-gamma.
+  - An alternative non-conjugate prior (that appears to have better performance) is a scaled correlation matrix with an LKJ prior on the correlation matrix (see Stan documentation for more).
+  - The latter is now preferred (especially by the Stan programmers)
+
+:::
+
+## Varying slopes model
+
+::: {.incremental}
+
+- Our prior on $\Sigma_{\beta}$ starts by decomposing $\Sigma_{\beta}$ into a diagonal scaling matrix $\text{diag}(\tau)$ and a correlation matrix $\Omega$
+
+  $$\Sigma_{\beta} = \text{diag}(\tau)\Omega\text{diag}(\tau)$$
+
+- For each $\tau_k$ we'll use a Half-Cauchy distribution (Cauchy with the constraint $\tau_k > 0$)
+- For $\Omega$, we'll use the Lewandowski-Kurowicka-Joe (LKJ) distribution which defines a distribution over correlation matrices
+  - **Intuition**: Similar to a beta distribution in multiple dimensions.
+
+:::
+
+## Varying slopes model
+
+- Our `data` block is the same as before
+
+```stan
+data{
+  int N; // number of respondents
+  int K; // number of covariates
+  matrix[N, K] X; //matrix of covariates
+  array[N] int<lower=0, upper=1> y; // 1 = Clinton, 0 = Trump
+  int J; // Number of groups
+  array[N] int state; // group membership indicator
+  int M; // number of cells
+  matrix[M, K] X_cell; // covariates for each cell
+  array[M] int n_cell; // number of respondents in each cell
+  array[M] int cell_state; // group of each cell
+}
+```
+
+## Varying slopes model
+
+- Our `parameters` field
+
+```stan
+parameters{
+  corr_matrix[K] Omega; //prior correlation
+  vector<lower=0>[K] tau; //prior scale
+  vector[K] mu_beta;
+  array[J] vector[K] beta; //group-level coefficients
+}
+```
+
+- And our `model`
+
+```stan
+model{
+  vector[N] eta; // linear predictor for each respondent
+  tau ~ cauchy(0, 2.5);
+  Omega ~ lkj_corr(2);
+  mu_beta ~ normal(0, 5);
+  beta ~ multi_normal(mu_beta, quad_form_diag(Omega, tau));
+  for (i in 1:N) {
+    eta[i] = X[i] * beta[state[i]];
+  }
+  y ~ bernoulli_logit(eta);
+}
+```
+
+
+## Varying slopes model
+
+- Run it in Stan, with the same cell-level `generated quantities`
+
+```stan
+generated quantities {
+  vector[M] eta_cell;
+  for (m in 1:M) {
+    eta_cell[m] = X_cell[m] * beta[cell_state[m]];
+  }
+  array[M] int y_rep = binomial_rng(n_cell, inv_logit(eta_cell));
+  vector[M] ll_clinton = log_inv_logit(eta_cell);
+  vector[M] ll_trump = log1m_inv_logit(eta_cell);
+}
+```
+
+```{r, echo=F}
+varying_slopes_model <- "
+data{
+  int N; // number of respondents
+  int K; // number of covariates
+  matrix[N, K] X; //matrix of covariates
+  array[N] int<lower=0, upper=1> y; // 1 = Clinton, 0 = Trump
+  int J; // Number of groups
+  array[N] int state; // group membership indicator
+  int M; // number of cells
+  matrix[M, K] X_cell; // covariates for each cell
+  array[M] int n_cell; // number of respondents in each cell
+  array[M] int cell_state; // group of each cell
+}
+parameters{
+  corr_matrix[K] Omega; //prior correlation
+  vector<lower=0>[K] tau; //prior scale
+  vector[K] mu_beta;
+  array[J] vector[K] beta; //group-level coefficients
+}
+model{
+  vector[N] eta; // linear predictor for each respondent
+  tau ~ cauchy(0, 2.5);
+  Omega ~ lkj_corr(2);
+  mu_beta ~ normal(0, 5);
+  beta ~ multi_normal(mu_beta, quad_form_diag(Omega, tau));
+  for (i in 1:N) {
+    eta[i] = X[i] * beta[state[i]];
+  }
+  y ~ bernoulli_logit(eta);
+}
+generated quantities {
+  vector[M] eta_cell;
+  for (m in 1:M) {
+    eta_cell[m] = X_cell[m] * beta[cell_state[m]];
+  }
+  array[M] int y_rep = binomial_rng(n_cell, inv_logit(eta_cell));
+  vector[M] ll_clinton = log_inv_logit(eta_cell);
+  vector[M] ll_trump = log1m_inv_logit(eta_cell);
+}
+"
+```
+
+```{r varslope-fit, message=F, warning=F, results=F, cache=T, cache.extra=list(varying_slopes_model, stan_data)}
+model_var_slope <- stan(
+  model_code = varying_slopes_model,  # Stan code
+  data = stan_data,       # named list of data
+  chains = 4,             # number of Markov chains
+  warmup = 500,           # number of warmup iterations per chain
+  iter = 2500,            # total number of iterations per chain
+  cores = 4,
+  refresh = 0,            # no progress shown
+  seed = 53706            # random seed
+  )
+```
+
+
+## Varying slopes model
+
+- Summarize the fit
+
+```{r}
+print(model_var_slope, pars=c("mu_beta", "tau", "Omega[1,2]"))
+```
+
+- $\tau_2$, the standard deviation of the education slopes across states, is clearly above zero
+
+## Varying slopes model
+
+- The state-specific education slopes $\beta_{1j}$
+
+```{r, fig.align="center",message=F, warning=F, fig.width=9, fig.height=6.5, echo=F}
+slope_dict <- levels(as.factor(cells$state))
+names(slope_dict) <- str_c("beta[", 1:length(slope_dict), ",2]")
+slope_order <- names(sort(colMeans(as.matrix(model_var_slope, pars = names(slope_dict)))))
+mcmc_intervals(model_var_slope, pars = slope_order) + scale_y_discrete(labels=slope_dict) +
+  geom_vline(xintercept = mean(as.matrix(model_var_slope, pars = "mu_beta[2]")), lty=2, col="black") +
+  theme(axis.text.y = element_text(size = 9))
+```
+
+## Posterior predictive check
+
+- Does the varying slopes model reproduce the education gap in each state?
+
+```{r}
+gap_varslope <- state_gap_ppc(model_var_slope)
+```
+
+```{r, echo=F, fig.align="center", fig.width=11, fig.height=4.2}
+ppc_plot(gap_varslope, "Education gap") + ggtitle("Varying slopes: observed gap (points) vs. 95% posterior predictive interval")
+```
+
+- Now `r sum(gap_varslope$obs < gap_varslope$lower | gap_varslope$obs > gap_varslope$upper)` of `r nrow(gap_varslope)` states fall outside
+
+## Leave-one-out CV
+
+```{r loo-varslope, cache=T, dependson="varslope-fit"}
+loo_varslope <- loo_respondents(model_var_slope)
+elpd_summary(loo_varslope)
+```
+
+- Compare against the varying intercepts model
+
+```{r}
+elpd_summary(loo_varslope - loo_varint)
+```
+
+- Some improvement - compared to how much the state intercepts helped, the slopes add relatively little predictive power
+  - Most of what we learn about any one respondent comes from their state's overall lean
+  - But we do a lot better on the **gap** in education polarization by state.
+
+## Partial pooling
+
+- Raw (no pooling) gaps (black) vs. the varying slopes model's estimates (red)
+
+```{r}
+b_draws <- rstan::extract(model_var_slope, "beta")$beta # draws x states x K
+model_gaps <- tibble(state = levels(as.factor(cells$state)), # model-implied gap in each state
+                     model = colMeans(plogis(b_draws[,,1] + b_draws[,,2]) - plogis(b_draws[,,1])))
+```
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4.2}
+raw_gaps %>% left_join(model_gaps, by = "state") %>%
+  ggplot(aes(x = n)) + geom_segment(aes(y = gap, yend = model), arrow = arrow(length = unit(.15, "cm")), col = "grey50") +
+  geom_point(aes(y = gap), col = "black") + geom_point(aes(y = model), col = "indianred") +
+  scale_x_log10() + scale_y_continuous(labels = scales::percent) + theme_bw() +
+  xlab("Number of respondents (log scale)") + ylab("Education gap in Clinton vote share")
+```
+
+- States with few respondents get pulled the most towards the national gap
+
+## Group-level predictors
+
+::: {.incremental}
+
+- So far, every state's coefficients are pooled towards the same national mean $\mu_{\beta}$
+  - But we know a lot about the states themselves! (e.g. how they voted in 2012)
+
+- Let the mean of each state's coefficients depend on a vector of $L$ **state-level predictors** $Z_j$ (including a 1 for the intercept)
+
+  $$\beta_j \sim \text{Normal}(\Gamma^{\prime}Z_j, \Sigma_{\beta})$$
+
+  - $\Gamma$ is an $L \times K$ matrix: one column of coefficients for the state intercepts, one for the state slopes
+  - Each state is pooled towards a **prediction** for that state rather than towards the national mean
+
+- @gelman2007rich model the state intercepts and income slopes using each state's average income and region
+  - We'll use Obama's 2012 share of the state's two-party vote (on the logit scale) and the state's share of adults with a college degree (both standardized), so $L = 3$
+
+:::
+
+## Group-level predictors
+
+::: {.incremental}
+
+- Write each state's coefficients as its **prediction** plus an **error**
+
+  $$\beta_j = \Gamma^{\prime}Z_j + e_j$$
+
+- The error has the same scale $\times$ correlation structure as in our varying slopes model, $e_j \sim \text{Normal}(0, \text{diag}(\tau)\,\Omega\,\text{diag}(\tau))$
+  - We'll build it from standard normal draws: $z_j \sim \text{Normal}(0, I)$ and $e_j = \text{diag}(\tau)\, \Omega^{1/2} z_j$
+  - $\Omega^{1/2}$ is a "square root" of the correlation matrix, which turns independent $z_j$'s into correlated errors. In Stan we use its Cholesky factor, `L_Omega` (lower triangular, with `L_Omega * L_Omega' = Omega`)
+  - Same idea as drawing from a Normal$(\mu, \tau^2)$ in R with `mu + tau * rnorm(1)`
+
+- Why build the errors this way? Stan samples the standardized $z_j$, whose prior doesn't depend on $\tau$
+  - Sampling the $\beta_j$ directly gets stuck when the group-level standard deviations are close to zero [@gelman2013bda, Section 15.5]
+  - That's common once the group-level predictors explain most of the differences between groups (as 2012 vote will here)
+
+:::
+
+## Group-level predictors
+
+- Add the state-level predictors to our data (one row per state, in the same order as `state_num`)
+
+```{r, message=F, warning=F}
+state_preds <- read_csv("data/state_predictors.csv") %>% arrange(state)
+Z <- cbind(1, scale(qlogis(state_preds$obama_2012)), scale(state_preds$college_share))
+stan_data$L <- ncol(Z)
+stan_data$Z <- Z
+```
+
+- And add them to the `data` block
+
+```stan
+  int L; // number of state-level predictors
+  matrix[J, L] Z; // state-level predictors
+```
+
+## Group-level predictors
+
+- The `parameters` and `transformed parameters` blocks
+
+```stan
+parameters{
+  cholesky_factor_corr[K] L_Omega; // Cholesky factor of the prior correlation
+  vector<lower=0>[K] tau; //prior scale
+  matrix[L, K] Gamma; // coefficients on the state-level predictors
+  matrix[K, J] z; // standardized state deviations
+}
+transformed parameters{
+  array[J] vector[K] beta; //group-level coefficients
+  for (j in 1:J) {
+    beta[j] = (Z[j] * Gamma)' + diag_pre_multiply(tau, L_Omega) * z[, j];
+  }
+}
+```
+
+## Group-level predictors
+
+- The `model` block
+
+```stan
+model{
+  vector[N] eta; // linear predictor for each respondent
+  tau ~ cauchy(0, 2.5);
+  L_Omega ~ lkj_corr_cholesky(2); // LKJ prior on Omega, written for its Cholesky factor
+  to_vector(Gamma) ~ normal(0, 5);
+  to_vector(z) ~ std_normal();
+  for (i in 1:N) {
+    eta[i] = X[i] * beta[state[i]];
+  }
+  y ~ bernoulli_logit(eta);
+}
+```
+
+- The `generated quantities` are the same as in the varying slopes model, plus one line to recover $\Omega$ from its Cholesky factor
+
+```stan
+  corr_matrix[K] Omega = multiply_lower_tri_self_transpose(L_Omega);
+```
+
+## Group-level predictors
+
+```{r, echo=F}
+group_model <- "
+data{
+  int N; // number of respondents
+  int K; // number of covariates
+  matrix[N, K] X; //matrix of covariates
+  array[N] int<lower=0, upper=1> y; // 1 = Clinton, 0 = Trump
+  int J; // Number of groups
+  array[N] int state; // group membership indicator
+  int M; // number of cells
+  matrix[M, K] X_cell; // covariates for each cell
+  array[M] int n_cell; // number of respondents in each cell
+  array[M] int cell_state; // group of each cell
+  int L; // number of state-level predictors
+  matrix[J, L] Z; // state-level predictors
+}
+parameters{
+  cholesky_factor_corr[K] L_Omega; // Cholesky factor of the prior correlation
+  vector<lower=0>[K] tau; //prior scale
+  matrix[L, K] Gamma; // coefficients on the state-level predictors
+  matrix[K, J] z; // standardized state deviations
+}
+transformed parameters{
+  array[J] vector[K] beta; //group-level coefficients
+  for (j in 1:J) {
+    beta[j] = (Z[j] * Gamma)' + diag_pre_multiply(tau, L_Omega) * z[, j];
+  }
+}
+model{
+  vector[N] eta; // linear predictor for each respondent
+  tau ~ cauchy(0, 2.5);
+  L_Omega ~ lkj_corr_cholesky(2); // LKJ prior on Omega, written for its Cholesky factor
+  to_vector(Gamma) ~ normal(0, 5);
+  to_vector(z) ~ std_normal();
+  for (i in 1:N) {
+    eta[i] = X[i] * beta[state[i]];
+  }
+  y ~ bernoulli_logit(eta);
+}
+generated quantities {
+  corr_matrix[K] Omega = multiply_lower_tri_self_transpose(L_Omega);
+  vector[M] eta_cell;
+  for (m in 1:M) {
+    eta_cell[m] = X_cell[m] * beta[cell_state[m]];
+  }
+  array[M] int y_rep = binomial_rng(n_cell, inv_logit(eta_cell));
+  vector[M] ll_clinton = log_inv_logit(eta_cell);
+  vector[M] ll_trump = log1m_inv_logit(eta_cell);
+}
+"
+```
+
+```{r group-fit, message=F, warning=F, results=F, cache=T, cache.extra=list(group_model, stan_data)}
+model_group <- stan(
+  model_code = group_model,  # Stan code
+  data = stan_data,       # named list of data
+  chains = 4,             # number of Markov chains
+  warmup = 500,           # number of warmup iterations per chain
+  iter = 2500,            # total number of iterations per chain
+  cores = 4,
+  refresh = 0,            # no progress shown
+  seed = 53706            # random seed
+  )
+```
+
+```{r}
+print(model_group, pars = c("Gamma", "tau", "Omega[1,2]"))
+```
+
+## Group-level predictors
+
+- `Gamma[2,1]`: states that voted more for Obama in 2012 have higher intercepts
+- `Gamma[3,2]`: states with more college graduates may have somewhat larger education gaps - but it's uncertain
+
+```{r loo-group, cache=T, dependson="group-fit"}
+loo_group <- loo_respondents(model_group)
+elpd_summary(loo_group - loo_varslope)
+```
+
+- A clear improvement over the varying slopes model without state-level predictors
+
+## Group-level predictors
+
+- The state intercepts $\beta_{0j}$ against 2012 vote: without (black) and with (red) the state-level predictors
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4.3}
+intercepts <- tibble(state = levels(as.factor(cells$state)), n = as.numeric(state_n),
+                     obama_2012 = state_preds$obama_2012,
+                     no_pred = colMeans(rstan::extract(model_var_slope, "beta")$beta[,,1]),
+                     with_pred = colMeans(rstan::extract(model_group, "beta")$beta[,,1]))
+intercepts %>% ggplot(aes(x = obama_2012)) +
+  geom_segment(aes(y = no_pred, yend = with_pred), arrow = arrow(length = unit(.15, "cm")), col = "grey50") +
+  geom_point(aes(y = no_pred), col = "black") + geom_point(aes(y = with_pred, size = n), col = "indianred", alpha = .7) +
+  geom_text(aes(y = with_pred, label = state), size = 2.5, vjust = -1) +
+  scale_x_continuous(labels = scales::percent) + scale_size(guide = "none") + theme_bw() +
+  xlab("Obama 2012 share of the two-party vote") + ylab("State intercept (log-odds)")
+```
+
+- Small states like DC and Wyoming are no longer pulled towards the national mean, but towards states that voted like them
+
+## Multilevel Regression and Post-stratification
+
+::: {.incremental}
+
+- Often we're interested in estimating political attitudes at very small areas
+  - Within a nationally-representative sample, we may only have a minor fraction of respondents who are even in a particular region.
+
+- Beyond that, our sample may not be demographically representative for a given region
+  - Can we do better than just using the sub-group means for our outcome of interest?
+
+:::
+
+## MrP
+
+::: {.incremental}
+
+- **Multilevel Regression** and **Post-stratification** combines two well-known tools to try to accomplish this task [@park2004bayesian]
+  1. **Multilevel regression**: Using the entire dataset, specify a flexible model for the outcome of interest
+  2. **Post-stratification**: Using known population characteristics, generate predictions for each covariate "cell" in each region
+
+- The national-level regression allows us to improve **precision** in small-area estimation
+    - e.g. if some of the variability between regions is driven by individual or group-level characteristics, we can model the relationship between those characteristics and the outcome using **all** the data.
+
+
+- The population-level data allows us to address non-response/sampling bias
+  - Ideally all of the variables that would go in the survey weighting model also go in the MrP model (so in principle we don't need to include survey weights in the analysis)
+
+:::
+
+## MrP Workflow
+
+::: {.incremental}
+
+1. Get survey data that contains individual and group-level predictors (e.g. demographic characteristics + "small area" of residence)
+2. Get information on the "small areas" themselves
+3. Estimate a multilevel regression model using these two sets of data
+4. Construct a post-stratification frame that has the joint distribution of our demographics for each "small area"
+5. Predict using the model for each cell in the post-stratification frame
+6. Aggregate to get predictions for each small area
+
+:::
+
+## Post-stratification
+
+::: {.incremental}
+
+- The easiest approach to adjusting a non-representative survey is to weight to match the **known** **joint** distribution of $x$ in the population $f_{\mathcal{U}}(\mathbf{x})$
+  - This requires a lot of auxiliary information about the target - typically obtained from high-quality census data
+  - (e.g.) U.S. Census Public-Use Microdata: What is the share of Black, college educated, 30-45 year olds in Massachusetts?
+
+- In post-stratification, we divide our sample up into $C$ **cells** $c$ that are mutually exclusive and exhaustive.
+  - $\tilde{T}_{\mathbf{x}} = \{\tilde{P}_{1}, \tilde{P}_2, \dotsc, \tilde{P}_{C}\}$ is our population distribution of these cells
+
+- Our **sampling/response model** assumes that **within** each of these cells we have a simple-random sample from that particular stratum of the population
+  - There may be variation in non-response or over/under-sampling, but only **across** cells
+  - "post"-stratification because the intuition is akin to a design where we actually *did* stratify ex-ante
+
+- Our **measurement model** assumes we observe the joint distribution of auxiliary variables $\mathbf{x}$ in the target population
+  - Difficult in many cases!
+
+:::
+
+## Post-stratification
+
+::: {.incremental}
+
+- Two ways to think of post-stratification:
+- **First** - Let $\hat{\theta}_{y}^{c}$ denote our estimator for the population mean **within** cell $c$
+  - Then, our post-stratification estimator $\hat{\theta}_{y}^{PS}$ is:
+
+  $$\hat{\theta}_{y}^{PS} = \sum_{c=1}^C \tilde{P}_{c} \hat{\theta}_{y}^{c}$$
+
+- Alternatively, we'll sometimes write $\tilde{P}_c = \frac{\tilde{N}_c}{\tilde{N}}$ where $\tilde{N}$ is the size of the population and $\tilde{N}_c$ is the number of units in that cell.
+
+  $$\hat{\theta}_{y}^{PS} = \sum_{c=1}^C \frac{\tilde{N}_c}{\tilde{N}} \hat{\theta}_{y}^{c}$$
+
+- Fixed "constant" weights on the within-cell estimators.
+
+:::
+
+## Post-stratification
+
+::: {.incremental}
+
+- **Second** - We can think of it as weighting individual observations using our adjustment weights $\tilde{w}^{PS}_i$
+- Let $c(i)$ denote the class to which unit $i$ belongs. Then the post-stratification weights are
+
+  $$\tilde{w}^{PS}_i = (\tilde{P}_{c(i)}/\hat{P}^{S}_{c(i)}) \times d_i$$
+
+  where $\hat{P}^{S}_{c(i)}$ is the estimated **in-sample** proportion of observations in class $c$ and $d_i$ is unit $i$'s design weight
+
+- When design weights are constant, $\hat{P}^{S}_{c(i)}$ is just the sample mean of the indicator of class membership $\mathbf{1}(i \in c)$
+  - More generally, you can write it as $\hat{P}^{S}_{c(i)} = (\sum_{i=1}^N  d_i \mathbf{1}(i \in c))/(\sum_{i=1}^N d_i)$
+
+- **Intuition**
+  - The weights **up-weight** observations that are under-represented in the sample relative to the target population
+  - The weights **down-weight** observations that are over-represented in the sample relative to the target population.
+
+:::
+
+## Example: CES 2016
+
+- How well does the **unweighted** CES do at estimating Clinton's share of the two-party vote in each state? (Actual county returns from @mit2018county)
+
+```{r, message=F, warning=F}
+pres <- read_csv("data/county_pres_2012_2016.csv")
+state_results <- pres %>% group_by(state) %>% summarize(actual = sum(dem_2016)/sum(dem_2016 + rep_2016))
+state_raw <- voters %>% group_by(state) %>% summarize(n = n(), raw = mean(clinton)) %>%
+  inner_join(state_results, by = "state") # Alaska doesn't report results by county
+```
+
+```{r, echo=F, fig.align="center", fig.width=6, fig.height=4.5}
+state_scatter <- function(data, est, title){
+  data %>% ggplot(aes(x = actual, y = {{ est }}, label = state)) + geom_abline(intercept = 0, slope = 1, lty = 2) +
+    geom_text(size = 3) + coord_fixed(xlim = c(.2, 1), ylim = c(.2, 1)) + theme_bw() +
+    scale_x_continuous(labels = scales::percent) + scale_y_continuous(labels = scales::percent) +
+    xlab("Actual Clinton share") + ylab("Estimated Clinton share") + ggtitle(title)
+}
+state_scatter(state_raw, raw, "Unweighted CES")
+```
+
+## Example: CES 2016
+
+- Let's fit a regression model
+  - We'll use the `brms` package which has pre-existing implementations of popular models like the random slopes/random intercepts generalized linear mixed model
+
+- We'll fit a logistic regression with coefficients on gender, age and education as well as our varying intercepts and education slopes by state
+  - The `brms` formula syntax: `(1 + college | state)` is our varying slopes model from before
+
+```{r, message=F, warning=F, results=F}
+library(brms)
+```
+
+```{r}
+vote_cells <- voters %>% group_by(state, female, age, educ, college) %>%
+  summarize(n = n(), clinton = sum(clinton), .groups = "drop")
+```
+
+```{r state-mlm, cache=T, message=F, warning=F, results=F, cache.extra=vote_cells}
+state_mlm <- brm(clinton | trials(n) ~ female + age + educ + (1 + college | state),
+                 family = binomial, data = vote_cells, cores = 4, seed = 53706, refresh = 0)
+```
+
+## Model diagnostics
+
+- Summarize the results
+
+```{r}
+summary(state_mlm)$random$state[, 1:5] # state-level standard deviations and correlation
+summary(state_mlm)$fixed[, 1:5]
+```
+
+## Who is the target population?
+
+- Our post-stratification frame comes from the Census - it counts **adults**
+  - But our target is Clinton's share among **voters**
+  - Turnout differs a lot across cells (e.g. by age and education)
+
+- So we need a second model: the probability that someone in each cell **turns out**
+  - We can fit it on the **whole** CES sample, voters and non-voters (validated turnout)
+  - Then weight each cell by $\tilde{N}_c \times \Pr(\text{vote} | c)$
+
+```{r}
+turnout_cells <- ces %>% group_by(state, female, age, educ) %>%
+  summarize(n = n(), voted = sum(voted), .groups = "drop")
+```
+
+```{r turnout-mlm, cache=T, message=F, warning=F, results=F, cache.extra=turnout_cells}
+turnout_mlm <- brm(voted | trials(n) ~ female + age + educ + (1 | state),
+                   family = binomial, data = turnout_cells, cores = 4, seed = 53706, refresh = 0)
+```
+
+## Generating the post-stratification frame
+
+- We'll use the ACS 2012-2016 5-year estimates of sex $\times$ age $\times$ education among adults in each **county** (table B15001)
+
+```{r, message=F, warning=F}
+acs <- read_csv("data/acs2016_county_frame.csv") %>%
+  mutate(college = as.integer(educ %in% c("BA", "Postgrad")))
+```
+
+- Each row contains a row for each **county** x **gender** x **age** x **education** combination
+
+```{r, echo=F}
+kable(head(acs %>% select(county_fips, state, female, age, educ, n), 5))
+```
+
+## Predicting with the model
+
+- Our models only depend on state and demographics: predict once for each **state** x **gender** x **age** x **education** cell
+
+```{r}
+state_frame <- acs %>% group_by(state, female, age, educ, college) %>%
+  summarize(N = sum(n), .groups = "drop") %>% mutate(n = 1) # n = 1: predict a probability
+state_frame$p_turnout <- colMeans(posterior_epred(turnout_mlm, newdata = state_frame))
+state_frame$p_clinton <- colMeans(posterior_epred(state_mlm, newdata = state_frame))
+```
+
+- Aggregate the predictions by the stratum shares (adults $\times$ turnout) to get state-level estimates!
+
+```{r}
+mrp_states <- state_frame %>% group_by(state) %>%
+  summarize(mrp = sum(N * p_turnout * p_clinton)/sum(N * p_turnout)) %>%
+  inner_join(state_raw, by = "state")
+```
+
+## Compare
+
+```{r, echo=F, fig.align="center", fig.width=11, fig.height=5}
+patchwork::wrap_plots(state_scatter(mrp_states, raw, "Unweighted CES"), state_scatter(mrp_states, mrp, "MrP"))
+```
+
+```{r}
+mrp_states %>% summarize(rmse_raw = sqrt(mean((raw - actual)^2)), rmse_mrp = sqrt(mean((mrp - actual)^2)),
+                         bias_raw = mean(raw - actual), bias_mrp = mean(mrp - actual))
+```
+
+## Pitfall: Pooling towards the national mean
+
+```{r, echo=F}
+st <- function(x) mrp_states %>% filter(state == x)
+```
+
+::: {.incremental}
+
+- MrP reduces the average bias, but its RMSE is no better than the raw means
+  - The state intercepts are partially pooled towards a common **grand mean**
+  - So the most extreme states get pulled towards the middle
+
+- DC: raw `r round(100*st("DC")$raw)`%, MrP `r round(100*st("DC")$mrp)`%, actual `r round(100*st("DC")$actual)`%
+- Wyoming: raw `r round(100*st("WY")$raw)`%, MrP `r round(100*st("WY")$mrp)`%, actual `r round(100*st("WY")$actual)`%
+
+- The fix is the one from our last Stan model: **state-level predictors** (e.g. past vote share), so that each state is pooled towards a *prediction* for that state, not towards the nation as a whole [@park2004bayesian]
+
+:::
+
+## State-level predictors
+
+- Add the same state-level predictors as in our Stan model: Obama's 2012 share and the share of adults with a college degree
+  - In `brms`, a group-level predictor is just a column that's constant within each group
+  - Interacting them with `college` lets them shift the state education slopes too (the second column of $\Gamma$)
+
+```{r, message=F, warning=F}
+state_preds_z <- state_preds %>% transmute(state, state_obama = as.numeric(scale(qlogis(obama_2012))),
+                                           state_college = as.numeric(scale(college_share)))
+vote_cells_st <- vote_cells %>% left_join(state_preds_z, by = "state")
+```
+
+```{r state-mlm2, cache=T, message=F, warning=F, results=F, cache.extra=vote_cells_st}
+state_mlm2 <- brm(clinton | trials(n) ~ female + age + educ + state_obama + state_college +
+                    college:state_obama + college:state_college + (1 + college | state),
+                  family = binomial, data = vote_cells_st, cores = 4, seed = 53706, refresh = 0)
+```
+
+## State-level predictors
+
+- Predict and post-stratify as before
+
+```{r}
+state_frame <- state_frame %>% left_join(state_preds_z, by = "state")
+state_frame$p_clinton2 <- colMeans(posterior_epred(state_mlm2, newdata = state_frame))
+mrp_states <- state_frame %>% group_by(state) %>%
+  summarize(mrp_statepred = sum(N * p_turnout * p_clinton2)/sum(N * p_turnout)) %>%
+  inner_join(mrp_states, by = "state")
+mrp_states %>% pivot_longer(c(raw, mrp, mrp_statepred), names_to = "estimate") %>% group_by(estimate) %>%
+  summarize(rmse = sqrt(mean((value - actual)^2)), bias = mean(value - actual))
+```
+
+- DC is now at `r round(100*st("DC")$mrp_statepred)`% and Wyoming at `r round(100*st("WY")$mrp_statepred)`%: pooled towards states that voted like them
+
+## Going smaller: counties
+
+- The real payoff of MrP is for **small areas** where we have few or no respondents
+
+```{r}
+voters %>% filter(county_fips %in% pres$county_fips) %>% count(county_fips) %>%
+  summarize(counties_with_respondents = n(), median_respondents = median(n))
+nrow(pres) # counties (outside Alaska)
+```
+
+- Our frame is already at the county level: join the cell predictions (from the model with state-level predictors) back to each county
+
+```{r}
+mrp_counties <- acs %>% left_join(state_frame %>% select(state, female, age, educ, p_turnout, p_clinton2),
+                                  by = c("state", "female", "age", "educ")) %>%
+  group_by(county_fips) %>% summarize(mrp_state = sum(n * p_turnout * p_clinton2)/sum(n * p_turnout)) %>%
+  inner_join(pres %>% select(county_fips, state, dem_share_2016), by = "county_fips")
+```
+
+## Visualize
+
+```{r, echo=F}
+county_map <- function(data, values, title, ...){
+  plot_usmap(regions = "counties", data = data %>% rename(fips = county_fips), values = values, color = NA,
+             data_year = 2021, ...) + # 2021 boundaries: Connecticut still has counties
+    scale_fill_distiller(palette = "RdBu", direction = 1, limits = c(0, 1), labels = scales::percent, name = "Clinton share") +
+    ggtitle(title) + theme(legend.position = "right", plot.margin = margin(0, 0, 0, 0),
+                           plot.title = element_text(size = 16), legend.title = element_text(size = 12))
+}
+```
+
+```{r, echo=F, fig.align="center", fig.width=12, fig.height=5.4, out.width="100%", warning=F}
+patchwork::wrap_plots(county_map(mrp_counties, "dem_share_2016", "Actual 2016 results", exclude = c("AK", "HI")),
+                      county_map(mrp_counties, "mrp_state", "MrP (state predictors + demographics)", exclude = c("AK", "HI")), guides = "collect") &
+  theme(legend.position = "bottom", legend.key.width = unit(2, "cm"))
+```
+
+## Visualize
+
+- Zoom in on the Midwest
+
+```{r, echo=F, fig.align="center", fig.width=11, fig.height=5.5, warning=F}
+midwest <- c("IL", "IN", "IA", "MO", "WI", "MI", "OH", "KY", "MN")
+patchwork::wrap_plots(county_map(mrp_counties, "dem_share_2016", "Actual 2016 results", include = midwest),
+                      county_map(mrp_counties, "mrp_state", "MrP (state predictors + demographics)", include = midwest), guides = "collect")
+```
+
+## Pitfall: State lines
+
+::: {.incremental}
+
+- In the model, the only thing that distinguishes two counties in the same state is their **demographics** (gender, age, education)
+  - Everything else is the **state** effect
+  - Rural Illinois gets the same state effect as Chicago, so it looks far more Democratic than rural Indiana or Missouri next door
+
+- Where neighboring counties sit on different sides of a state line, the estimates **jump**
+  - Even though there is likely a lot more smoothness across the border
+
+- Common feature of small-area MRP estimates!
+
+:::
+
+## Pitfall: State lines
+
+- @aspe2021hesitancy: county estimates of COVID-19 vaccine hesitancy, from a logistic regression on demographics + **state** applied to Census microdata
+
+```{r, echo=F, message=F, fig.align="center", fig.width=9, fig.height=4.2}
+aspe <- read_csv("data/aspe_hesitancy_2021.csv") %>% rename(fips = county_fips)
+plot_usmap(regions = "counties", data = aspe, values = "hesitant", color = NA, data_year = 2021, exclude = c("AK", "HI")) +
+  scale_fill_viridis_c(option = "A", labels = scales::percent, name = "Hesitant") + theme(legend.position = "right")
+```
+
+## County-level predictors
+
+- The fix: give the model information about the small areas themselves (step 2 of the workflow)
+  - A **county-level predictor**: Obama's 2012 share of the two-party vote in the county (on the logit scale)
+  - A **varying intercept** for each county, partially pooled towards the prediction from the county-level predictor
+
+- In `brms`, a group-level predictor is just another column that's constant within each group: `obama_2012 + (1 | county_fips)` pools each county's intercept towards $\gamma_0 + \gamma_1 \times \text{(2012 vote)}_c$
+
+- The county's own 2012 vote takes the place of the state-level predictors
+  - Counties with no respondents still get a prediction from their demographics, their state, and their 2012 vote
+
+```{r}
+county_info <- pres %>% transmute(county_fips, obama_2012 = qlogis(dem_share_2012))
+county_cells <- voters %>% inner_join(county_info, by = "county_fips") %>%
+  group_by(state, county_fips, obama_2012, female, age, educ, college) %>%
+  summarize(n = n(), clinton = sum(clinton), .groups = "drop")
+```
+
+```{r county-mlm, cache=T, message=F, warning=F, results=F, cache.extra=county_cells}
+county_mlm <- brm(clinton | trials(n) ~ female + age + educ + obama_2012 +
+                    (1 + college | state) + (1 | county_fips),
+                  family = binomial, data = county_cells, cores = 4, seed = 53706, refresh = 0)
+```
+
+## County-level predictors
+
+```{r}
+summary(county_mlm)$random$county_fips[, 1:5] # county-level standard deviation
+summary(county_mlm)$random$state[, 1:5]
+summary(county_mlm)$fixed[, 1:5]
+```
+
+## Predicting with the model
+
+- Now predictions depend on the county: predict for every row of the county frame
+  - `allow_new_levels`: counties with no respondents draw their county effect from the fitted distribution
+
+```{r county-predict, cache=T, dependson="county-mlm"}
+county_frame <- acs %>% inner_join(county_info, by = "county_fips") %>% mutate(n_adults = n, n = 1)
+county_frame$p_clinton <- colMeans(posterior_epred(county_mlm, newdata = county_frame,
+                                                   allow_new_levels = TRUE, ndraws = 500, seed = 53706))
+```
+
+```{r}
+county_frame <- county_frame %>% left_join(state_frame %>% select(state, female, age, educ, p_turnout),
+                                           by = c("state", "female", "age", "educ"))
+mrp_counties <- mrp_counties %>% left_join(county_frame %>% group_by(county_fips) %>%
+  summarize(mrp_county = sum(n_adults * p_turnout * p_clinton)/sum(n_adults * p_turnout)), by = "county_fips")
+```
+
+## Visualize
+
+```{r, echo=F, fig.align="center", fig.width=12, fig.height=5.4, out.width="100%", warning=F}
+patchwork::wrap_plots(county_map(mrp_counties, "dem_share_2016", "Actual 2016 results", exclude = c("AK", "HI")),
+                      county_map(mrp_counties, "mrp_county", "MrP (+ county predictor)", exclude = c("AK", "HI")), guides = "collect") &
+  theme(legend.position = "bottom", legend.key.width = unit(2, "cm"))
+```
+
+## Visualize
+
+```{r, echo=F, fig.align="center", fig.width=11, fig.height=5.5, warning=F}
+patchwork::wrap_plots(county_map(mrp_counties, "dem_share_2016", "Actual 2016 results", include = midwest),
+                      county_map(mrp_counties, "mrp_county", "MrP (+ county predictor)", include = midwest), guides = "collect")
+```
+
+## Compare
+
+- How close are the county estimates to the actual results?
+
+```{r}
+mrp_counties %>% pivot_longer(c(mrp_state, mrp_county), names_to = "model", values_to = "estimate") %>%
+  group_by(model) %>% summarize(rmse = sqrt(mean((estimate - dem_share_2016)^2)),
+                                bias = mean(estimate - dem_share_2016),
+                                correlation = cor(estimate, dem_share_2016))
+```
+
+- Aggregate the county predictions up to the states too
+
+```{r}
+mrp_states <- county_frame %>% group_by(state) %>%
+  summarize(mrp_county = sum(n_adults * p_turnout * p_clinton)/sum(n_adults * p_turnout)) %>%
+  inner_join(mrp_states, by = "state")
+mrp_states %>% pivot_longer(c(raw, mrp, mrp_statepred, mrp_county), names_to = "estimate") %>% group_by(estimate) %>%
+  summarize(rmse = sqrt(mean((value - actual)^2)), bias = mean(value - actual))
+```
+
+## MrP can only fix what's in the model
+
+::: {.incremental}
+
+- Even with the county predictor, our estimates still lean towards Clinton
+  - Clinton's estimated share is `r round(100*mean(mrp_states$mrp_county - mrp_states$actual), 1)` points too high in the average state, and `r round(100*mean(mrp_counties$mrp_county - mrp_counties$dem_share_2016), 1)` points too high in the average county
+
+- The **sampling/response model** assumption: within each cell, respondents look like non-respondents
+  - CES respondents are more Democratic than people with the same gender, age, education and county who didn't take the survey
+
+:::
+
+## How to improve this model
+
+::: {.incremental}
+
+- We've provided a very simple example of an MrP model but there are a lot of ways it can be improved
+  1. More group-level predictors (e.g. county demographics, urbanicity)
+  2. Individual-level interactions in the model + partial-pooling on the coefficients
+  3. Actually knowing the joint distribution of the demographics in each county (we don't observe race $\times$ education $\times$ age by county!)
+  4. Pool state-level means to regional rather than a common "grand" mean.
+  5. Many more possibilities...
+
+- MrP is most powerful when there are **very few** respondents from a particular small area in our data
+  - But it can only correct for differences between the sample and the population that are **in the model**
+
+:::
+
+## Next week
+
+::: {.incremental}
+
+- **Mixture models**
+  - Exploratory data analysis and clustering models
+  - MLE and MAP estimation via the "Expectation-Maximization" algorithm
+
+- **Readings:** Chapters 13 and 22 of @gelman2013bda
+
+:::
+
+## References {.refs-slide}
+
+::: {#refs}
+:::
