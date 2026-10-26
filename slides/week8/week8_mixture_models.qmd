@@ -1,0 +1,1058 @@
+---
+title: "Week 8: Mixture Models"
+subtitle: "PS 818 - Data Analysis with Statistical Models"
+author:
+  - name: "Anton Strezhnev"
+    affiliation: "University of Wisconsin-Madison"
+    email: strezhnev@wisc.edu
+date: "October 26, 2026"
+date-format: "MMMM D, YYYY"
+editor:
+  render-on-save: true
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    slide-number: true
+    overview: true
+    navigation-mode: vertical
+    progress: false
+    controls: true
+    link-external-newwindow: true
+    footer: "PS 818 - University of Wisconsin-Madison"
+    html-math-method:
+      method: mathjax
+      url: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+embed-resources: true
+bibliography: ../ps818.bib
+link-citations: true
+
+---
+
+## Mixture Models {.title-slide}
+
+::: {style="display: none"}
+$$
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+$$
+:::
+
+```{r, echo = F, message=F, warning=F}
+library(tidyverse)
+library(knitr)
+library(rstan)
+options(digits=3, knitr.kable.NA = "")
+knitr::opts_chunk$set(echo = T)
+```
+
+## Previously
+
+::: {.incremental}
+
+- **Multilevel/Hierarchical models**
+  - Impose **structure** on parameters by way of prior distributions
+  - Information from **grouping** (partial pooling/"random effects")
+  - Strength of the prior determines the degree of pooling
+
+- **Model checking**
+  - Posterior predictive checks: can the model reproduce features of the data?
+  - Comparing models: information criteria and cross-validation
+
+- **MrP**: multilevel regression + post-stratification to adjust non-representative surveys
+
+:::
+
+## This week
+
+::: {.incremental}
+
+- **"Exploratory" modeling**
+  - Unsupervised "clustering" algorithms
+  - K-means clustering
+  - Finite mixture models
+  - Obtaining MLEs or posterior modes via **Expectation-Maximization**
+
+- **Running example**: Policy attitudes in the 2023 CES
+  - Are there distinct "types" of voters in terms of their policy attitudes?
+  - Next week we'll ask the same question with a **continuous** latent variable (item response theory)
+
+:::
+
+## Finite Mixture Models
+
+::: {.incremental}
+
+- In conventional **regression** models, we assume a known distribution for the outcome given a set of covariates
+  - The covariates could be something like a discrete "group" label (e.g. $X_i = x$)
+
+- In this setting, conditional on $X_i$, we would model each $Y_i$ with a known distribution (e.g. Normal)
+
+  $$Y_i | X_i = x \sim \text{Normal}(\mu_{x}, \sigma^2_{x})$$
+
+  $\mu_{x}$ and $\sigma^2_{x}$ are the mean and variance parameters associated with the group $X_i = x$.
+
+- Now imagine that the group indicators are **not observed** but instead are **latent variables**
+  - We can do inference on these conditional on the observed data and the model.
+
+:::
+
+## Finite Mixture Models
+
+::: {.incremental}
+
+- In a **finite** mixture model, we assume that the outcome distribution for each observation $i$ is governed by some discrete latent indicator $z_i \in \{1, 2, \dotsc, K\}$
+  - $z_1, z_2, \dotsc, z_N$ are i.i.d. $\sim \text{Categorical}(\pi)$
+
+- Conditional on the latent variable $z_i = k$, the outcome distribution is known.
+  - For a continuous outcome, a **gaussian** mixture: $Y_i | z_i = k \sim \text{Normal}(\mu_{k}, \sigma^2_{k})$
+  - For a binary outcome, a **Bernoulli** mixture: $Y_i | z_i = k \sim \text{Bernoulli}(\beta_{k})$
+
+- But unconditionally, $Y_i$ has a **mixture** distribution: its density is a weighted average of the component densities. In the gaussian case:
+
+  $$Y_i \sim \sum_{k=1}^K \pi_k \times \text{Normal}(\mu_{k}, \sigma^2_{k})$$
+
+  where $\pi_k = Pr(z_i = k)$
+
+- Our goal is to estimate the parameters of each component and the mixing proportions $\pi$ using likelihood inference.
+  - Put priors on the component parameters and $\pi$ to make it fully Bayesian.
+
+:::
+
+## Application: Policy attitudes
+
+::: {.incremental}
+
+- The **organization** of voters' policy views is at the heart of political science.
+  - Are voters' attitudes well-summarized by a single dimension ("left" vs. "right")?
+  - Or are many voters cross-pressured?
+  - Is there any structure to voters' attitudes [@converse1964nature]?
+
+- Recent methodological debate in the *APSR* 
+  - @fowler2023moderates: most moderates are genuine centrists on a single dimension - few "Conversian" or Inattentive voters.
+  - @broockman2025moderates: this is a modelling artifact - moderates are actually much less constrained!
+  - These next two weeks are about the statistical model(s) at the core of this debate.
+
+- Surveys ask respondents batteries of **yes/no** policy questions
+  - Can we recover groups of respondents with similar response patterns without telling the model anything about party or ideology?
+
+:::
+
+## Data: CES 2023 {.smaller}
+
+- The 2023 **Cooperative Election Study** [@schaffner2024ces]: the full public release, as downloaded from Dataverse
+
+```{r}
+library(haven)
+ces_raw <- read_dta("data/CCES23_Common_OUTPUT.dta.gz") # haven reads the compressed Stata file directly
+dim(ces_raw)
+```
+
+- Stata files carry **value labels**: each policy question is coded `1` = Support, `2` = Oppose, `8` = skipped, `9` = not asked
+
+```{r}
+count(ces_raw, CC23_324c) # "Make abortions illegal in all circumstances"
+```
+
+- The questionnaire (`data/CES 2023 CC Questionnaire.pdf`) has the full wording of every item
+
+## Data: CES 2023 {.smaller}
+
+- 24 "support/oppose" policy questions on guns and policing, immigration, abortion, the environment, and social welfare
+
+```{r}
+items <- c(ban_assault_rifles = "CC23_321a", concealed_carry = "CC23_321b", background_checks = "CC23_321c",
+           more_police = "CC23_321d", fewer_police = "CC23_321e", legal_status = "CC23_323a",
+           border_patrols = "CC23_323b", border_wall = "CC23_323c", dreamers = "CC23_323d",
+           abortion_choice = "CC23_324a", abortion_exceptions = "CC23_324b", abortion_ban = "CC23_324c",
+           abortion_expand = "CC23_324d", epa_co2 = "CC23_326a", renewable_mandate = "CC23_326b",
+           epa_enforcement = "CC23_326c", more_fossil_fuels = "CC23_326d", halt_leases = "CC23_326e",
+           relax_zoning = "CC23_328a", housing_credits = "CC23_328b", medicaid_work_req = "CC23_328c",
+           repeal_aca = "CC23_328d", expand_medicaid = "CC23_328e", forgive_loans = "CC23_328f")
+ces <- ces_raw %>%
+  transmute(caseid, commonweight, pid3 = as.character(as_factor(pid3)), ideo5 = as.character(as_factor(ideo5)),
+            across(all_of(items), ~ case_when(.x == 1 ~ 1, .x == 2 ~ 0))) %>% # skipped/not asked become NA
+  drop_na(all_of(names(items)))
+Y <- as.matrix(select(ces, all_of(names(items)))) # 1 = Support, 0 = Oppose
+```
+
+- `r format(nrow(Y), big.mark=",")` of the `r format(nrow(ces_raw), big.mark=",")` respondents answered all `r ncol(Y)` questions
+
+## Data: CES 2023 {.smaller}
+
+```{r, echo=F}
+item_labels <- c(ban_assault_rifles = "Ban assault rifles", concealed_carry = "Easier concealed-carry permits",
+                 background_checks = "Background checks on all gun sales", more_police = "10% more police",
+                 fewer_police = "10% fewer police", legal_status = "Legal status for undocumented workers",
+                 border_patrols = "More border patrols", border_wall = "Build a border wall",
+                 dreamers = "Citizenship path for Dreamers", abortion_choice = "Always allow abortion",
+                 abortion_exceptions = "Abortion only for rape, incest, life", abortion_ban = "Make abortion illegal",
+                 abortion_expand = "Expand abortion access", epa_co2 = "EPA regulates CO2",
+                 renewable_mandate = "Renewable fuel mandate", epa_enforcement = "Stronger EPA enforcement",
+                 more_fossil_fuels = "More fossil fuel production", halt_leases = "Halt new oil and gas leases",
+                 relax_zoning = "Relax zoning", housing_credits = "Tax credits for low-income housing",
+                 medicaid_work_req = "Medicaid work requirements", repeal_aca = "Repeal the ACA",
+                 expand_medicaid = "Expand Medicaid", forgive_loans = "Forgive student loans")
+tibble(Item = item_labels, `Share supporting` = scales::percent(colMeans(Y), 1)) %>%
+  mutate(Item2 = lead(Item, 12), `Share supporting2` = lead(`Share supporting`, 12)) %>% slice(1:12) %>%
+  kable(col.names = c("Item", "Support", "Item", "Support"))
+```
+
+## Clustering
+
+- Each respondent is a vector of `r ncol(Y)` ones and zeroes.
+
+```{r, echo=F}
+item_tiles <- function(Y_sub, row_group = NULL){
+  df <- as_tibble(Y_sub) %>% mutate(row = row_number(), group = if (is.null(row_group)) "" else row_group) %>%
+    pivot_longer(-c(row, group), names_to = "item", values_to = "support") %>%
+    mutate(item = factor(item_labels[item], levels = item_labels), support = factor(support, 0:1, c("Oppose", "Support")))
+  ggplot(df, aes(x = item, y = row, fill = support)) + geom_tile() +
+    scale_fill_manual(values = c("grey85", "grey20"), name = "") + scale_y_continuous(expand = c(0, 0)) +
+    theme_bw() + xlab("") + ylab("Respondent") +
+    theme(axis.text.x = element_text(angle = 40, hjust = 1, size = 10), axis.text.y = element_blank(), plot.margin = margin(5, 5, 5, 70),
+          axis.ticks.y = element_blank(), panel.grid = element_blank(), text = element_text(size = 14))
+}
+set.seed(53703)
+tile_sample <- sample(nrow(Y), 150)
+```
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=5.5}
+item_tiles(Y[tile_sample, ])
+```
+
+## K-means
+
+::: {.incremental}
+
+- A simple algorithm for finding clusters that has no underlying probabilistic model is the **K-means algorithm**
+  - Straightforward to implement and still surprisingly popular and effective for a "first cut" at the data.
+
+- **K-means algorithm**
+  1. Initialize $K$ distinct clusters by randomly assigning points to one of the $K$ groups
+  2. Calculate $\mu_k$ as the mean of $Y_i$ in observations in cluster $k$.
+  3. Reassign each point to the cluster $k$ that has the smallest distance between $Y_i$ and $\mu_k$.
+  4. Repeat 2-3 until no points change their assignments.
+
+- With binary responses, $\mu_k$ is the vector of **proportions supporting** each policy among respondents in cluster $k$
+
+:::
+
+## K-means example
+
+- R's `kmeans()` implements the algorithm; `nstart` re-runs it from multiple random starts and keeps the result with smallest within-cluster sum of squares.
+
+```{r}
+set.seed(53703)
+km2 <- kmeans(Y, centers = 2, nstart = 10)
+km2$size
+```
+
+- Sorting our 150 respondents by their assigned cluster
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4.6}
+km_order <- order(km2$cluster[tile_sample])
+item_tiles(Y[tile_sample[km_order], ]) +
+  geom_hline(yintercept = sum(km2$cluster[tile_sample] == km2$cluster[tile_sample][km_order][1]) + .5, col = "indianred", lwd = 1.2)
+```
+
+## K-means example
+
+- The cluster centroids $\mu_k$: share of each cluster supporting each policy
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=6}
+centroid_plot <- function(beta, cluster_names, xlab = "Share supporting"){
+  as_tibble(t(beta), .name_repair = ~ cluster_names) %>% mutate(item = factor(item_labels, levels = rev(item_labels))) %>%
+    pivot_longer(-item, names_to = "cluster", values_to = "share") %>%
+    mutate(cluster = factor(cluster, levels = cluster_names)) %>%
+    ggplot(aes(x = share, y = item, col = cluster)) + geom_point(size = 3.5) +
+    scale_x_continuous(labels = scales::percent, limits = c(0, 1)) + theme_bw() + xlab(xlab) + ylab("") +
+    theme(text = element_text(size = 14), legend.position = "bottom", legend.title = element_blank())
+}
+centroid_plot(km2$centers, str_c("Cluster ", 1:2))
+```
+
+## K-means example
+
+- How do the clusters compare to respondents' **party identification**?
+
+```{r}
+table(cluster = km2$cluster, party = ces$pid3)
+```
+
+- The clusters themselves don't have any underlying interpretation or meaning
+  - We **assign** the interpretation through inspection.
+
+## K-means
+
+::: {.incremental}
+
+- Advantages
+  - Easy to implement, fast updates, and quick convergence.
+
+- Disadvantages
+  - Multimodality (we can't really solve this one!)
+  - Choice of distance metric matters (e.g. should we standardize the items somehow?)
+  - Euclidean distance is an awkward fit for binary/discrete outcomes
+
+- With conventional K-means, we have no underlying probability model -- each unit is assigned to a single cluster.
+  - Sometimes called **"hard"** K-means.
+
+- We can instead implement an approach sometimes referred to as a "soft" K-means algorithm
+  - Our target of inference is the **probability** that a unit belongs to each cluster.
+
+:::
+
+## Bernoulli Mixture Models
+
+::: {.incremental}
+
+- We observe $N$ respondents each giving binary responses to $J$ questions. $Y_i$ is the vector of responses for unit $i$ with components $Y_{ij}$.
+
+- Assume **latent variables** $z = \{z_1, z_2, \dotsc, z_N\}$
+
+  $$z_i \underset{\text{i.i.d.}}{\sim} \text{Categorical}(\pi)$$
+
+- Conditional on $z_i = k$, each response is **independently** Bernoulli with a cluster-and-question-specific probability $\beta_{kj}$
+
+  $$Y_{ij} | z_i = k \sim \text{Bernoulli}(\beta_{kj})$$
+
+- Our targets of inference are the $K \times J$ matrix of response probabilities $\beta$ and the cluster prevalences $\pi$
+  - And conditional on these estimates, we can obtain the cluster probabilities $Pr(z_i = k | Y_i)$
+
+:::
+
+## Local independence
+
+::: {.incremental}
+
+- The key assumption: **conditional** on cluster membership, a respondent's answers are independent
+
+  $$f(Y_i | z_i = k) = \prod_{j=1}^J \beta_{kj}^{Y_{ij}}(1 - \beta_{kj})^{1 - Y_{ij}}$$
+
+- Answers are certainly **not** independent marginally
+  - Supporting an assault rifle ban is strongly correlated with supporting background checks
+
+- The mixture model says **all** of that correlation comes from respondents belonging to different clusters
+  - Within a cluster, knowing someone supports a ban tells you nothing about how they'll answer on background checks
+  - This is a strong assumption!
+
+:::
+
+## Expectation-Maximization
+
+::: {.incremental}
+
+- Let's write down the marginal likelihood, summing out the latent variables:
+
+  $$\mathcal{L}(\beta, \pi; \mathbf{Y}) = \prod_{i=1}^N \sum_{k=1}^K f(Y_i| \beta_{k}, z_i = k) \times p(z_i = k | \pi)$$
+
+- This is a tricky likelihood to maximize - if we take the log, we get a log of a sum (which doesn't simplify as neatly as a log of a product)
+
+  $$\ell(\beta, \pi ; \mathbf{Y}) = \sum_{i=1}^N \log\bigg(\sum_{k=1}^K \pi_k \prod_{j=1}^J \beta_{kj}^{Y_{ij}}(1 - \beta_{kj})^{1 - Y_{ij}} \bigg)$$
+
+- Suppose we knew the $z_i$ as well (they were like "data"), then the "complete" log-likelihood would be easier to maximize!
+
+  $$\ell(\beta, \pi ; \mathbf{Y}, \mathbf{Z}) = \sum_{i=1}^N \sum_{k=1}^K I(z_i = k) \bigg[\log \pi_k + \sum_{j=1}^J \Big(Y_{ij} \log \beta_{kj} + (1 - Y_{ij}) \log (1 - \beta_{kj})\Big)\bigg]$$
+
+:::
+
+## Expectation-Maximization
+
+::: {.incremental}
+
+- The **Expectation-Maximization** algorithm [@dempster1977em] is an iterative method for obtaining a maximum likelihood estimate (or maximum a posteriori (MAP) in a Bayesian setting) when the likelihood consists of a sum/integral over the distribution of some **latent variables**
+  - It uses the idea of iteratively optimizing a **lower bound** on the likelihood until convergence is reached.
+  - The key trick is **Jensen's inequality**. For a **concave** function like the logarithm:
+
+  $$\log(E[X]) \ge E[\log(X)]$$
+
+- Consider the general setting where we have a parameter $\theta$, data $\mathbf{X}$ and discrete latent variables $\mathbf{Z}$
+- We want to optimize the log-likelihood:
+
+  $$\ell(\theta; \mathbf{X}) = \log \sum_{\mathbf{Z}} f(\mathbf{X}, \mathbf{Z} |  \theta) = \log \sum_{\mathbf{Z}} f(\mathbf{X} | \mathbf{Z}, \theta) p(\mathbf{Z} | \theta)$$
+
+:::
+
+## Expectation-Maximization
+
+::: {.incremental}
+
+- Instead of optimizing the log-likelihood directly, we'll optimize its **lower bound**. Define some arbitrary distribution on the latent variables $q(\mathbf{Z})$.
+- Multiply by 1:
+
+  $$\ell(\theta; \mathbf{X}) = \log \sum_{\mathbf{Z}}  f(\mathbf{X} | \mathbf{Z}, \theta) p(\mathbf{Z} | \theta) \frac{q(\mathbf{Z})}{q(\mathbf{Z})}$$
+
+- Rearranging terms, we can see that this can be written as an expectation over the distribution $q$
+
+  $$\ell(\theta; \mathbf{X}) = \log E_{q} \bigg[\frac{ f(\mathbf{X} | \mathbf{Z}, \theta) p(\mathbf{Z} | \theta)}{q(\mathbf{Z})}\bigg]$$
+
+- By **Jensen's inequality**, we have a lower bound
+
+  $$\ell(\theta; \mathbf{X}) \ge E_{q} \bigg[ \log \bigg(\frac{ f(\mathbf{X} | \mathbf{Z}, \theta) p(\mathbf{Z} | \theta)}{q(\mathbf{Z})}\bigg)\bigg]$$
+
+:::
+
+## Expectation-Maximization
+
+::: {.incremental}
+
+- And by properties of logs, our lower-bound is:
+
+  $$\ell(\theta; \mathbf{X}) \ge E_{q}[\log f(\mathbf{X}|\mathbf{Z}, \theta)] + E_{q}[\log p(\mathbf{Z}| \theta)] - E_{q}[\log q(\mathbf{Z})]$$
+
+- We can optimize this **iteratively** by switching between finding an optimal distribution $q^{(t+1)}$ given parameter values $\theta^{(t)}$ and finding parameter values $\theta^{(t+1)}$ given an existing choice of $q^{(t+1)}$.
+
+  1. **Expectation** step: Find $q^{(t+1)}$ (what distribution are we taking the expectation over)
+  2. **Maximization** step: Find $\theta^{(t+1)}$ (given our $q$ distribution, what is the value of the parameter values that maximizes the lower bound).
+
+:::
+
+## E-step
+
+- Can we find a closed-form "optimal" solution for our update $q^{(t+1)}$ given $\theta^{(t)}$?
+  - Yes, find the $q$ that makes the inequality an equality!
+
+  $$\ell(\theta^{(t)}; \mathbf{X}) \ge E_{q} \bigg[ \log \bigg(\frac{ f(\mathbf{X} | \mathbf{Z}, \theta^{(t)}) p(\mathbf{Z} | \theta^{(t)})}{q(\mathbf{Z})}\bigg)\bigg]$$
+
+  $$\ell(\theta^{(t)}; \mathbf{X}) \ge \sum_{\mathbf{Z}}\log \bigg(\frac{ f(\mathbf{X}, \mathbf{Z} | \theta^{(t)}) }{q(\mathbf{Z})}\bigg) q(\mathbf{Z})$$
+
+## E-step
+
+::: {.incremental}
+
+- Let's try to get the $\mathbf{Z}$ out of the log. Start by factoring the joint distribution in the numerator conditioning on $\mathbf{X}$ instead of $\mathbf{Z}$
+
+  $$\ell(\theta^{(t)}; \mathbf{X}) \ge \sum_{\mathbf{Z}}\log \bigg(\frac{ f(\mathbf{Z} | \mathbf{X}, \theta^{(t)}) p(\mathbf{X} | \theta^{(t)})}{q(\mathbf{Z})}\bigg) q(\mathbf{Z})$$
+
+- Now we can see the optimal choice for $q^{(t+1)}$ revealed to us. Suppose we plug in $q = f(\mathbf{Z} | \mathbf{X}, \theta^{(t)})$, the conditional distribution of $\mathbf{Z}$ given $\mathbf{X}$ and $\theta^{(t)}$:
+
+  $$\ell(\theta^{(t)}; \mathbf{X}) \ge \sum_{\mathbf{Z}}\log p(\mathbf{X} | \theta^{(t)}) \times f(\mathbf{Z} | \mathbf{X}, \theta^{(t)})$$
+
+- The logged term no longer depends on $\mathbf{Z}$, so pull it out of the sum
+
+  $$\ell(\theta^{(t)}; \mathbf{X}) \ge \log p(\mathbf{X} | \theta^{(t)}) \times \sum_{\mathbf{Z}} f(\mathbf{Z} | \mathbf{X}, \theta^{(t)})$$
+
+:::
+
+## E-step
+
+::: {.incremental}
+
+- The sum is equal to $1$ (sum over a PMF/PDF) and we're left with the definition of the marginal log-likelihood, so this expression holds with *equality*
+
+  $$\ell(\theta^{(t)}; \mathbf{X}) = \log p(\mathbf{X} | \theta^{(t)})$$
+
+- So our choice of distribution over which to take the expectation of the joint likelihood is $q^{(t+1)} = f(\mathbf{Z} | \mathbf{X}, \theta^{(t)})$
+
+:::
+
+## M-step
+
+::: {.incremental}
+
+- Let's go back to our lower bound - for a given value of $q^{(t+1)}$, we want to find the $\theta^{(t+1)}$ that maximize the "complete data" log-likelihood
+
+  $$\ell(\theta; \mathbf{X}) \ge E_{q^{(t+1)}}[\log f(\mathbf{X}|\mathbf{Z}, \theta)] + E_{q^{(t+1)}}[\log p(\mathbf{Z}| \theta)] - E_{q^{(t+1)}}[\log q^{(t+1)}(\mathbf{Z})]$$
+
+- Since the third term doesn't depend on $\theta$, we only need to worry about the first two.
+  - This expectation is sometimes called the "Q-Function" $Q(\theta | \theta^{(t)})$ or the expected "complete data" log-likelihood
+
+  $$Q(\theta | \theta^{(t)}) = E_{\mathbf{Z}|\mathbf{X}, \theta^{(t)}}[\log f(\mathbf{X}, \mathbf{Z}| \theta)]$$
+
+- The M-step sets $\theta^{(t+1)}$ to the value of $\theta$ that maximizes this Q-function
+
+  $$\theta^{(t+1)} = \argmax_{\theta} Q(\theta | \theta^{(t)})$$
+
+- Each E-step makes the bound touch the log-likelihood at $\theta^{(t)}$, and each M-step pushes the bound up, so the log-likelihood **never decreases** from one iteration to the next
+
+:::
+
+## Deriving EM for the Bernoulli mixture
+
+::: {.incremental}
+
+- For current values $\beta^{(t)}$, $\pi^{(t)}$, let's derive the conditional distribution $z_i | Y_i, \beta^{(t)}, \pi^{(t)}$ using Bayes' rule
+
+  $$p(z_i = k | Y_i, \beta^{(t)}, \pi^{(t)}) = \frac{p(z_i = k | \pi^{(t)}) f(Y_i |  \beta^{(t)}, z_i = k)}{f(Y_i |  \beta^{(t)}, \pi^{(t)})}$$
+
+- Given $z_i = k$, the responses are independent Bernoulli draws. And the denominator is just the sum of the numerator over $k$
+
+  $$\gamma_{ik} = p(z_i = k | Y_i, \beta^{(t)}, \pi^{(t)}) = \frac{\overbrace{\pi_k^{(t)}}^{\text{prior}} \overbrace{\prod_{j=1}^J \big(\beta_{kj}^{(t)}\big)^{Y_{ij}}\big(1 - \beta_{kj}^{(t)}\big)^{1 - Y_{ij}}}^{\text{likelihood of } Y_i \text{ under cluster } k}}{\underbrace{\sum_{l=1}^K \pi_l^{(t)} \prod_{j=1}^J \big(\beta_{lj}^{(t)}\big)^{Y_{ij}}\big(1 - \beta_{lj}^{(t)}\big)^{1 - Y_{ij}}}_{\text{prior} \times \text{likelihood, summed over all clusters}}}$$
+
+- These weights, $\gamma_{ik}$ are sometimes called the "responsibility" parameters as they denote the extent to which each cluster is "responsible" for an observation.
+
+:::
+
+## Deriving EM for the Bernoulli mixture
+
+::: {.incremental}
+
+- Recall the "complete" log-likelihood
+
+  $$\ell(\beta, \pi ; \mathbf{Y}, \mathbf{Z}) = \sum_{i=1}^N \sum_{k=1}^K I(z_i = k) \bigg[\log \pi_k + \sum_{j=1}^J \Big(Y_{ij} \log \beta_{kj} + (1 - Y_{ij}) \log (1 - \beta_{kj})\Big)\bigg]$$
+
+- Now, taking the expectation over $z_i$, the only component that is not a constant is $I(z_i = k)$ and $E[I(z_i = k)] = p(z_i = k)$ (fundamental bridge).
+  - And we got that (conditional) expectation in the previous slide: $\gamma_{ik}$
+
+- So our Q function is
+
+  $$Q(\beta, \pi | \beta^{(t)}, \pi^{(t)}) = \sum_{i=1}^N \sum_{k=1}^K \gamma_{ik} \bigg[\log \pi_k + \sum_{j=1}^J \Big(Y_{ij} \log \beta_{kj} + (1 - Y_{ij}) \log (1 - \beta_{kj})\Big)\bigg]$$
+
+- $\beta^{(t)}$ and $\pi^{(t)}$ only enter through the responsibilities $\gamma_{ik}$
+
+:::
+
+## Deriving EM for the Bernoulli mixture
+
+::: {.incremental}
+
+- Closed form solutions for the M-step: each $\beta_{kj}$ is a **weighted** Bernoulli MLE, and $\pi$ comes from maximizing $\sum_k n_k \log \pi_k$ subject to $\sum_k \pi_k = 1$
+
+  $$n_k = \sum_{i=1}^N \gamma_{ik}$$
+  $$\pi_k = \frac{n_k}{N}$$
+  $$\beta_{kj} = \frac{1}{n_k}\sum_{i=1}^N \gamma_{ik} Y_{ij}$$
+
+- Compare to K-means: $\beta_{kj}$ is the share supporting policy $j$ in cluster $k$, but every respondent counts toward every cluster in proportion to $\gamma_{ik}$
+  - K-means is the special case where each $\gamma_{ik}$ is forced to be $0$ or $1$
+
+:::
+
+## MAP estimation with EM
+
+::: {.incremental}
+
+- EM works just as well for finding the **posterior mode** -- add the log prior to the Q-function
+
+  $$Q(\beta, \pi | \beta^{(t)}, \pi^{(t)}) + \log p(\beta) + \log p(\pi)$$
+
+- With conjugate priors, the M-step stays in closed form
+  - $\beta_{kj} \sim \text{Beta}(a, b)$ and $\pi \sim \text{Dirichlet}(\alpha, \dotsc, \alpha)$
+
+  $$\beta_{kj} = \frac{\sum_{i=1}^N \gamma_{ik} Y_{ij} + a - 1}{n_k + a + b - 2} \qquad \pi_k = \frac{n_k + \alpha - 1}{N + K(\alpha - 1)}$$
+
+- The prior acts like **pseudo-observations** added to each cluster
+  - Keeps $\beta_{kj}$ away from exactly $0$ or $1$ (where the log-likelihood blows up) when a cluster is small
+
+- Below we use $a = b = 2$ and a flat prior on $\pi$ ($\alpha = 1$)
+  - With `r format(nrow(Y), big.mark=",")` respondents, this has little effect on the estimates, but it keeps EM from crashing when a cluster has no units.
+
+:::
+
+## Implementing EM
+
+- For the complete data log-likelihood, entry $(i, k)$ is $\log \pi_k + \sum_j Y_{ij}\log \beta_{kj} + (1 - Y_{ij})\log(1 - \beta_{kj})$
+
+```{r}
+bmm_complete_loglik <- function(Y, beta, pi){ # N x K matrix: complete-data log-lik of unit i if z_i = k
+  Y %*% t(log(beta)) + (1 - Y) %*% t(log(1 - beta)) + matrix(log(pi), nrow(Y), length(pi), byrow = T)
+}
+```
+
+- The observed-data log-likelihood sums $\pi_k f(Y_i | z_i = k)$ over $k$, then takes the log
+
+```{r}
+bmm_loglik <- function(Y, beta, pi){
+  sum(log(rowSums(exp(bmm_complete_loglik(Y, beta, pi)))))
+}
+```
+
+## Implementing EM
+
+- The E-step: normalize each row of $\pi_k f(Y_i | z_i = k)$ to sum to $1$
+
+```{r}
+bmm_estep <- function(Y, beta, pi){
+  joint <- exp(bmm_complete_loglik(Y, beta, pi))
+  joint / rowSums(joint) # N x K matrix of responsibilities
+}
+```
+
+- The M-step: weighted shares supporting each policy, plus the Beta($a$, $b$) pseudo-observations
+
+```{r}
+bmm_mstep <- function(Y, gamma, a = 2, b = 2){
+  n_k <- colSums(gamma)
+  list(pi = n_k / nrow(Y),
+       beta = (t(gamma) %*% Y + a - 1) / (n_k + a + b - 2)) # K x J matrix
+}
+```
+
+## Implementing EM
+
+```{r}
+bmm_em <- function(Y, K, a = 2, b = 2, maxit = 5000, tol = 1e-6){
+  ## Initialize with random responsibilities
+  gamma <- matrix(runif(nrow(Y) * K), ncol = K)
+  gamma <- gamma / rowSums(gamma)
+  curr_post <- -Inf
+  for (iter in 1:maxit){
+    # M-step
+    params <- bmm_mstep(Y, gamma, a, b)
+    # E-step
+    gamma <- bmm_estep(Y, params$beta, params$pi)
+    # Check convergence: change in the per-observation log posterior (up to a constant)
+    log_lik <- bmm_loglik(Y, params$beta, params$pi)
+    new_post <- log_lik + (a - 1) * sum(log(params$beta)) + (b - 1) * sum(log(1 - params$beta))
+    if (abs(new_post - curr_post) / nrow(Y) < tol) break
+    curr_post <- new_post
+  }
+  if (iter == maxit) warning("Maxit reached")
+  list(beta = params$beta, pi = params$pi, gamma = gamma, log_lik = log_lik, log_post = new_post, iter = iter)
+}
+```
+
+## Implementing EM
+
+- EM only finds a **local** maximum, so run it from several random starts and keep the run with the highest log posterior
+
+```{r}
+bmm_em_runs <- function(Y, K, runs = 10){
+  fits <- map(1:runs, function(r) bmm_em(Y, K))
+  fits[[which.max(map_dbl(fits, "log_post"))]]
+}
+```
+
+- Cluster labels are arbitrary, so it's helpful to put them in a consistent order. We'll summarize each by the average share giving the **liberal** answer
+
+```{r}
+conservative_items <- c("concealed_carry", "more_police", "border_patrols", "border_wall", "abortion_exceptions",
+                        "abortion_ban", "more_fossil_fuels", "medicaid_work_req", "repeal_aca")
+liberal_answer <- 1 - colnames(Y) %in% conservative_items # 1 = "Support" is the liberal answer
+order_clusters <- function(fit){
+  liberal_share <- colMeans(liberal_answer * t(fit$beta) + (1 - liberal_answer) * (1 - t(fit$beta)))
+  o <- order(liberal_share, decreasing = T)
+  list(beta = fit$beta[o, , drop = F], pi = fit$pi[o], gamma = fit$gamma[, o, drop = F], log_lik = fit$log_lik, log_post = fit$log_post)
+}
+```
+
+```{r, echo=F}
+# The cached EM chunks below re-run when the data or any of the EM code changes
+em_code <- map(list(bmm_complete_loglik, bmm_loglik, bmm_estep, bmm_mstep, bmm_em, bmm_em_runs, order_clusters), deparse)
+```
+
+## Two clusters
+
+```{r bmm-2, cache=T, cache.extra=list(Y, em_code)}
+set.seed(60637)
+bmm2 <- order_clusters(bmm_em_runs(Y, K = 2))
+bmm2$pi
+```
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=6}
+centroid_plot(bmm2$beta, str_c("Cluster ", 1:2), xlab = expression(hat(beta)[kj]))
+```
+
+## Two clusters
+
+- Cluster 2 (`r scales::percent(bmm2$pi[2], 1)`): conservative answers on almost everything. Cluster 1 (`r scales::percent(bmm2$pi[1], 1)`): liberal on most questions
+  - Some questions split the clusters much less than others: `r scales::percent(bmm2$beta[2, "background_checks"], 1)` of cluster 2 support background checks; `r scales::percent(bmm2$beta[1, "more_police"], 1)` of cluster 1 support more police
+
+- Almost the same split as K-means 
+
+```{r}
+table(kmeans = km2$cluster, mixture = apply(bmm2$gamma, 1, which.max))
+```
+
+- It lines up mostly with Party ID -- `r scales::percent(mean(apply(bmm2$gamma, 1, which.max)[ces$pid3 == "Republican"] == 1), 1)` of Republicans land in "liberal" cluster 1
+
+```{r}
+round(prop.table(table(party = ces$pid3, cluster = apply(bmm2$gamma, 1, which.max)), 1), 2)
+```
+
+## Two clusters
+
+- Each respondent has a **probability** of belonging to each cluster
+
+```{r, echo=F, fig.align="center", fig.width=8, fig.height=4.5}
+tibble(gamma = bmm2$gamma[, 1]) %>% ggplot(aes(x = gamma)) + geom_histogram(bins = 50, fill = "dodgerblue", col = "white") +
+  theme_bw() + xlab(expression(paste("Responsibility of cluster 1 (", gamma[i1], ")"))) + ylab("Respondents") +
+  theme(text = element_text(size = 16))
+```
+
+- `r scales::percent(mean(apply(bmm2$gamma, 1, max) > .99), 1)` of respondents are assigned to a cluster with more than 99% probability
+  - Under local independence, `r ncol(Y)` answers are `r ncol(Y)` **independent** pieces of evidence about $z_i$, so the posterior piles up near $0$ and $1$
+
+## Five clusters
+
+- Let's add more clusters. With $K = 5$, the log posterior (up to a constant) across 10 random starts:
+
+```{r bmm-5-runs, cache=T, cache.extra=list(Y, em_code)}
+set.seed(60637)
+fits5 <- map(1:10, function(r) bmm_em(Y, K = 5))
+map_dbl(fits5, "log_post")
+```
+
+```{r}
+bmm5 <- order_clusters(fits5[[which.max(map_dbl(fits5, "log_post"))]])
+```
+
+::: {.incremental}
+
+- Different starts get stuck at different local maxima - so be sure to use multiple runs!
+- **Label switching**: runs that reach the same maximum may number the clusters differently. Permuting the labels doesn't change the likelihood.
+
+:::
+
+## Five clusters
+
+```{r, echo=F, fig.align="center", fig.width=11, fig.height=6.5}
+as_tibble(t(bmm5$beta), .name_repair = ~ str_c("Cluster ", 1:5, "\n(", scales::percent(bmm5$pi, 1), ")")) %>%
+  mutate(item = factor(item_labels, levels = rev(item_labels))) %>%
+  pivot_longer(-item, names_to = "cluster", values_to = "beta") %>%
+  ggplot(aes(x = cluster, y = item, fill = beta)) + geom_tile(col = "white") +
+  geom_text(aes(label = round(100 * beta), col = abs(beta - .5) > .3), size = 5) +
+  scale_color_manual(values = c("black", "white"), guide = "none") +
+  scale_fill_gradient2(low = "#8c510a", mid = "grey95", high = "#01665e", midpoint = .5, labels = scales::percent, name = "Support") +
+  scale_x_discrete(position = "top") + theme_bw() + xlab("") + ylab("") + theme(text = element_text(size = 16), panel.grid = element_blank())
+```
+
+## Five clusters
+
+::: {.incremental}
+
+- **Cluster 1**: Consistent liberals
+- **Cluster 5**: Consistent conservatives
+- **Cluster 2**: Liberal, except on **police and the border**
+- **Cluster 4**: Probabilities between 30% and 70% on most questions
+  - Seems like a cluster that has ideologically *unconstrained* preferences [@converse1964nature]
+- **Cluster 3**: A majority supports `r sum(bmm5$beta[3, ] > .5)` of the `r ncol(Y)` proposals -- including **both** sides of the same question
+  - `r scales::percent(bmm5$beta[3, "more_police"], 1)` support more police and `r scales::percent(bmm5$beta[3, "fewer_police"], 1)` support fewer; `r scales::percent(bmm5$beta[3, "expand_medicaid"], 1)` support expanding Medicaid and `r scales::percent(bmm5$beta[3, "repeal_aca"], 1)` support repealing the ACA
+  - Looks like **acquiescence** bias - a tendency to say "support" regardless of the content
+
+:::
+
+## Five clusters
+
+- Who is in each cluster?
+
+```{r}
+hard5 <- apply(bmm5$gamma, 1, which.max)
+round(prop.table(table(cluster = hard5, ideology = ces$ideo5), 1), 2)[, c("Very liberal", "Liberal", "Moderate",
+                                                                         "Conservative", "Very conservative", "Not sure")]
+```
+
+- The middle clusters (2-4) have the most self-described moderates; cluster 4 has the largest share of "Not sure"
+
+## Five clusters
+
+- The CES has survey weights. We can estimate each cluster's prevalence in the **population** by weighting the responsibilities with these weights (`commonweight`)
+
+```{r}
+rbind(unweighted = colMeans(bmm5$gamma),
+      weighted = colSums(ces$commonweight * bmm5$gamma) / sum(ces$commonweight))
+```
+
+- One interesting feature is that the low-structure cluster 4 is under-represented in the raw sample
+
+## Challenges with mixture models
+
+::: {.incremental}
+
+- **Highly model dependent** - the clusters we find depend on the distribution we assume for $Y_i$ given $z_i$
+  - Local independence is a substantial assumption: all of the correlation between answers has to be explained by the clusters
+  - But some questions are logically dependent on others even conditional on ideology (e.g. abortion, policing).
+
+- **Multi-modality** - Mixture model likelihoods often have multiple modes and EM is only guaranteed to converge to a **local** optimum
+  - Can get stuck in a "bad" EM run (**Solution**: Run EM from multiple starting values and pick the one with the best log-likelihood (or log posterior))
+  - **"Label-switching" problem**: Permuting the labels doesn't change the likelihood
+
+- **Challenges with Bayes** - Sampling-based inference can be tricky with mixtures due to the label-switching problem.
+  - Different chains (or the same chain) can visit different permutations of the labels, so averaging $\beta_{1j}$ across draws will mix clusters together
+  - Common to use an approximation to the posterior around the mode obtained via EM.
+
+:::
+
+## Mixture models in Stan
+
+- Stan can't sample discrete parameters like $z_i$ (no gradient)
+- But we can **marginalize out** the $z_i$. Same model and priors as our EM: Beta(2, 2) on each $\beta_{kj}$, flat on $\pi$
+
+```{r}
+bmm_stan_code <- "
+data {
+  int N; int J; int K;
+  matrix[N, J] Y; // 1 = Support, 0 = Oppose
+}
+parameters {
+  simplex[K] pi; // cluster prevalences (flat prior by default)
+  matrix<lower=0, upper=1>[J, K] beta; // response probabilities
+}
+model {
+  matrix[N, K] lp = Y * log(beta) + (1 - Y) * log1m(beta); // log f(Y_i | z_i = k), as in bmm_complete_loglik
+  to_vector(beta) ~ beta(2, 2);
+  for (i in 1:N) target += log_sum_exp(log(pi) + lp[i]'); // log of the sum over clusters
+}
+"
+```
+
+## Mixture models in Stan
+
+- Fit $K = 5$ (this takes a few minutes -- the likelihood sums over all `r format(nrow(Y), big.mark=",")` respondents at every step)
+
+```{r bmm-stan-fit, message=F, warning=F, results=F, cache=T, cache.extra=list(bmm_stan_code, Y)}
+bmm_stan_fit <- stan(
+  model_code = bmm_stan_code,  # Stan code
+  data = list(N = nrow(Y), J = ncol(Y), K = 5, Y = Y), # named list of data
+  chains = 4,             # number of Markov chains
+  warmup = 500,           # number of warmup iterations per chain
+  iter = 1000,            # total number of iterations per chain
+  cores = 4,              # number of cores
+  refresh = 0,            # no progress shown
+  seed = 53706            # random seed
+  )
+```
+
+- **Label switching**: each chain's posterior mean of $\pi$. The chains found the same clusters, but numbered them differently
+
+```{r}
+round(get_posterior_mean(bmm_stan_fit, pars = "pi")[, 1:4], 2)
+```
+
+## Stan vs. EM
+
+- Relabel every draw the same way we ordered the EM clusters (by the share giving the liberal answer)
+
+```{r}
+relabel <- function(beta, pi){ # beta is J x K in Stan
+  liberal_share <- colMeans(liberal_answer * beta + (1 - liberal_answer) * (1 - beta))
+  o <- order(liberal_share, decreasing = T)
+  list(beta = t(beta[, o]), pi = pi[o]) # K x J, like the EM estimates
+}
+relabel_draws <- function(fit){
+  draws <- rstan::extract(fit)
+  relabeled <- map(1:nrow(draws$pi), function(s) relabel(draws$beta[s, , ], draws$pi[s, ]))
+  list(beta = simplify2array(map(relabeled, "beta")), # K x J x draws
+       pi = simplify2array(map(relabeled, "pi")))     # K x draws
+}
+stan_random <- relabel_draws(bmm_stan_fit)
+```
+
+```{r}
+bmm5_worst <- order_clusters(fits5[[which.min(map_dbl(fits5, "log_post"))]]) # the EM start that found a worse local maximum
+rbind(`EM (best start)` = bmm5$pi, `EM (worst start)` = bmm5_worst$pi, `Stan (posterior mean)` = rowMeans(stan_random$pi))
+```
+
+## Stan vs. EM
+
+```{r, echo=F}
+stan_em_plot <- function(stan_draws, em_fit, em_label){
+  tibble(cluster = factor(rep(1:5, ncol(Y))), em = as.vector(em_fit$beta),
+         post_mean = as.vector(apply(stan_draws$beta, c(1, 2), mean)),
+         lower = as.vector(apply(stan_draws$beta, c(1, 2), quantile, .025)),
+         upper = as.vector(apply(stan_draws$beta, c(1, 2), quantile, .975))) %>%
+    ggplot(aes(x = em, y = post_mean, col = cluster)) + geom_abline(intercept = 0, slope = 1, lty = 2, col = "grey50") +
+    geom_errorbar(aes(ymin = lower, ymax = upper), width = 0) + geom_point(size = 2) + coord_fixed() + theme_bw() +
+    xlab(bquote("EM estimate of" ~ beta[kj] ~ "(" * .(em_label) * ")")) + ylab("Stan posterior mean (95% interval)") +
+    scale_color_manual(values = c("#0479A8", "#8fbcd4", "grey60", "#e3a3a5", "#c5050c"), name = "Cluster") +
+    theme(text = element_text(size = 16))
+}
+max_width <- function(stan_draws) max(apply(stan_draws$beta, c(1, 2), quantile, .975) - apply(stan_draws$beta, c(1, 2), quantile, .025))
+```
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4.5}
+stan_em_plot(stan_random, bmm5_worst, "worst start")
+```
+
+- All four chains align on the **worse** local maximum (log-likelihood `r format(round(bmm5_worst$log_lik), big.mark=",")` vs. `r format(round(bmm5$log_lik), big.mark=",")`)
+- MCMC can't jump between well-separated modes, so like EM, there's no guarantee we've found the best mode.
+
+## Starting Stan at the EM mode
+
+- Solution: Find the mode with EM, then run MCMC for uncertainty
+
+```{r bmm-stan-fit-em, message=F, warning=F, results=F, cache=T, cache.extra=list(bmm_stan_code, Y, bmm5$beta, bmm5$pi)}
+em_init <- list(pi = bmm5$pi, beta = t(bmm5$beta)) # beta is J x K in Stan
+bmm_stan_fit_em <- stan(
+  model_code = bmm_stan_code, data = list(N = nrow(Y), J = ncol(Y), K = 5, Y = Y),
+  chains = 4, warmup = 500, iter = 1000, cores = 4, refresh = 0, seed = 53706,
+  init = rep(list(em_init), 4) # the same starting values for all four chains
+  )
+stan_em <- relabel_draws(bmm_stan_fit_em)
+```
+
+```{r}
+rbind(`EM (best start)` = bmm5$pi, `Stan (started at EM)` = rowMeans(stan_em$pi))
+```
+
+::: {.incremental}
+
+- No label switching (every chain starts with the same labels) and we've guaranteed a good mode.
+
+:::
+
+## Starting Stan at the EM mode
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4.5}
+stan_em_plot(stan_em, bmm5, "best start")
+```
+
+- Largest 95% interval width across the `r 5 * ncol(Y)` $\beta_{kj}$: `r round(max_width(stan_em), 3)`
+
+## Choosing K
+
+::: {.incremental}
+
+- Choosing $K$ is a problem of model comparison and selection.
+  - Just like before, more parameters = better **in-sample** fit.
+  - But we want to avoid **over-fitting**
+
+- Just as last week, two approaches
+  - **Information criteria** - Evaluate the in-sample log-likelihood at the maximum, penalized by some factor for the number of parameters
+    - Here, $KJ + (K - 1)$ parameters
+  - **Cross-validation** - Estimate the model on a **training set**. Compute the log-likelihood on a **held-out** test set.
+
+:::
+
+## Choosing K
+
+```{r bmm-k-sweep, cache=T, cache.extra=list(Y, em_code)}
+set.seed(53703)
+K_choice <- 1:10
+fits_K <- map(K_choice, function(K) order_clusters(bmm_em_runs(Y, K, runs = 5)))
+k_fit <- tibble(K = K_choice, log_lik = map_dbl(fits_K, "log_lik"), n_par = K * ncol(Y) + K - 1) %>%
+  mutate(AIC = 2 * n_par - 2 * log_lik, BIC = log(nrow(Y)) * n_par - 2 * log_lik)
+```
+
+```{r, echo=F, fig.align="center", fig.width=12, fig.height=4.5}
+k_fit %>% mutate(`Log-likelihood per respondent` = log_lik / nrow(Y)) %>%
+  pivot_longer(c(`Log-likelihood per respondent`, AIC, BIC)) %>% mutate(name = fct_inorder(name)) %>%
+  ggplot(aes(x = K, y = value)) + geom_line() + geom_point(size = 2.5) + facet_wrap(~ name, scales = "free_y") +
+  scale_x_continuous(breaks = K_choice) + theme_bw() + xlab("Number of clusters") + ylab("") + theme(text = element_text(size = 16))
+```
+
+- Big gains up to $K = 3$, then smaller ones -- but even **BIC** keeps improving through $K = `r max(K_choice)`$
+
+## Choosing K
+
+- 5-fold cross-validation: average held-out log-likelihood per respondent
+
+```{r bmm-k-cv, cache=T, cache.extra=list(Y, em_code)}
+set.seed(60637)
+n_folds <- 5
+cv_fold <- sample(rep(1:n_folds, length.out = nrow(Y)))
+heldout <- expand_grid(K = K_choice, fold = 1:n_folds) %>%
+  mutate(ll = map2_dbl(K, fold, function(K, f){
+    fold_fit <- bmm_em_runs(Y[cv_fold != f, ], K, runs = 3)
+    bmm_loglik(Y[cv_fold == f, ], fold_fit$beta, fold_fit$pi) / sum(cv_fold == f)
+  }))
+```
+
+```{r, echo=F, fig.align="center", fig.width=8, fig.height=3.3}
+heldout %>% group_by(K) %>% summarize(ll = mean(ll)) %>%
+  ggplot(aes(x = K, y = ll)) + geom_line() + geom_point(size = 2.5) + scale_x_continuous(breaks = K_choice) +
+  theme_bw() + xlab("Number of clusters") + ylab("Held-out log-likelihood") + theme(text = element_text(size = 16))
+```
+
+- With `r format(nrow(Y), big.mark=",")` respondents, more clusters keep predicting better out of sample. No obvious "right" $K$
+
+## Checking local independence
+
+::: {.incremental}
+
+- Under the mixture model, the implied covariance between questions is 
+  $$\text{Cov}(Y_{ij}, Y_{il}) = \sum_{k=1}^K \pi_k \beta_{kj}\beta_{kl} - p_j p_l$$
+
+- Like a posterior predictive check, but plugging in the EM estimates: does the model reproduce the observed correlations among the various pairs of questions?
+
+:::
+
+```{r, echo=F}
+implied_cor <- function(fit){
+  p <- colSums(fit$pi * fit$beta)
+  S <- t(fit$beta) %*% diag(fit$pi, length(fit$pi)) %*% fit$beta
+  diag(S) <- p # E[Y_j^2] = E[Y_j] for binary Y
+  cov2cor(S - outer(p, p))
+}
+```
+
+## Checking local independence
+
+```{r, echo=F, fig.align="center", fig.width=12, fig.height=4.1}
+obs_cor <- cor(Y)
+pairs <- upper.tri(obs_cor)
+map_dfr(c(2, 5, 10), function(k) tibble(K = str_c("K = ", k), observed = obs_cor[pairs], implied = implied_cor(fits_K[[k]])[pairs])) %>%
+  mutate(K = fct_inorder(K)) %>%
+  ggplot(aes(x = implied, y = observed)) + geom_abline(intercept = 0, slope = 1, lty = 2, col = "indianred") +
+  geom_point(alpha = .6, size = 2) + facet_wrap(~ K) + coord_fixed() + theme_bw() +
+  xlab("Correlation implied by the mixture") + ylab("Observed correlation") + theme(text = element_text(size = 16))
+```
+
+::: {.incremental}
+
+- With $K = 2$, the model **under-predicts** many of the positive correlations: answers are still correlated *within* clusters
+  - Worst of all: always allowing abortion and expanding abortion access (observed correlation `r round(obs_cor["abortion_choice", "abortion_expand"], 2)`, implied `r round(implied_cor(fits_K[[2]])["abortion_choice", "abortion_expand"], 2)`)
+  - Local independence is an implausible assumption - lots of overconfidence in the classification probabilities.
+- Adding clusters soaks up some of that correlation.
+
+:::
+
+## Logically exclusive questions {.smaller}
+
+- A coherent respondent can't support **both** 10% more police and 10% fewer police -- these answers should be perfectly dependent
+
+```{r}
+table(more_police = ces$more_police, fewer_police = ces$fewer_police)
+```
+
+- Yet `r scales::percent(mean(ces$more_police == 1 & ces$fewer_police == 1), 1)` of respondents support both. Within each $K = 5$ cluster, the share supporting both:
+
+```{r, echo=F}
+both_police <- ces$more_police * ces$fewer_police
+tibble(Cluster = 1:5, `Implied by local independence` = bmm5$beta[, "more_police"] * bmm5$beta[, "fewer_police"],
+       Observed = colSums(bmm5$gamma * both_police) / colSums(bmm5$gamma)) %>%
+  mutate(across(-Cluster, ~ scales::percent(.x, 1))) %>% kable()
+```
+
+- Local independence over-predicts "support both", as it should -- but interestingly the observed shares are nowhere near the $0\%$ that perfect dependence implies.
+
+## Classifying the clusters
+
+- Count the **liberal** answers each respondent gives (0-`r ncol(Y)`) based on their "hard" cluster at $K = 5$
+
+```{r, echo=F, fig.align="center", fig.width=11, fig.height=4.4}
+n_liberal <- as.vector(Y %*% liberal_answer + (1 - Y) %*% (1 - liberal_answer))
+tibble(n_liberal, cluster = factor(hard5)) %>%
+  ggplot(aes(x = n_liberal, fill = cluster)) + geom_bar(position = "stack", col = "white", lwd = .2) +
+  scale_fill_manual(values = c("#0479A8", "#8fbcd4", "grey60", "#e3a3a5", "#c5050c"), name = "Cluster") +
+  scale_x_continuous(breaks = 0:ncol(Y)) + theme_bw() + xlab("Number of liberal answers") + ylab("Respondents") +
+  theme(text = element_text(size = 16))
+```
+
+
+## Latent classes vs. latent traits
+
+::: {.incremental}
+
+- **Mixture model** ("latent class"): a discrete $z_i$ for each respondent
+
+  $$Pr(Y_{ij} = 1 | z_i = k) = \beta_{kj}$$
+
+- **Item response theory** ("latent trait"): a continuous $\theta_i$ for each respondent, and a slope and intercept for each question
+
+  $$Pr(Y_{ij} = 1 | \theta_i) = F(\alpha_j\theta_i - \tau_j)$$
+
+- Both assume local independence conditional on the underlying latent variable
+- But IRT uses a single **continuous** trait rather than a **discrete** classification.
+- Maybe a single dimension works better here?
+  - But it probably won't do so well for cluster 4 (no structure) or cluster 3 (supporting both sides)
+- Next week: fit IRT to the same `r ncol(Y)` questions and see what we learn.
+
+:::
+
+## Next week
+
+::: {.incremental}
+
+- **Item response theory and ideal point models**
+  - Latent trait models for binary responses
+  - "Ideal point" models: inferring latent *continuous* preferences from discrete responses
+  - Adding **temporal structure** through a random-walk prior.
+
+- **Readings:** @clinton2004statistical and @imai2016fast
+
+:::
+
+## References {.refs-slide}
+
+::: {#refs}
+:::
