@@ -52,7 +52,8 @@ Links become active as the materials for each week are posted.
 
 ### Week 8: Mixture Models and the EM Algorithm
 
-*To be posted*
+- [Week 8 Github Repository](https://github.com/astrezhnev/ps818/tree/main/slides/week8/)
+- [Week 8 `.html` slides](https://www.antonstrezhnev.com/ps818/slides/week8/week8_mixture_models.html)
 
 ### Week 9: Item Response Theory and Ideal Point Models
 
