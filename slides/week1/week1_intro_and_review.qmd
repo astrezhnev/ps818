@@ -179,7 +179,7 @@ options(digits=3)
 - **Midterm 1:** In class, Wednesday, October 7
 - **Problem Set 3:** Assigned October 7, due October 21
 - **Replication memo:** Due October 21
-- **Problem Set 4:** Assigned October 21, due November 4
+- **Problem Set 4:** Assigned October 21, due November 9
 - **Midterm 2:** In class, Wednesday, November 11
 - **Replication poster:** MEAD poster session, Friday, December 4
 

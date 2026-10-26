@@ -11,7 +11,7 @@ title: "Assignments"
 | **Midterm 1**                | --                | **In class, Oct 7 (Week 5)** |
 | Problem Set 3                | Oct 7 (Week 5)    | Oct 21 (Week 7)    |
 | Replication project memo     | --                | Oct 21 (Week 7)    |
-| Problem Set 4                | Oct 21 (Week 7)   | Nov 4 (Week 9)     |
+| Problem Set 4                | Oct 21 (Week 7)   | Mon Nov 9 (Week 10) |
 | **Midterm 2**                | --                | **In class, Nov 11 (Week 10)** |
 | **Replication poster**       | --                | **MEAD poster session, Fri Dec 4** |
 
@@ -53,7 +53,7 @@ Links become active as each problem set is assigned.
 
 ### Problem Set 4
 
-*Assigned Wednesday, October 21 -- due Wednesday, November 4*
+*Assigned Wednesday, October 21 -- due Monday, November 9*
 
 - [Problem Set 4 `.html`](https://www.antonstrezhnev.com/ps818/psets/ps4/ps818_problem_set_4.html)
 - [Problem Set 4 Github Repository](https://github.com/astrezhnev/ps818/tree/main/psets/ps4/)

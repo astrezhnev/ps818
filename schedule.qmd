@@ -146,7 +146,7 @@ There is **no class during the first week of instruction** due to APSA and Labor
 - Park, David K., Andrew Gelman, and Joseph Bafumi. 2004. ["Bayesian Multilevel Estimation with Poststratification: State-Level Estimates from National Polls."](https://doi.org/10.1093/pan/mph024) *Political Analysis* 12 (4): 375-385.
 
 ::: {.callout-note appearance="simple"}
-**Problem Set 3** due Wednesday, October 21. **Problem Set 4** assigned Wednesday, October 21 -- due Wednesday, November 4.
+**Problem Set 3** due Wednesday, October 21. **Problem Set 4** assigned Wednesday, October 21 -- due Monday, November 9.
 :::
 
 ::: {.callout-note appearance="simple"}
@@ -186,10 +186,6 @@ There is **no class during the first week of instruction** due to APSA and Labor
 - Clinton, Joshua, Simon Jackman, and Douglas Rivers. 2004. ["The Statistical Analysis of Roll Call Data."](https://doi.org/10.1017/S0003055404001194) *American Political Science Review* 98 (2): 355-370.
 - Imai, Kosuke, James Lo, and Jonathan Olmsted. 2016. ["Fast Estimation of Ideal Points with Massive Data."](https://doi.org/10.1017/S000305541600037X) *American Political Science Review* 110 (4): 631-656.
 
-::: {.callout-note appearance="simple"}
-**Problem Set 4** due Wednesday, November 4.
-:::
-
 ## Week 10: Regularization and Model Selection
 
 *Monday, November 9*
@@ -202,6 +198,10 @@ There is **no class during the first week of instruction** due to APSA and Labor
 **Readings:**
 
 - Chapters 6-7; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. [*An Introduction to Statistical Learning*.](https://www.statlearning.com/) New York: Springer.
+
+::: {.callout-note appearance="simple"}
+**Problem Set 4** due Monday, November 9.
+:::
 
 ---
 
