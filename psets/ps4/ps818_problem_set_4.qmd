@@ -1,0 +1,140 @@
+---
+title: "PS 818: Problem Set 4"
+author: "YOUR NAME"
+date: "October 25, 2026"
+format:
+  html:
+    toc: true
+    df-print: paged
+    embed-resources: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(brms)
+library(usmap)
+library(patchwork)
+library(knitr)
+```
+
+# Problem 1
+
+This problem will have you estimating local opinion of U.S. trade policy. Specifically, we'll focus on Pennsylvania's 67 counties and use survey data from the 2020 Cooperative Election Study (CES). Our outcome of interest is support for U.S. tariffs on China. The question of interest (`CC20_338a`) reads:
+
+> On the issue of trade, do you support or oppose the following proposed tariffs? Tariffs on $200 billion worth of goods imported from China.
+
+There are 3,144 Pennsylvania respondents. Sixty-six counties have at least one respondent (a median of 24.5) but Sullivan County has none. We will be post-stratifying to the combination of sex age and education using Census data to construct our post-stratification frame for each county. 
+
+Below, we read in the CES data and do some pre-processing to align the CES labels with the post-stratification targets. 
+
+Our outcome of interest is:
+
+- `tariff`: support the tariffs on Chinese goods (recoded `CC20_338a`).
+
+We also define a second outcome that we will use in Part E:
+
+- `trump`: voted for Trump in 2020 (`CC20_410`), among **validated voters**: respondents who took the post-election wave and have a 2020 general election vote record (`CL_2020gvm`). Coded 1 for Trump and 0 for Biden or another candidate; missing for everyone else.
+
+```{r}
+ces <- read_csv("data/CES20_Common_subset.csv") %>%
+  filter(inputstate == 42, !is.na(countyfips)) %>%
+  mutate(county_fips = as.character(countyfips),
+         female = as.integer(gender == 2),
+         age = cut(2020 - birthyr, c(17, 24, 34, 44, 64, Inf),
+                   labels = c("18-24", "25-34", "35-44", "45-64", "65+")),
+         educ = case_when(educ <= 2 ~ "HS or less", educ <= 4 ~ "Some college", educ == 5 ~ "BA", TRUE ~ "Postgrad"),
+         educ = factor(educ, levels = c("HS or less", "Some college", "BA", "Postgrad")),
+         tariff = case_when(CC20_338a == 1 ~ 1, CC20_338a == 2 ~ 0),
+         voted = !is.na(CL_2020gvm),
+         trump = case_when(tookpost != 2 | !voted ~ NA_real_, CC20_410 == 2 ~ 1, CC20_410 %in% c(1, 4) ~ 0))
+
+ces %>% summarize(across(c(tariff, trump), list(n = ~ sum(!is.na(.x)), mean = ~ mean(.x, na.rm = TRUE))))
+```
+
+The post-stratification frame is the ACS table of adults by county $\times$ sex $\times$ age $\times$ education (B15001): $67 \times 2 \times 5 \times 4 = 2{,}680$ cells.
+
+```{r}
+frame <- read_csv("data/acs_pa_frame.csv", col_types = cols(county_fips = "c")) %>%
+  mutate(educ = factor(educ, levels = levels(ces$educ)))
+frame %>% filter(county_fips == "42003") %>% head(8)  # Allegheny County
+```
+
+We will also directly model county-level attitudes using a series of county-level predictors.
+
+- `manufacturing_share`: The share of employment in manufacturing (NAICS 31-33)
+- `metals_share`: The share of employment in primary metals manufacturing (NAICS 331)
+- `trump_share_2016`: Trump's 2016 share of the two-party vote. (We do not use 2020 results as predictors, because they are the truth we check against in Part E.)
+- `pct_white`: The share of the population that is non-Hispanic white.
+
+```{r}
+counties <- read_csv("data/pa_counties.csv", col_types = cols(county_fips = "c")) %>%
+  left_join(frame %>% group_by(county_fips) %>%
+              summarize(pct_ba = 100 * sum(n[educ %in% c("BA", "Postgrad")]) / sum(n)),
+            by = "county_fips") %>%
+  mutate(trump_share_2016 = 100 * rep_2016 / (rep_2016 + dem_2016),
+         manufacturing_share = 100 * emp_manufacturing / emp_total,
+         metals_share = 100 * emp_metals / emp_total,
+         across(c(manufacturing_share, metals_share, trump_share_2016, pct_ba, pct_white),
+                ~ (.x - mean(.x)) / sd(.x), .names = "z_{.col}")) # Standardize - mean 0/variance 1
+
+ces <- ces %>% left_join(counties %>% select(county_fips, starts_with("z_")), by = "county_fips")
+frame <- frame %>% left_join(counties %>% select(county_fips, starts_with("z_")), by = "county_fips")
+```
+
+Below is some code that generates a **map** for Pennsylvania given some inputs (it wraps `plot_usmap` from the `usmap` R package). It expects a data frame with the values of interest labelled as "value".
+
+```{r, fig.width = 10, fig.height = 4.5}
+pa_map <- function(d, title, limits = NULL, labels = scales::percent) {
+  plot_usmap(regions = "counties", include = "PA", data = d, values = "value", linewidth = 0.2) +
+    scale_fill_viridis_c(limits = limits, labels = labels, oob = scales::squish, name = NULL, na.value = "grey85") +
+    labs(title = title) +
+    theme(legend.position = "bottom", legend.key.width = unit(1.2, "cm"), plot.title = element_text(hjust = 0.5))
+}
+pa_map(counties %>% transmute(fips = county_fips, value = manufacturing_share / 100), "Manufacturing share of employment") +
+  pa_map(counties %>% transmute(fips = county_fips, value = trump_share_2016 / 100), "Trump 2016 two-party share")
+```
+
+## Part A:
+
+Using only the survey, estimate the share of adults supporting the tariffs in each county with the CES weights (`commonweight`). Generate a map with your point estimates. What do you notice about your estimates.
+
+## Part B:
+
+We want to improve on the raw survey predictions by using features of county demographics. We also want to incorporate county-level predictors into the model.
+
+Estimate a multi-level logistic regression that models whether a respondent supports the tariffs on China as a function of sex, age and education, county-level predictors, and a county random intercept.
+
+Does local manufacturing employment predict support for the tariffs conditional on all of the other predictors? How does its predictive power vary based on which other covariates we include?
+
+## Part C
+
+For each posterior draw, predict the share of respondents that would support the policy in each cell of the post-stratification frame. Then generate a prediction for each county by aggregating over the post-stratification cells for that county.
+
+$$\hat\theta_g = \frac{\sum_{c \in g} N_c \hat\pi_c}{\sum_{c \in g} N_c}$$
+
+Note that Sullivan County has no respondents in the survey, so draw its county intercept from the estimated county distribution (`allow_new_levels = TRUE`).
+
+Plot the posterior means and 95% credible intervals for each county in a **ridgeline plot**. Use `mcmc_areas_ridges()` from the `bayesplot` R package. What do you notice about the estimates? Which posteriors are high-variance? Which posteriors are low-variance?
+
+## Part D
+
+Plot the posterior means from Part C in a map of Pennsylvania. Compare your estimates to your results from Part A. Discuss what you find.
+
+## Part E
+
+One way of verifying whether we have a good model is verifying against an outcome where we have a ground truth. One such outcome is Trump's 2020 share of the presidential vote in each county:
+
+```{r}
+truth <- counties %>% transmute(county_fips, county, truth = rep_2020 / total_2020) # Trump votes / all presidential votes
+```
+
+The outcome is `trump`, which is defined only for validated voters, so the sample for this part is smaller and different from the tariff sample. Evaluate the following three approaches for predicting county-level Trump vote shares:
+
+1. **Direct** estimates just with the post-election weights (`commonpostweight`).
+2. **MRP without county predictors**: individual predictors and a county intercept only.
+3. **MRP with county predictors**: the same specification as the tariff model.
+
+For the MRP estimates, poststratify to the same frame as in Part C. Use the average absolute value of the county-level errors (estimate minus truth) as your measure of model quality. Which approach does best?
+
+Note that the frame counts **adults**, but the benchmark here is a share of **voters**. What population are your MRP estimates describing? How might that difference bias them?
