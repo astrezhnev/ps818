@@ -18,6 +18,14 @@ library(patchwork)
 library(knitr)
 ```
 
+> **Assigned:** Wednesday, October 21, 2026. **Due:** Monday, November 9, 2026.
+>
+> Submit your solutions on **Gradescope**. Upload *both* the rendered `.html` file (saved as `Yourlastname_Yourfirstinitial_pset4.html`) and the `.qmd` source file that produced it (saved as `Yourlastname_Yourfirstinitial_pset4.qmd`). We should be able to run your code without error messages. In order to receive credit, homework submissions must be substantially started and all work must be shown.
+>
+> I recommend editing this `.qmd` file directly and rendering it to `.html` when you are done. Problem sets are graded on a (+/✓/-) scale.
+>
+> You are strongly encouraged to discuss the problems with other students, in person or on the course [Slack](https://uw-mpolscimethods.slack.com/), but each student must submit their own write-up and code. See the [Syllabus](https://www.antonstrezhnev.com/ps818/syllabus.html) for the full collaboration policy and for the course policy on generative large language models.
+
 # Problem 1
 
 This problem will have you estimating local opinion of U.S. trade policy. Specifically, we'll focus on Pennsylvania's 67 counties and use survey data from the 2020 Cooperative Election Study (CES). Our outcome of interest is support for U.S. tariffs on China. The question of interest (`CC20_338a`) reads:
