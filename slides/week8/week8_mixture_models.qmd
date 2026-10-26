@@ -137,7 +137,7 @@ knitr::opts_chunk$set(echo = T)
 
 :::
 
-## Data: CES 2023 {.smaller}
+## Data: CES 2023
 
 - The 2023 **Cooperative Election Study** [@schaffner2024ces]: the full public release, as downloaded from Dataverse
 
@@ -155,7 +155,7 @@ count(ces_raw, CC23_324c) # "Make abortions illegal in all circumstances"
 
 - The questionnaire (`data/CES 2023 CC Questionnaire.pdf`) has the full wording of every item
 
-## Data: CES 2023 {.smaller}
+## Data: CES 2023
 
 - 24 "support/oppose" policy questions on guns and policing, immigration, abortion, the environment, and social welfare
 
@@ -177,7 +177,7 @@ Y <- as.matrix(select(ces, all_of(names(items)))) # 1 = Support, 0 = Oppose
 
 - `r format(nrow(Y), big.mark=",")` of the `r format(nrow(ces_raw), big.mark=",")` respondents answered all `r ncol(Y)` questions
 
-## Data: CES 2023 {.smaller}
+## Data: CES 2023
 
 ```{r, echo=F}
 item_labels <- c(ban_assault_rifles = "Ban assault rifles", concealed_carry = "Easier concealed-carry permits",
@@ -986,7 +986,7 @@ map_dfr(c(2, 5, 10), function(k) tibble(K = str_c("K = ", k), observed = obs_cor
 
 :::
 
-## Logically exclusive questions {.smaller}
+## Logically exclusive questions
 
 - A coherent respondent can't support **both** 10% more police and 10% fewer police -- these answers should be perfectly dependent
 
