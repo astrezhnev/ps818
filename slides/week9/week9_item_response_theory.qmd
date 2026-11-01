@@ -1,0 +1,1039 @@
+---
+title: "Week 9: Item Response Theory"
+subtitle: "PS 818 - Data Analysis with Statistical Models"
+author:
+  - name: "Anton Strezhnev"
+    affiliation: "University of Wisconsin-Madison"
+    email: strezhnev@wisc.edu
+date: "November 2, 2026"
+date-format: "MMMM D, YYYY"
+editor:
+  render-on-save: true
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    slide-number: true
+    overview: true
+    navigation-mode: vertical
+    progress: false
+    controls: true
+    link-external-newwindow: true
+    footer: "PS 818 - University of Wisconsin-Madison"
+    html-math-method:
+      method: mathjax
+      url: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+embed-resources: true
+bibliography: ../ps818.bib
+link-citations: true
+
+---
+
+## Item Response Theory {.title-slide}
+
+::: {style="display: none"}
+$$
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+$$
+:::
+
+```{r, echo = F, message=F, warning=F}
+library(tidyverse)
+library(knitr)
+library(rstan)
+library(posterior)
+library(ggrepel)
+options(digits=3, knitr.kable.NA = "")
+knitr::opts_chunk$set(echo = T)
+```
+
+## Previously
+
+::: {.incremental}
+
+- **Mixture models**
+  - "Unsupervised" approach to clustering observations.
+  - A **discrete** latent variable $z_i$: cluster membership
+  - MLE/MAP estimation via **Expectation-Maximization**
+
+- **Policy attitudes in the 2023 CES**
+  - Two clusters $\approx$ party
+  - Five clusters show different types of "moderates"
+
+:::
+
+## This week
+
+::: {.incremental}
+
+- **Item Response Theory**
+  - Model **discrete** responses as a function of a **continuous** latent trait
+  - Logit/probit regression with **unobserved** regressors
+- **Ideal point models**
+  - Item response theory as a model of **voting**
+  - Identification, estimation, and interpreting the latent dimension
+- **Running example**: Last week's 24 CES policy questions
+- **Dynamic IRT**
+  - Allow ideal points to *drift* over time 
+
+:::
+
+## Item Response Theory
+
+::: {.incremental}
+
+- In many settings, we observe **binary** or **ordinal** responses to a set of questions among a sample of units.
+  - Students' responses to test questions (correct/incorrect)
+  - Survey respondents' answers to policy questions (support/oppose)
+  - Legislators voting on bills (yea/nay)
+
+- In these settings, we're interested in learning about an (interval-scaled) **latent trait** of the units based on their discrete responses
+  - Measuring student **ability**
+  - Measuring voter **ideology**
+  - Measuring legislator **ideology**
+
+- Simple aggregation of the binary responses may give misleading results
+  - Some test questions are **harder** than others and some are more informative about student ability than others.
+  - Counting "liberal" answers treats a question that splits the parties as equivalent to one that almost everyone supports.
+
+:::
+
+## Item Response Theory
+
+::: {.incremental}
+
+- **Item Response Theory** (IRT) developed out of research on testing and evaluation.
+
+- Observed responses to test questions are a function of:
+  - **Latent traits** that are common features of respondents across all questions
+  - **Item parameters** that are common features of questions across all respondents.
+
+- **Setup**:
+  - Observe $N$ respondents indexed by $i \in \{1, 2, \dotsc, N\}$
+  - Observe $J$ questions indexed by $j \in \{1, 2, \dotsc, J\}$
+  - Observe $Y_{ij}$, the response to question $j$ by respondent $i$
+      - We'll work with binary $Y_{ij}$ to start, but can generalize to other outcome distributions (typically ordinal)
+
+:::
+
+## One Parameter Logit (1PL)
+
+::: {.incremental}
+
+- The baseline classic IRT model (sometimes called the "Rasch" model after Georg Rasch) assumes the following **item response function**:
+
+  $$Pr(Y_{ij} = 1) = F(\theta_i - \alpha_j)$$
+
+  where $F()$ is the logistic CDF.
+
+- In other words,
+
+  $$Pr(Y_{ij} = 1) = \frac{1}{1 + \exp[-(\theta_i - \alpha_j)]}$$
+
+- Or in "latent variable form"
+
+  $$Y_{ij} = \mathbf{1}(Y_{ij}^* > 0)$$
+  $$Y_{ij}^* = \theta_i - \alpha_j + \epsilon_{ij}$$
+
+  where $\epsilon_{ij}$ are distributed i.i.d. standard logistic
+
+:::
+
+## One Parameter Logit (1PL)
+
+::: {.incremental}
+
+- In the 1PL model, we have **one** parameter describing the item and **one** parameter describing the individual's latent trait
+
+  $$Pr(Y_{ij} = 1) = F(\theta_i - \alpha_j)$$
+
+  - $\theta_i$ is the **latent trait** for unit $i$
+  - $\alpha_j$ is the **item difficulty** of question $j$
+
+- Analogy to the GLM
+  - $\alpha_j$ is the **intercept** for item $j$
+  - $\theta_i$ is the **regressor**, common to all of unit $i$'s responses
+  - What are we implicitly assuming?
+
+- Every question counts the same w.r.t. $\theta_i$ 
+  - Doesn't work well for our case where "Support" is the liberal answer on some questions and the conservative answer on others
+
+:::
+
+## Two Parameter Logit (2PL)
+
+::: {.incremental}
+
+- One drawback of the 1PL model is that it only allows questions to vary in their difficulty (intercept) and not in the extent to which variation in the responses captures variation in the latent trait.
+  - Essentially assuming a constant "slope" of $1$ on the $\theta$ parameter
+
+- The two-parameter logit adds an additional **item parameter** $\beta_j$ and assumes
+
+  $$Pr(Y_{ij} = 1) = F\bigg(\beta_j(\theta_i - \alpha_j)\bigg)$$
+
+- Now each item has:
+  - $\alpha_j$ - **item difficulty**
+  - $\beta_j$ - **item discrimination**
+
+- $\beta_j$ captures the extent to which the question reflects the latent trait
+  - $\beta_j$ close to $0$ means that the probability of $Y_{ij} = 1$ is essentially uncorrelated with the latent trait
+  - **Negative** $\beta_j$ implies that **low** latent trait values are more likely to answer $Y_{ij} = 1$ (this creates some identifiability issues!)
+
+:::
+
+## Two Parameter Logit (2PL)
+
+::: {.incremental}
+
+- Typically also see the 2PL written as:
+
+  $$Pr(Y_{ij} = 1) = F\bigg(\beta_j\theta_i - \tau_j\bigg)$$
+
+  with $\tau_j = \beta_j \alpha_j$
+
+- Think back again to the logistic regression
+  - $\tau_j$ is the "intercept"
+  - $\beta_j$ is the "slope"
+  - $\theta_i$ is the "regressor"
+
+- Compare to last week's mixture model: $Pr(Y_{ij} = 1 | z_i = k) = \beta_{kj}$
+  - Both assume **local independence** given the latent variable
+  - (single-dimensional) IRT: $2 \times J$ item parameters
+  - Bernoulli mixture model: $K \times J$ item parameters
+
+:::
+
+## Interpretation as a voting model
+
+::: {.incremental}
+
+- In political science, the 2PL is the standard model for analyzing voting in legislatures [@clinton2004statistical]
+
+- Often described in terms of **utility maximization**
+  - Consider a legislator (or survey respondent) choosing "Yea" $Y_{ij} = 1$ or "Nay" $Y_{ij} = 0$.
+  - These positions are located in some space (we'll work in $\mathbb{R}^1$ for now). The "Yea" position is $\zeta_j$ and the "Nay" position is $\psi_j$.
+
+- Define a utility function for legislator $i$: $U_i()$
+  - $U_i(\zeta_j) = -\frac{1}{\sigma_j}(\theta_i - \zeta_j)^2 + \eta_{ij}$
+  - $U_i(\psi_j) = -\frac{1}{\sigma_j}(\theta_i - \psi_j)^2 + \nu_{ij}$
+
+- In other words, they get decreasing utility (in terms of quadratic distance) from policies that are further from their **ideal point**
+  - They will vote $Y_{ij} = 1$ if $U_i(\zeta_j) > U_i(\psi_j)$ and $Y_{ij} = 0$ otherwise.
+
+- $\eta_{ij}$ and $\nu_{ij}$ are the "vote-specific error terms"
+
+:::
+
+## Interpretation as a voting model
+
+::: {.incremental}
+
+- Returning to the "latent variable" formulation of the logit, we can write: $Y_{ij}^* = U_i(\zeta_j) - U_i(\psi_j)$
+- Then, some algebra
+  $$\begin{align*}
+  Y_{ij}^* &= -\frac{1}{\sigma_j}(\theta_i - \zeta_j)^2 + \eta_{ij} + \frac{1}{\sigma_j}(\theta_i - \psi_j)^2 - \nu_{ij}\\
+  Y_{ij}^* &= \frac{1}{\sigma_j}(-\theta_i^2 + 2\theta_i\zeta_j - \zeta_j^2) + \frac{1}{\sigma_j}(\theta_i^2 - 2\theta_i\psi_j + \psi_j^2) + (\eta_{ij} - \nu_{ij})\\
+  Y_{ij}^* &= \frac{2(\zeta_j - \psi_j)}{\sigma_j}\theta_i + \frac{(\psi_j^2 - \zeta_j^2)}{\sigma_{j}} + (\eta_{ij} - \nu_{ij})
+  \end{align*}$$
+
+- And with some assumptions on the error distribution of $\epsilon_{ij} = (\eta_{ij} - \nu_{ij})$ we have our 2-parameter logit!
+  - $\tau_j = -\frac{(\psi_j^2 - \zeta_j^2)}{\sigma_{j}}$
+  - $\beta_j = \frac{2(\zeta_j - \psi_j)}{\sigma_j}$
+
+- The sign of $\beta_j$ says which side of the space the "Yea" position is on. $|\beta_j|$ grows with the distance between the two positions relative to the noise.
+
+:::
+
+## Interpretation as a voting model
+
+::: {.incremental}
+
+- IRT also assumes **local independence** of responses given the latent ideology.
+
+  $$Pr(Y_{ij} =1 , Y_{ij^{\prime}} = 1 | \theta_i, \beta, \tau) = Pr(Y_{ij} = 1 | \theta_i, \beta, \tau) \times  Pr(Y_{ij^{\prime}} = 1 | \theta_i, \beta, \tau)$$
+
+- In other words, knowing how a legislator voted on bill $j$ doesn't tell you anything about how they will vote on bill $j^{\prime}$ if we already know the latent positions of the legislators and bills
+  - Could be violated under common legislative behavior (e.g. log-rolling, horse-trading, etc...)
+  - In surveys: two questions about the **same issue** (two abortion questions) may be correlated beyond what one ideological dimension explains
+  - You'll still get **something** but interpreting ideal points in this setting is a bit harder - essentially some of the "closeness" in ideal points could be driven by non-ideological factors.
+
+- The "utility maximization" interpretation of the 2PL also implies **single peaked** preferences
+  - Legislators strictly prefer policies closer to their ideal point and disprefer ones that are further away
+  - But this assumption can be violated if some extreme legislators vote against their party and with the opposition but for differing reasons
+      - "Ends against the middle"
+
+:::
+
+## Identification
+
+::: {.incremental}
+
+- While historically, IRT models were estimated via maximum-likelihood, there are many reasons why modern methods use Bayes.
+  1. **Inconsistency** - The number of parameters grows as we add more **questions** and as we add more **respondents** so our ML estimators are not consistent
+  2. **Non-identifiability** - The 2PL likelihood only depends on $\beta_j\theta_i - \tau_j$
+      - **Location**: add $c$ to every $\theta_i$ and $c\beta_j$ to every $\tau_j$
+      - **Scale**: multiply every $\theta_i$ by $c$ and divide every $\beta_j$ by $c$
+      - **Reflection**: multiply every $\theta_i$ and every $\beta_j$ by $-1$. This flips what high $\theta$ means but leaves the likelihood unchanged
+
+- Putting a prior on $\theta$ pins down the location and scale
+  - Typically assume $\theta_i \sim \text{Normal}(0, 1)$
+
+- But the prior is symmetric, so we need an additional constraint to fix the **reflection**:
+  - Constraints on the sign of some $\beta_j$...
+  - ...or setting some of the $\theta_i$ parameters to a **known** value (or a tight prior around it)
+
+:::
+
+## Estimation
+
+::: {.incremental}
+
+- Estimation typically relies on either MCMC or a (variational) EM algorithm
+  - The underlying **trick** is to use existing theory for Bayesian probit (and now logit) regression to derive the conditional distributions of $\theta_i$, $\beta_j$ and $\tau_j$
+
+- Consider the "latent variable" form of the logit/probit regression:
+
+  $$Y_{ij}^* = \beta_j\theta_i - \tau_j + \epsilon_{ij}$$
+
+- Conditional on $\theta$, we have $J$ regressions of $Y^*_{ij}$ on $\theta_i$, each with intercept $-\tau_j$ and slope $\beta_j$
+- Conditional on $\beta$ and $\tau$, we have $N$ regressions of $Y^*_{ij} + \tau_j$ on $\beta_j$ with slope $\theta_i$ and no intercept.
+  - With a probit link and $Y^*_{ij}$ treated as missing data, this gives a **Gibbs sampler** [@clinton2004statistical]...
+  - ...or an **EM algorithm** for the posterior mode that scales to millions of votes [@imai2016fast].
+- Stan doesn't need any of this: HMC samples $\theta$, $\beta$, and $\tau$ jointly.
+
+:::
+
+# Application: Policy attitudes
+
+## Data: CES 2023
+
+- Same data as last week: the 24 support/oppose policy questions from the 2023 CES [@schaffner2024ces], `1` = Support, `0` = Oppose
+
+```{r}
+library(haven)
+ces_raw <- read_dta("../week8/data/CCES23_Common_OUTPUT.dta.gz") # the file from last week
+items <- c(ban_assault_rifles = "CC23_321a", concealed_carry = "CC23_321b", background_checks = "CC23_321c",
+           more_police = "CC23_321d", fewer_police = "CC23_321e", legal_status = "CC23_323a",
+           border_patrols = "CC23_323b", border_wall = "CC23_323c", dreamers = "CC23_323d",
+           abortion_choice = "CC23_324a", abortion_exceptions = "CC23_324b", abortion_ban = "CC23_324c",
+           abortion_expand = "CC23_324d", epa_co2 = "CC23_326a", renewable_mandate = "CC23_326b",
+           epa_enforcement = "CC23_326c", more_fossil_fuels = "CC23_326d", halt_leases = "CC23_326e",
+           relax_zoning = "CC23_328a", housing_credits = "CC23_328b", medicaid_work_req = "CC23_328c",
+           repeal_aca = "CC23_328d", expand_medicaid = "CC23_328e", forgive_loans = "CC23_328f")
+ces <- ces_raw %>%
+  transmute(caseid, commonweight, pid3 = as.character(as_factor(pid3)), ideo5 = as.character(as_factor(ideo5)),
+            across(all_of(items), ~ case_when(.x == 1 ~ 1, .x == 2 ~ 0))) %>% # skipped/not asked become NA
+  drop_na(all_of(names(items)))
+Y <- as.matrix(select(ces, all_of(names(items)))) # 1 = Support, 0 = Oppose
+dim(Y)
+```
+
+```{r, echo=F}
+item_labels <- c(ban_assault_rifles = "Ban assault rifles", concealed_carry = "Easier concealed-carry permits",
+                 background_checks = "Background checks on all gun sales", more_police = "10% more police",
+                 fewer_police = "10% fewer police", legal_status = "Legal status for undocumented workers",
+                 border_patrols = "More border patrols", border_wall = "Build a border wall",
+                 dreamers = "Citizenship path for Dreamers", abortion_choice = "Always allow abortion",
+                 abortion_exceptions = "Abortion only for rape, incest, life", abortion_ban = "Make abortion illegal",
+                 abortion_expand = "Expand abortion access", epa_co2 = "EPA regulates CO2",
+                 renewable_mandate = "Renewable fuel mandate", epa_enforcement = "Stronger EPA enforcement",
+                 more_fossil_fuels = "More fossil fuel production", halt_leases = "Halt new oil and gas leases",
+                 relax_zoning = "Relax zoning", housing_credits = "Tax credits for low-income housing",
+                 medicaid_work_req = "Medicaid work requirements", repeal_aca = "Repeal the ACA",
+                 expand_medicaid = "Expand Medicaid", forgive_loans = "Forgive student loans")
+issue_area <- rep(c("Guns and policing", "Immigration", "Abortion", "Environment", "Social welfare"), c(5, 4, 4, 5, 6))
+names(issue_area) <- names(items)
+conservative_items <- c("concealed_carry", "more_police", "border_patrols", "border_wall", "abortion_exceptions",
+                        "abortion_ban", "more_fossil_fuels", "medicaid_work_req", "repeal_aca")
+liberal_answer <- 1 - colnames(Y) %in% conservative_items # 1 = "Support" is the liberal answer
+n_liberal <- as.vector(Y %*% liberal_answer + (1 - Y) %*% (1 - liberal_answer))
+```
+
+## A 2PL in Stan
+
+```{r}
+irt_code <- "
+data {
+  int N; int J;
+  array[N, J] int<lower=0, upper=1> Y; // 1 = Support, 0 = Oppose
+}
+parameters {
+  vector[N] theta; // respondent ideal points
+  vector[J] beta;  // item discrimination
+  vector[J] tau;   // item intercept (difficulty)
+}
+model {
+  theta ~ normal(0, 1); // fixes the location and scale
+  beta ~ normal(0, 3);
+  tau ~ normal(0, 3);
+  for (j in 1:J) Y[, j] ~ bernoulli_logit(beta[j] * theta - tau[j]);
+}
+"
+```
+
+- `r format(nrow(Y), big.mark=",")` respondents means `r format(nrow(Y), big.mark=",")` $\theta_i$ parameters. For a quick illustration, we'll fit a random subsample of 1,500
+
+```{r}
+set.seed(53703)
+sub <- sample(nrow(Y), 1500)
+irt_data <- list(N = length(sub), J = ncol(Y), Y = Y[sub, ])
+```
+
+## Fitting the model
+
+```{r irt-fit, message=F, warning=F, results=F, cache=T, cache.extra=list(irt_code, irt_data)}
+irt_fit <- stan(
+  model_code = irt_code,  # Stan code
+  data = irt_data,        # named list of data
+  chains = 4,             # number of Markov chains
+  warmup = 500,           # number of warmup iterations per chain
+  iter = 1000,            # total number of iterations per chain
+  cores = 4,              # number of cores
+  refresh = 0,            # no progress shown
+  seed = 60637            # random seed
+  )
+```
+
+- Stan complains: the largest $\hat{R}$ is `r round(max(summary(irt_fit)$summary[, "Rhat"], na.rm = T), 2)`. Each chain's posterior mean of $\beta_j$ for two of the items:
+
+```{r}
+anchor <- which(colnames(Y) == "border_wall")
+epa <- which(colnames(Y) == "epa_enforcement")
+round(get_posterior_mean(irt_fit, pars = str_c("beta[", c(anchor, epa), "]"))[, 1:4], 2)
+```
+
+## What's happening here?
+
+```{r, fig.align="center", fig.width=10, fig.height=5}
+traceplot(irt_fit, pars = str_c("beta[", c(anchor, epa), "]"))
+```
+
+## What's happening here?
+
+::: {.incremental}
+
+- Because the IRT model is identified only up to **reflection**, the chains end up going to one of two posterior modes
+  - $\beta_{\text{wall}} > 0$: high $\theta$ means **conservative**
+  - $\beta_{\text{wall}} < 0$: high $\theta$ means **liberal**
+
+- In educational testing, a common fix is to make **all** of the discrimination parameters positive
+  - A correct answer should never indicate *lower* ability
+- Ideology doesn't work this way, but we can still fix the **sign** of some of the $\beta_j$
+
+:::
+
+## Constraining one item
+
+- Supporting a border wall is a conservative answer, so require $\beta_{\text{wall}} > 0$
+- Pass a lower and upper bound for each $\beta_j$ as data ($0$ or $\pm\infty$)
+
+```{r}
+irt_sign_code <- "
+data {
+  int N; int J;
+  array[N, J] int<lower=0, upper=1> Y;
+  vector[J] lb; // lower bound on each beta_j: 0 or -infinity
+  vector[J] ub; // upper bound on each beta_j: 0 or +infinity
+}
+parameters {
+  vector[N] theta;
+  vector<lower=lb, upper=ub>[J] beta;
+  vector[J] tau;
+}
+model {
+  theta ~ normal(0, 1);
+  beta ~ normal(0, 3);
+  tau ~ normal(0, 3);
+  for (j in 1:J) Y[, j] ~ bernoulli_logit(beta[j] * theta - tau[j]);
+}
+"
+lb_one <- if_else(colnames(Y) == "border_wall", 0, -Inf) # only the border wall is constrained
+ub_one <- rep(Inf, ncol(Y))
+```
+
+```{r irt-anchor-fit, message=F, warning=F, results=F, cache=T, cache.extra=list(irt_sign_code, irt_data, lb_one, ub_one)}
+irt_anchor_fit <- stan(model_code = irt_sign_code, data = c(irt_data, list(lb = lb_one, ub = ub_one)),
+                       chains = 4, warmup = 500, iter = 1000, cores = 4, refresh = 0, seed = 60637)
+```
+
+## Constraining one item
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4}
+traceplot(irt_anchor_fit, pars = str_c("beta[", c(anchor, epa), "]"))
+```
+
+::: {.incremental}
+
+- **Not fixed!** The chains that started in the "wrong" mode are stuck at the $\beta_{\text{wall}} = 0$ boundary.
+  - The other $\beta_j$ and all of the $\theta_i$ are still reflected, so HMC can't get to the other mode.
+
+:::
+
+## Constraining every item
+
+- We know which answer is the conservative one on **every** question (last week's coding), so constrain all of the signs
+  - $\beta_j > 0$ for the `r length(conservative_items)` conservative items, $\beta_j < 0$ for the other `r ncol(Y) - length(conservative_items)`
+
+```{r}
+lb_all <- if_else(colnames(Y) %in% conservative_items, 0, -Inf)
+ub_all <- if_else(colnames(Y) %in% conservative_items, Inf, 0)
+```
+
+```{r irt-sign-fit, message=F, warning=F, results=F, cache=T, cache.extra=list(irt_sign_code, irt_data, lb_all, ub_all)}
+irt_sign_fit <- stan(model_code = irt_sign_code, data = c(irt_data, list(lb = lb_all, ub = ub_all)),
+                     chains = 4, warmup = 500, iter = 1000, cores = 4, refresh = 0, seed = 60637)
+```
+
+```{r}
+draws <- as_draws_df(irt_sign_fit)
+irt_summary <- summarise_draws(draws, "mean", ~ quantile2(.x, probs = c(.025, .975)), "rhat", "ess_bulk")
+summary(irt_summary$rhat)
+```
+
+## Constraining every item
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=3.3}
+traceplot(irt_sign_fit, pars = str_c("beta[", c(anchor, epa), "]"))
+```
+
+::: {.incremental}
+
+- The four chains converge to the same mode: every $\hat{R}$ is close to 1
+- **Other fixes**: start the chains near the right mode...
+  - ...or flip the draws after sampling.
+
+:::
+
+## Item discrimination
+
+```{r, echo=F}
+item_post <- irt_summary %>% filter(str_detect(variable, "^(beta|tau)\\[")) %>%
+  mutate(param = str_extract(variable, "^[a-z]+"), item = rep(colnames(Y), 2))
+beta_post <- item_post %>% filter(param == "beta")
+tau_post <- item_post %>% filter(param == "tau")
+```
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=6.2}
+beta_post %>% mutate(label = fct_reorder(item_labels[item], mean), issue = issue_area[item]) %>%
+  ggplot(aes(x = mean, y = label, col = issue)) + geom_vline(xintercept = 0, lty = 2, col = "grey50") +
+  geom_errorbarh(aes(xmin = q2.5, xmax = q97.5), height = 0) + geom_point(size = 3) +
+  theme_bw() + xlab(expression(paste("Discrimination ", beta[j], " (posterior mean and 95% interval)"))) + ylab("") +
+  scale_color_brewer(palette = "Dark2", name = "") +
+  theme(text = element_text(size = 15), legend.position = "bottom")
+```
+
+## Item discrimination
+
+::: {.incremental}
+
+- Positive $\beta_j$: conservatives (high $\theta$) more likely to support. Negative $\beta_j$: liberals more likely to support.
+- The most discriminating items: EPA enforcement and CO2 regulation, the border wall
+- The least: relaxing zoning (`r round(beta_post$mean[beta_post$item == "relax_zoning"], 2)`) and making abortion illegal (`r round(beta_post$mean[beta_post$item == "abortion_ban"], 2)`)
+  - Few respondents of *any* ideology support a total abortion ban: `r scales::percent(mean(Y[, "abortion_ban"]), 1)` of the sample
+  - The ban question discriminates only among the most conservative respondents
+
+:::
+
+## Item characteristic curves
+
+- Each item's $Pr(Y_{ij} = 1)$ as a function of $\theta_i$, at the posterior means of $\beta_j$ and $\tau_j$
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=5}
+icc_items <- c("border_wall", "epa_enforcement", "abortion_ban", "background_checks", "relax_zoning")
+expand_grid(theta = seq(-3, 3, by = .02), item = icc_items) %>%
+  left_join(select(beta_post, item, beta = mean), by = "item") %>% left_join(select(tau_post, item, tau = mean), by = "item") %>%
+  mutate(prob = plogis(beta * theta - tau), label = factor(item_labels[item], levels = item_labels[icc_items])) %>%
+  ggplot(aes(x = theta, y = prob, col = label)) + geom_line(lwd = 1.3) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) + scale_color_brewer(palette = "Set1", name = "") +
+  theme_bw() + xlab(expression(paste("Latent trait ", theta, " (higher = more conservative)"))) + ylab("Pr(Support)") +
+  theme(text = element_text(size = 16), legend.position = "right")
+```
+
+- Steep curves (large $|\beta_j|$) separate respondents near the point where $Pr = 50\%$, at $\theta = \tau_j / \beta_j$. Flat curves carry little information about $\theta$.
+
+## Respondent ideal points
+
+```{r, echo=F}
+theta_post <- irt_summary %>% filter(str_detect(variable, "^theta\\[")) %>%
+  mutate(pid3 = ces$pid3[sub], n_liberal = n_liberal[sub],
+         party = case_when(pid3 %in% c("Democrat", "Republican") ~ pid3, T ~ "Independent/other/not sure"))
+party_colors <- c(Democrat = "#0479A8", Republican = "#c5050c", `Independent/other/not sure` = "grey50")
+```
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=5}
+theta_post %>% arrange(mean) %>% mutate(rank = row_number()) %>%
+  ggplot(aes(x = rank, y = mean, col = party)) + geom_errorbar(aes(ymin = q2.5, ymax = q97.5), width = 0, alpha = .3) +
+  geom_point(size = .8) + scale_color_manual(values = party_colors, name = "") + theme_bw() +
+  xlab("Respondents (sorted by posterior mean)") + ylab(expression(paste(theta[i], " (mean and 95% interval)"))) +
+  theme(text = element_text(size = 16), legend.position = "bottom")
+```
+
+## How different is this from just counting?
+
+- Posterior means of $\theta_i$ against the number of liberal answers (0-`r ncol(Y)`)
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=3.6}
+set.seed(1)
+theta_post %>% ggplot(aes(x = n_liberal, y = mean, col = party)) + geom_jitter(width = .2, height = 0, alpha = .5, size = 1.3) +
+  scale_color_manual(values = party_colors, name = "") + scale_x_continuous(breaks = 0:ncol(Y)) + theme_bw() +
+  xlab("Number of liberal answers") + ylab(expression(paste("Posterior mean of ", theta[i]))) +
+  theme(text = element_text(size = 16), legend.position = "bottom")
+```
+
+::: {.incremental}
+
+- Strongly related (correlation `r round(cor(theta_post$mean, theta_post$n_liberal), 2)`), but not one-to-one.
+- Conditional on the same total, a conservative answer on a low-$|\beta_j|$ question (relaxing zoning) moves $\theta_i$ much less than one on a high-$|\beta_j|$ question (the border wall)
+
+:::
+
+## Scaling up: EM
+
+::: {.incremental}
+
+- MCMC on 1,500 respondents took about `r round(max(rowSums(get_elapsed_time(irt_fit))) / 60, 1)` minutes. All `r format(nrow(Y), big.mark=",")` would mean `r round(nrow(Y) / 1500)` times as much data **and** `r round(nrow(Y) / 1500)` times as many parameters.
+  - Roll-call datasets can be even larger: every legislator in every chamber, or millions of social media users "voting" by following accounts [@barbera2015birds].
+
+- @imai2016fast: an **EM algorithm** for the posterior mode
+  - Probit link: treat the latent utilities $Y^*_{ij}$ as the missing data
+  - E-step: expectation of each $Y^*_{ij}$ given the current parameters (a truncated normal mean)
+  - M-step: the $N + J$ conditional regressions from before have closed-form solutions
+  - Variational EM for extensions (ordinal, dynamic, text)
+
+- Implemented in the `emIRT` package.
+
+:::
+
+## Scaling up: EM
+
+- `binIRT()` takes a roll call object from the `pscl` package: votes are recoded to $+1$/$-1$, with $0$ meaning missing
+
+```{r, message=F}
+library(emIRT)
+rc <- convertRC(rollcall(Y, yea = 1, nay = 0, missing = NA))
+```
+
+```{r, results="hide"}
+set.seed(53703)
+em_time <- system.time(
+  em_fit <- binIRT(.rc = rc, .starts = getStarts(rc$n, rc$m, 1), .priors = makePriors(rc$n, rc$m, 1),
+                   .control = list(threads = 1, verbose = FALSE, thresh = 1e-6))
+)
+```
+
+- All `r format(nrow(Y), big.mark=",")` respondents in `r round(em_time["elapsed"], 1)` seconds (`r em_fit$runtime$iters` iterations)
+- `makePriors()` sets $\theta_i \sim \text{Normal}(0, 1)$ and $\text{Normal}(0, 5^2)$ priors on the item parameters. 
+
+```{r}
+x_mode <- em_fit$means$x[, 1]
+c(sd_theta = sd(x_mode), mean_abs_beta = mean(abs(em_fit$means$beta[, "d1"])))
+```
+
+## Scale at the posterior mode
+
+::: {.incremental}
+
+- The $\theta_i$ estimates are tiny and the $\beta_j$ are huge. Only the products $\beta_j\theta_i$ are identified by the likelihood.
+  - The prior on the `r format(nrow(Y), big.mark=",")` values of $\theta_i$ prefers small values far more than the prior on the 24 values of $\beta_j$ penalizes large ones
+  - This ultimately doesn't *really* matter since the **scale** of the ideal points is arbitrary.
+- We can **standardize** the estimates after the fact.
+
+:::
+
+## EM vs. MCMC
+
+- Standardize and align direction.
+
+```{r}
+em_sign <- sign(em_fit$means$beta[anchor, "d1"])
+theta_em <- em_sign * (x_mode - mean(x_mode)) / sd(x_mode)
+```
+
+- For the 1,500 respondents in both fits:
+
+```{r, echo=F, fig.align="center", fig.width=6, fig.height=5}
+tibble(em = theta_em[sub], stan = theta_post$mean, party = theta_post$party) %>%
+  ggplot(aes(x = em, y = stan, col = party)) + geom_abline(intercept = 0, slope = 1, lty = 2, col = "grey50") +
+  geom_point(alpha = .5, size = 1.3) + scale_color_manual(values = party_colors, guide = "none") + coord_fixed() + theme_bw() +
+  xlab("EM (standardized, all respondents)") + ylab("Stan posterior mean (subsample)") + theme(text = element_text(size = 15))
+```
+
+- Correlation `r round(cor(theta_em[sub], theta_post$mean), 3)`. The Stan estimates are shrunk toward zero at both extremes: with few answers on the other side to go on, the posterior is pulled back towards the $\text{Normal}(0, 1)$ prior.
+
+## Ideal points and party
+
+- With all `r format(nrow(Y), big.mark=",")` respondents (EM estimates)
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4.8}
+ces <- ces %>% mutate(theta_em = theta_em, party = case_when(pid3 %in% c("Democrat", "Republican") ~ pid3, T ~ "Independent/other/not sure"))
+ces %>% ggplot(aes(x = theta_em, fill = party)) + geom_histogram(bins = 60, col = "white", lwd = .1) +
+  facet_wrap(~ party, ncol = 1, scales = "free_y") + scale_fill_manual(values = party_colors, guide = "none") + theme_bw() +
+  xlab(expression(paste(theta[i], " (EM, standardized)"))) + ylab("Respondents") + theme(text = element_text(size = 16))
+```
+
+- Partisans are well separated, but there is a long tail of Democrats and Republicans in the middle. Independents are everywhere.
+
+## Ideal points and ideology
+
+- Distribution of $\theta_i$ by **self-reported** ideology (dashed line: group mean)
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4.4}
+ideo_levels <- c("Very liberal", "Liberal", "Moderate", "Conservative", "Very conservative", "Not sure")
+ideo_df <- ces %>% filter(ideo5 %in% ideo_levels) %>% mutate(ideo5 = factor(ideo5, levels = ideo_levels)) %>%
+  add_count(ideo5) %>% mutate(label = str_c(ideo5, " (n = ", format(n, big.mark = ",", trim = T), ")"))
+ideo_df %>% ggplot(aes(x = theta_em, fill = ideo5)) + geom_density(alpha = .8, col = NA) +
+  geom_vline(data = ideo_df %>% group_by(ideo5) %>% summarize(mean_theta = mean(theta_em)),
+             aes(xintercept = mean_theta), lty = 2) +
+  geom_text(data = distinct(ideo_df, ideo5, label), aes(label = label), x = Inf, y = Inf, hjust = 1.05, vjust = 1.5, size = 5) +
+  facet_wrap(~ ideo5, ncol = 1) +
+  scale_fill_manual(values = c("#2166AC", "#67A9CF", "#9E9AC8", "#EF8A62", "#B2182B", "grey50"), guide = "none") +
+  theme_bw() + xlab(expression(paste(theta[i], " (EM, standardized)"))) + ylab("") +
+  theme(text = element_text(size = 15), axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        strip.text = element_blank(), strip.background = element_blank())
+```
+
+::: {.incremental}
+
+- Self-described ideology lines up with $\theta_i$ on average, with plenty of spread within each category
+- "Not sure": same average as moderates, but more tightly bunched in the middle
+
+:::
+
+## Where do last week's clusters land?
+
+```{r bmm5, echo=F, cache=T, cache.extra=Y}
+# Last week's EM code for the Bernoulli mixture, unchanged
+bmm_complete_loglik <- function(Y, beta, pi){
+  Y %*% t(log(beta)) + (1 - Y) %*% t(log(1 - beta)) + matrix(log(pi), nrow(Y), length(pi), byrow = T)
+}
+bmm_loglik <- function(Y, beta, pi) sum(log(rowSums(exp(bmm_complete_loglik(Y, beta, pi)))))
+bmm_estep <- function(Y, beta, pi){
+  joint <- exp(bmm_complete_loglik(Y, beta, pi))
+  joint / rowSums(joint)
+}
+bmm_mstep <- function(Y, gamma, a = 2, b = 2){
+  n_k <- colSums(gamma)
+  list(pi = n_k / nrow(Y), beta = (t(gamma) %*% Y + a - 1) / (n_k + a + b - 2))
+}
+bmm_em <- function(Y, K, a = 2, b = 2, maxit = 5000, tol = 1e-6){
+  gamma <- matrix(runif(nrow(Y) * K), ncol = K)
+  gamma <- gamma / rowSums(gamma)
+  curr_post <- -Inf
+  for (iter in 1:maxit){
+    params <- bmm_mstep(Y, gamma, a, b)
+    gamma <- bmm_estep(Y, params$beta, params$pi)
+    log_lik <- bmm_loglik(Y, params$beta, params$pi)
+    new_post <- log_lik + (a - 1) * sum(log(params$beta)) + (b - 1) * sum(log(1 - params$beta))
+    if (abs(new_post - curr_post) / nrow(Y) < tol) break
+    curr_post <- new_post
+  }
+  list(beta = params$beta, pi = params$pi, gamma = gamma, log_lik = log_lik, log_post = new_post, iter = iter)
+}
+order_clusters <- function(fit){
+  liberal_share <- colMeans(liberal_answer * t(fit$beta) + (1 - liberal_answer) * (1 - t(fit$beta)))
+  o <- order(liberal_share, decreasing = T)
+  list(beta = fit$beta[o, , drop = F], pi = fit$pi[o], gamma = fit$gamma[, o, drop = F], log_lik = fit$log_lik, log_post = fit$log_post)
+}
+set.seed(53703)
+fits5 <- map(1:10, function(r) bmm_em(Y, K = 5))
+bmm5 <- order_clusters(fits5[[which.max(map_dbl(fits5, "log_post"))]])
+```
+
+```{r, echo=F}
+cluster_names <- c("1: Consistent liberals", "2: Liberal, except police\nand the border", "3: Support (almost) everything",
+                   "4: Low structure", "5: Consistent conservatives")
+ces <- ces %>% mutate(cluster = factor(cluster_names[apply(bmm5$gamma, 1, which.max)], levels = rev(cluster_names)))
+```
+
+- Last week's $K = 5$ mixture, with each respondent assigned to their most likely cluster
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4.6}
+ces %>% ggplot(aes(x = theta_em, y = cluster, fill = cluster)) + geom_violin(scale = "width", col = NA, alpha = .8) +
+  geom_boxplot(width = .15, outlier.shape = NA, fill = "white") +
+  scale_fill_manual(values = rev(c("#0479A8", "#8fbcd4", "grey60", "#e3a3a5", "#c5050c")), guide = "none") +
+  theme_bw() + xlab(expression(paste(theta[i], " (EM, standardized)"))) + ylab("") + theme(text = element_text(size = 16))
+```
+
+## Where do last week's clusters land?
+
+::: {.incremental}
+
+- The consistent liberal and conservative clusters are at the ends.
+- Clusters 2, 3, and 4 **all** land in the middle of the scale
+  - Cluster 2 is near the center because it is liberal on most issues and conservative on police and the border
+  - Cluster 3 is near the center because saying "support" to everything means half its answers are liberal and half are conservative
+  - Cluster 4 is near the center because its answers have little ideological structure
+
+- A single dimension maps all three patterns to a "moderate" ideal point
+  - This is the  @fowler2023moderates vs. @broockman2025moderates debate: are moderates **centrists**, or are they **unconstrained** voters that a one-dimensional model assigns to the middle?
+  - The answer depends on which model we're willing to assume.
+
+:::
+
+## Checking local independence
+
+- Like last week: does the model reproduce the observed correlations between pairs of questions?
+  - Posterior predictive check: simulate replicated datasets $Y^{\text{rep}}$ from 200 posterior draws and compute their correlation matrices
+
+```{r ppc, cache=T, cache.extra=list(irt_sign_code, irt_data, lb_all, ub_all)}
+theta_draws <- unclass(as_draws_matrix(subset_draws(draws, variable = "theta"))) # draws x respondents
+beta_draws <- unclass(as_draws_matrix(subset_draws(draws, variable = "beta")))
+tau_draws <- unclass(as_draws_matrix(subset_draws(draws, variable = "tau")))
+pairs <- upper.tri(diag(ncol(Y)))
+set.seed(53703)
+rep_cor <- sapply(sample(ndraws(draws), 200), function(s){
+  eta <- outer(theta_draws[s, ], beta_draws[s, ]) - matrix(tau_draws[s, ], length(sub), ncol(Y), byrow = T)
+  Y_rep <- matrix(rbinom(length(eta), 1, plogis(eta)), nrow(eta))
+  cor(Y_rep)[pairs]
+})
+obs_cor <- cor(Y[sub, ])[pairs]
+```
+
+## Checking local independence
+
+```{r, echo=F}
+item_pairs <- which(pairs, arr.ind = T)
+ppc_df <- tibble(item1 = colnames(Y)[item_pairs[, 1]], item2 = colnames(Y)[item_pairs[, 2]], observed = obs_cor,
+                 rep_mean = rowMeans(rep_cor), rep_lo = apply(rep_cor, 1, quantile, .025), rep_hi = apply(rep_cor, 1, quantile, .975)) %>%
+  mutate(same_issue = if_else(issue_area[item1] == issue_area[item2], "Same issue area", "Different issue areas"),
+         outside = observed < rep_lo | observed > rep_hi)
+```
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4.6}
+ppc_df %>% ggplot(aes(x = rep_mean, y = observed, col = same_issue)) + geom_abline(intercept = 0, slope = 1, lty = 2, col = "grey50") +
+  geom_errorbarh(aes(xmin = rep_lo, xmax = rep_hi), height = 0, alpha = .4) + geom_point(size = 2, alpha = .8) +
+  scale_color_manual(values = c("grey50", "#c5050c"), name = "") + coord_fixed() + theme_bw() +
+  xlab("Correlation in replicated data (mean and 95% interval)") + ylab("Observed correlation") +
+  theme(text = element_text(size = 15), legend.position = "right")
+```
+
+- `r scales::percent(mean(ppc_df$outside), 1)` of the `r nrow(ppc_df)` pairs fall outside the 95% predictive interval: `r with(filter(ppc_df, same_issue == "Same issue area"), str_c(sum(outside), " of ", length(outside)))` pairs on the **same issue**, vs. `r with(filter(ppc_df, same_issue != "Same issue area"), scales::percent(mean(outside), 1))` of pairs across issue areas
+
+## Checking local independence
+
+- The worst-fitting pairs:
+
+```{r, echo=F}
+ppc_df %>% mutate(gap = observed - rep_mean) %>% arrange(desc(abs(gap))) %>% slice(1:6) %>%
+  transmute(`Question 1` = item_labels[item1], `Question 2` = item_labels[item2], Observed = observed, Replicated = rep_mean) %>%
+  kable(digits = 2)
+```
+
+::: {.incremental}
+
+- Answers on the **same issue** are more strongly related than one ideological dimension can explain
+  - Someone who always allows abortion is much more likely to want to expand access than their $\theta_i$ alone predicts
+
+:::
+
+## Extensions
+
+::: {.incremental}
+
+- **Ordinal responses** (e.g. a 5-point agree/disagree scale): an ordered logit with item-specific cutpoints $\tau_{j1} < \tau_{j2} < \dotsc < \tau_{j,K_j-1}$
+
+  $$Pr(Y_{ij} \le k) = F(\tau_{jk} - \beta_j\theta_i)$$
+
+- **Multiple dimensions**: $\theta_i \in \mathbb{R}^D$, with more identification constraints (rotation, not just reflection)
+
+- **Hierarchical priors** on $\theta_i$: let the prior mean depend on covariates (party, region, ...) and borrow strength like last week's multilevel models
+
+- **Dynamic** models: let $\theta_i$ change over time
+
+:::
+
+# Dynamic IRT
+
+## Dynamic IRT model
+
+::: {.incremental}
+
+- So far, we've focused on settings with just one time period.
+  - But many datasets (e.g. legislative voting, survey panels) observe the same units over time.
+
+- One option: estimate each period's ideal points entirely separately.
+  - But this seems inefficient. The previous year's latent score is probably a good predictor of this year's score.
+  - How do we incorporate this in the model?
+
+- Put a **random walk prior** on $\theta_i$
+  - In political science, first used by @martin2002dynamic to study the ideology of Supreme Court justices.
+  - Many other applications to different settings (e.g. UN General Assembly voting by @bailey2017estimating)
+
+:::
+
+## Dynamic IRT model
+
+::: {.incremental}
+
+- We observe roll call votes for $N$ legislators on $J$ bills across $T$ time periods.
+  - $Y_{ijt}$ denotes the choice ($1$ = Yea, $0$ = Nay)
+  - Note that not all legislators will vote in every time period, not every bill appears in every time period, etc...
+
+- Same two-parameter set-up as before with a time-specific ideal point $\theta_{it}$. @martin2002dynamic use the probit link here.
+
+  $$Pr(Y_{ijt} = 1) = \Phi\bigg(\beta_j\theta_{it} - \tau_j\bigg)$$
+
+:::
+
+## Dynamic IRT model
+
+::: {.incremental}
+
+- Same normal priors on the bill parameters $\beta_j$ and $\tau_j$
+- For the **first** ideal point for legislator $i$, $\theta_{i0}$, we use a standard normal prior.
+- But each successive ideal point is assumed to come from a random walk centered on the *previous* ideal point
+
+  $$\theta_{it} \sim \mathcal{N}(\theta_{i(t-1)}, \omega^2)$$
+
+- $\omega^2$ is a user-specified "smoothing parameter" -- what is our prior belief about how "jumpy" the ideal points are from year-to-year.
+  - $\omega^2 \to 0$ is equivalent to a **pooled** IRT model where every legislator has the same ideal point in each session.
+  - $\omega^2 \to \infty$ is equivalent to the setting where each time period is analyzed **completely separately**
+  - Same partial pooling logic as multilevel models, but pooling across **adjacent periods**
+
+:::
+
+## Illustration: Supreme Court Ideology
+
+- @martin2002dynamic implement an MCMC algorithm for this model.
+  - @imai2016fast develop a faster variational EM algorithm for obtaining the posterior modes.
+  - Implemented in `emIRT` as `dynIRT()`, which also ships with the Martin and Quinn data
+
+```{r, echo=T}
+data(mq_data)
+```
+
+- Votes of every justice in every case, October Term 1937 through 2013. What does the "data matrix" look like? (One case, with $+1$/$-1$ for the two sides and $0$ for justices not on the Court)
+
+```{r}
+mq_data$data.mq$rc[, 4]
+```
+
+## Illustration: Supreme Court Ideology
+
+- Priors on the case parameters (`emIRT` writes the model as $\alpha_j + \beta_j\theta_{it}$, so its `alpha` is our $-\tau_j$)
+
+```{r}
+mq_data$priors.mq$beta.mu
+mq_data$priors.mq$beta.sigma
+```
+
+- We use informative priors on some of the $\theta$ values to get identification
+
+```{r, echo=T}
+mq_data$priors.mq$x.mu0[mq_data$priors.mq$x.mu0 != 0]
+mq_data$priors.mq$x.sigma0[mq_data$priors.mq$x.mu0 != 0]
+```
+
+- Which justices do these correspond to?
+
+```{r,echo=T}
+rownames(mq_data$data.mq$rc)[mq_data$priors.mq$x.mu0 != 0]
+```
+
+## Illustration: Supreme Court Ideology
+
+- How much smoothing are we doing?
+
+```{r}
+head(mq_data$priors.mq$omega2)
+```
+
+- Let's estimate the model
+
+```{r, echo=T, results="hide"}
+mq_estimates <- dynIRT(.data = mq_data$data.mq,
+                       .starts = mq_data$cur.mq,
+                       .priors = mq_data$priors.mq,
+                       .control = list(threads = 1, verbose = FALSE, thresh = 1e-6, maxit = 500))
+```
+
+- `mq_estimates$means$x` is a justices $\times$ terms matrix of ideal points
+
+## Illustration: Supreme Court Ideology
+
+- Reshape to one row per justice per term they served (term $t$ is the October Term $1937 + t$)
+
+```{r}
+mq_long <- function(x){ # justices x terms matrix -> data frame of served terms
+  tibble(justice = rownames(mq_data$data.mq$rc), i = seq_along(justice),
+         start = mq_data$data.mq$startlegis[, 1], end = mq_data$data.mq$endlegis[, 1]) %>%
+    mutate(t = map2(start, end, seq)) %>% unnest(t) %>%
+    mutate(term = 1937 + t, ideal_point = x[cbind(i, t + 1)])
+}
+results_df <- mq_long(mq_estimates$means$x)
+results_df %>% select(justice, term, ideal_point) %>% slice(1:5)
+```
+
+## Illustration: Supreme Court Ideology
+
+```{r, echo=F}
+mq_plot <- function(df){
+  df %>% ggplot(aes(x = term, y = ideal_point, colour = justice)) + geom_line() +
+    geom_text_repel(data = df %>% filter(t == end), aes(label = justice), nudge_x = 0.5, na.rm = TRUE, min.segment.length = 100) +
+    xlab("October Term") + ylab("Ideal point (higher = more conservative)") + theme_bw() + theme(legend.position = "none", text = element_text(size = 14))
+}
+```
+
+```{r, echo=F, message=F, warning=F, fig.align = "center", fig.width=10, fig.height=5.5, dpi=150}
+mq_plot(results_df)
+```
+
+
+## Illustration: Supreme Court Ideology
+
+- What happens when we use a lower smoothing variance?
+
+```{r, results="hide"}
+priors_strong <- mq_data$priors.mq
+priors_strong$omega2[, 1] <- .001
+
+mq_estimates_heavysmooth <- dynIRT(.data = mq_data$data.mq,
+                                   .starts = mq_data$cur.mq,
+                                   .priors = priors_strong,
+                                   .control = list(threads = 1, verbose = FALSE, thresh = 1e-6, maxit = 500))
+results_heavysmooth <- mq_long(mq_estimates_heavysmooth$means$x)
+```
+
+## Illustration: Supreme Court Ideology
+
+- $\omega^2 = 0.001$ instead of $0.1$:
+
+```{r, echo=F, message=F, warning=F, fig.align = "center", fig.width=10, fig.height=5.5, dpi=150}
+mq_plot(results_heavysmooth)
+```
+
+## Summary
+
+::: {.incremental}
+
+- Like mixture models, Item Response Theory (IRT) models treat the outcome as a function of a **latent variable**
+  - However, in IRT, the **latent variable** is continuous rather than discrete
+
+- As with clustering, imagine a regression model with **unknown regressors**
+  - Our goal is to draw inferences about these regressors under the model structure.
+
+- Inference algorithms leverage the fact that **conditional** on the latent regressors, the model has a familiar structure (e.g. logistic regression)
+  - But similar identifiability problems as clustering: invariance to reflection + rescaling.
+
+- **Careful!** - Results dependent on model structure!
+  - Interpretation of the model parameters is ultimately up to the researchers - no inherent "meaning" to the latent scale.
+  - In the CES, very different response patterns all end up in the "middle" of a single dimension.
+
+:::
+
+## Next week
+
+::: {.incremental}
+
+- **Regularization and model selection**
+  - Variable selection and penalized regression (Ridge, LASSO)
+  - Cross-fitting and out-of-sample validation
+
+- **Readings:** Chapters 6-7 of @james2013isl
+
+:::
+
+## References {.refs-slide}
+
+::: {#refs}
+:::
