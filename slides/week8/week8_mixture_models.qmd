@@ -1029,7 +1029,7 @@ tibble(n_liberal, cluster = factor(hard5)) %>%
 
 - **Item response theory** ("latent trait"): a continuous $\theta_i$ for each respondent, and a slope and intercept for each question
 
-  $$Pr(Y_{ij} = 1 | \theta_i) = F(\alpha_j\theta_i - \tau_j)$$
+  $$Pr(Y_{ij} = 1 | \theta_i) = F(\beta_j\theta_i - \tau_j)$$
 
 - Both assume local independence conditional on the underlying latent variable
 - But IRT uses a single **continuous** trait rather than a **discrete** classification.
