@@ -303,8 +303,6 @@ knitr::opts_chunk$set(echo = T)
 
 :::
 
-# Application: Policy attitudes
-
 ## Data: CES 2023
 
 - Same data as last week: the 24 support/oppose policy questions from the 2023 CES [@schaffner2024ces], `1` = Support, `0` = Oppose
@@ -841,8 +839,6 @@ ppc_df %>% mutate(gap = observed - rep_mean) %>% arrange(desc(abs(gap))) %>% sli
 - **Dynamic** models: let $\theta_i$ change over time
 
 :::
-
-# Dynamic IRT
 
 ## Dynamic IRT model
 
