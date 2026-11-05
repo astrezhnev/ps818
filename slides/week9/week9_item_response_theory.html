@@ -1355,11 +1355,6 @@ Y_{ij}^* &amp;= \frac{2(\zeta_j - \psi_j)}{\sigma_j}\theta_i + \frac{(\psi_j^2 -
 <li class="fragment"><p>Stan doesn’t need any of this: HMC samples <span class="math inline">\(\theta\)</span>, <span class="math inline">\(\beta\)</span>, and <span class="math inline">\(\tau\)</span> jointly.</p></li>
 </ul>
 </section>
-<section>
-<section id="application-policy-attitudes" class="title-slide slide level1 center">
-<h1>Application: Policy attitudes</h1>
-
-</section>
 <section id="data-ces-2023" class="slide level2">
 <h2>Data: CES 2023</h2>
 <ul>
@@ -1623,7 +1618,7 @@ beta[16]        -3.20         3.19        -3.20         3.20</code></pre>
 <span id="cb16-5"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
-<li>All 24,453 respondents in 3.4 seconds (80 iterations)</li>
+<li>All 24,453 respondents in 3.8 seconds (80 iterations)</li>
 <li><code>makePriors()</code> sets <span class="math inline">\(\theta_i \sim \text{Normal}(0, 1)\)</span> and <span class="math inline">\(\text{Normal}(0, 5^2)\)</span> priors on the item parameters.</li>
 </ul>
 <div class="cell">
@@ -1816,11 +1811,6 @@ beta[16]        -3.20         3.19        -3.20         3.20</code></pre>
 <li class="fragment"><p><strong>Hierarchical priors</strong> on <span class="math inline">\(\theta_i\)</span>: let the prior mean depend on covariates (party, region, …) and borrow strength like last week’s multilevel models</p></li>
 <li class="fragment"><p><strong>Dynamic</strong> models: let <span class="math inline">\(\theta_i\)</span> change over time</p></li>
 </ul>
-</section></section>
-<section>
-<section id="dynamic-irt" class="title-slide slide level1 center">
-<h1>Dynamic IRT</h1>
-
 </section>
 <section id="dynamic-irt-model" class="slide level2">
 <h2>Dynamic IRT model</h2>
@@ -2096,7 +2086,7 @@ Schaffner, Brian, Stephen Ansolabehere, Jeremy Pope, and Marissa Shih. 2024. <sp
 </div>
 
 
-</section></section>
+</section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
