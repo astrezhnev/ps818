@@ -1771,181 +1771,6 @@
     "text": "References\n\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press. https://avehtari.github.io/ROS-Examples/index.html."
   },
   {
-    "objectID": "schedule.html",
-    "href": "schedule.html",
-    "title": "Schedule",
-    "section": "",
-    "text": "A schedule of topics and readings is provided below. Each week will cover a single topic or group of topics. You should treat the readings as a reference and as a more detailed exposition of the topics discussed in lecture. Consult the readings when you want to know more or want a slightly different approach to explaining a particular topic.\nMonday lectures will typically introduce the core theory for the week’s topic while Wednesday lectures will go into greater detail and work through applications. You should make sure to review the readings prior to that week’s lectures with an aim towards completing them before Wednesday’s lecture.\nAll hyperlinks to papers are either to the published version of the paper (if published) or to the working paper. You should use your university library access to obtain the full version if the article is not open access. Likewise, textbook readings will be to the free/open version of the book (if available) or to the UW-Madison university library eBook."
-  },
-  {
-    "objectID": "schedule.html#week-1-course-introduction-and-review",
-    "href": "schedule.html#week-1-course-introduction-and-review",
-    "title": "Schedule",
-    "section": "Week 1: Course Introduction and Review",
-    "text": "Week 1: Course Introduction and Review\nWednesday, September 9\nTopics:\n\nWhat is a statistical model and what is it good for?\nReview of regression\n\nReadings:\n\nReview: Chapters 1-7; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\n\n\n\n\n\n\n\nProblem Set 1 assigned Wednesday, September 9 – due Wednesday, September 23."
-  },
-  {
-    "objectID": "schedule.html#week-2-introduction-to-likelihood-inference",
-    "href": "schedule.html#week-2-introduction-to-likelihood-inference",
-    "title": "Schedule",
-    "section": "Week 2: Introduction to Likelihood Inference",
-    "text": "Week 2: Introduction to Likelihood Inference\nMonday, September 14 & Wednesday, September 16\nTopics:\n\nWhat is a “parametric” model?\nThe likelihood function\nMaximum likelihood estimation\n\nReadings:\n\nChapter 5 (“Parametric Models”); Aronow, P. M. and Benjamin T. Miller. 2019. Foundations of Agnostic Statistics. Cambridge: Cambridge University Press.\nChapter 6 (“Likelihood Inference”); Evans, Michael J., and Jeffrey S. Rosenthal. 2010. Probability and Statistics: The Science of Uncertainty, 2nd ed. New York: W.H. Freeman."
-  },
-  {
-    "objectID": "schedule.html#week-3-generalized-linear-models",
-    "href": "schedule.html#week-3-generalized-linear-models",
-    "title": "Schedule",
-    "section": "Week 3: Generalized Linear Models",
-    "text": "Week 3: Generalized Linear Models\nMonday, September 21 & Wednesday, September 23\nTopics:\n\nProperties of maximum likelihood estimators\nThe generalized linear model framework\nBinary outcome models\n\nReadings:\n\nChapters 13-14; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\n\n\n\n\n\n\n\nProblem Set 1 due Wednesday, September 23. Problem Set 2 assigned Sunday, September 27 – due Friday, October 9."
-  },
-  {
-    "objectID": "schedule.html#week-4-more-likelihood-models",
-    "href": "schedule.html#week-4-more-likelihood-models",
-    "title": "Schedule",
-    "section": "Week 4: More Likelihood Models",
-    "text": "Week 4: More Likelihood Models\nMonday, September 28 & Wednesday, September 30\nTopics:\n\nDuration models (parametric, semi-parametric (Cox) and non-parametric approaches)\nEvent count models (Poisson regression and quasi-MLE methods)\n\nReadings:\n\nChapter 15; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\nClark, T. G., M. J. Bradburn, S. B. Love, and D. G. Altman. 2003. “Survival Analysis Part I: Basic Concepts and First Analyses.” British Journal of Cancer 89 (2): 232-238.\nStensrud, Mats J., and Miguel A. Hernán. 2020. “Why Test for Proportional Hazards?” JAMA 323 (14): 1401-1402.\nChapter 8; Wooldridge, Jeffrey M. 1999. “Quasi-Likelihood Methods for Count Data.” In Handbook of Applied Econometrics, vol. 2, 352-406."
-  },
-  {
-    "objectID": "schedule.html#week-5-bayesian-inference",
-    "href": "schedule.html#week-5-bayesian-inference",
-    "title": "Schedule",
-    "section": "Week 5: Bayesian Inference",
-    "text": "Week 5: Bayesian Inference\nMonday, October 5\nTopics:\n\nPrinciples of posterior inference\nHow to write a Bayesian model\nQuantities of interest: posterior mode, posterior mean, credible intervals\n\nReadings:\n\nChapter 9; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\nChapters 10-11; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton: Chapman and Hall/CRC.\n\n\n\n\n\n\n\nProblem Set 3 assigned Wednesday, October 7 – due Wednesday, October 21. Problem Set 2 due Friday, October 9.\n\n\n\n\n\n\n\n\n\n\nMidterm 1 In-Class, Wednesday, October 7th"
-  },
-  {
-    "objectID": "schedule.html#week-6-estimating-bayesian-models",
-    "href": "schedule.html#week-6-estimating-bayesian-models",
-    "title": "Schedule",
-    "section": "Week 6: Estimating Bayesian Models",
-    "text": "Week 6: Estimating Bayesian Models\nMonday, October 12 & Wednesday, October 14\nTopics:\n\nAnalytically tractable solutions through conjugate priors\nMarkov Chain Monte Carlo methods\nIntroduction to MCMC in Stan\n\nReadings:\n\nChapters 3 and 9; McElreath, Richard. 2020. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd ed. Boca Raton: Chapman and Hall/CRC."
-  },
-  {
-    "objectID": "schedule.html#week-7-multilevel-regression-models",
-    "href": "schedule.html#week-7-multilevel-regression-models",
-    "title": "Schedule",
-    "section": "Week 7: Multilevel Regression Models",
-    "text": "Week 7: Multilevel Regression Models\nMonday, October 19 & Wednesday, October 21\nTopics:\n\nPartial pooling through priors\nMethods for model validation\nMultilevel regression and post-stratification (MRP)\n\nReadings:\n\nChapter 11 and Appendix A; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\nChapter 15; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton: Chapman and Hall/CRC.\nPark, David K., Andrew Gelman, and Joseph Bafumi. 2004. “Bayesian Multilevel Estimation with Poststratification: State-Level Estimates from National Polls.” Political Analysis 12 (4): 375-385.\n\n\n\n\n\n\n\nProblem Set 3 due Wednesday, October 21. Problem Set 4 assigned Wednesday, October 21 – due Monday, November 9.\n\n\n\n\n\n\n\n\n\nReplication project memo due Wednesday, October 21"
-  },
-  {
-    "objectID": "schedule.html#week-8-mixture-models-and-the-em-algorithm",
-    "href": "schedule.html#week-8-mixture-models-and-the-em-algorithm",
-    "title": "Schedule",
-    "section": "Week 8: Mixture Models and the EM Algorithm",
-    "text": "Week 8: Mixture Models and the EM Algorithm\nMonday, October 26 & Wednesday, October 28\nTopics:\n\nExploratory data analysis and clustering models\nMLE and MAP estimation via the “Expectation-Maximization” algorithm\n\nReadings:\n\nChapters 13 and 22; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton: Chapman and Hall/CRC."
-  },
-  {
-    "objectID": "schedule.html#week-9-item-response-theory-and-ideal-point-models",
-    "href": "schedule.html#week-9-item-response-theory-and-ideal-point-models",
-    "title": "Schedule",
-    "section": "Week 9: Item Response Theory and Ideal Point Models",
-    "text": "Week 9: Item Response Theory and Ideal Point Models\nMonday, November 2 & Wednesday, November 4\nTopics:\n\nLatent trait models\n“Ideal point” models in legislative voting\n\nReadings:\n\nMartin, Andrew D., and Kevin M. Quinn. 2002. “Dynamic Ideal Point Estimation via Markov Chain Monte Carlo for the U.S. Supreme Court, 1953-1999.” Political Analysis 10 (2): 134-153.\nClinton, Joshua, Simon Jackman, and Douglas Rivers. 2004. “The Statistical Analysis of Roll Call Data.” American Political Science Review 98 (2): 355-370.\nImai, Kosuke, James Lo, and Jonathan Olmsted. 2016. “Fast Estimation of Ideal Points with Massive Data.” American Political Science Review 110 (4): 631-656."
-  },
-  {
-    "objectID": "schedule.html#week-10-regularization-and-model-selection",
-    "href": "schedule.html#week-10-regularization-and-model-selection",
-    "title": "Schedule",
-    "section": "Week 10: Regularization and Model Selection",
-    "text": "Week 10: Regularization and Model Selection\nMonday, November 9\nTopics:\n\nVariable selection and penalized regression (Ridge, LASSO)\nCross-fitting and out-of-sample validation\n\nReadings:\n\nChapters 6-7; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer.\n\n\n\n\n\n\n\nProblem Set 4 due Monday, November 9.\n\n\n\n\n\n\n\n\n\n\nMidterm 2 In-Class, Wednesday, November 11th"
-  },
-  {
-    "objectID": "schedule.html#week-11-flexible-regression-trees-and-forests",
-    "href": "schedule.html#week-11-flexible-regression-trees-and-forests",
-    "title": "Schedule",
-    "section": "Week 11: Flexible Regression – Trees and Forests",
-    "text": "Week 11: Flexible Regression – Trees and Forests\nMonday, November 16 & Wednesday, November 18\nTopics:\n\nRegression trees\nAggregation via sums of trees + regularization via BART\nBagging, boosting, random forests\n\nReadings:\n\nChapter 8; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer.\nChapters 9-10 and 15; Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2009. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd ed. New York: Springer.\nHill, Jennifer, Antonio Linero, and Jared Murray. 2020. “Bayesian Additive Regression Trees: A Review and Look Forward.” Annual Review of Statistics and Its Application 7: 251-278."
-  },
-  {
-    "objectID": "schedule.html#week-12-flexible-regression-kernels-and-gaussian-processes",
-    "href": "schedule.html#week-12-flexible-regression-kernels-and-gaussian-processes",
-    "title": "Schedule",
-    "section": "Week 12: Flexible Regression – Kernels and Gaussian Processes",
-    "text": "Week 12: Flexible Regression – Kernels and Gaussian Processes\nMonday, November 23\n\n\n\n\n\n\nThanksgiving recess runs November 26-29. Class meets as usual on Monday this week. Wednesday is cancelled.\n\n\n\nTopics:\n\nInfinite dimensional function spaces\nKernel ridge regression\nGaussian process regression\n\nReadings:\n\nHainmueller, Jens, and Chad Hazlett. 2014. “Kernel Regularized Least Squares: Reducing Misspecification Bias with a Flexible and Interpretable Machine Learning Approach.” Political Analysis 22 (2): 143-168.\nChapters 2 and 4; Rasmussen, Carl Edward, and Christopher K. I. Williams. 2006. Gaussian Processes for Machine Learning. Cambridge, MA: MIT Press."
-  },
-  {
-    "objectID": "schedule.html#week-13-causal-inference-with-flexible-regression",
-    "href": "schedule.html#week-13-causal-inference-with-flexible-regression",
-    "title": "Schedule",
-    "section": "Week 13: Causal Inference with Flexible Regression",
-    "text": "Week 13: Causal Inference with Flexible Regression\nMonday, November 30 & Wednesday, December 2\nTopics:\n\nEfficient semiparametric estimation of statistical functionals\nInfluence functions\n“Doubly-robust”/“Neyman-orthogonal” estimators\n\nReadings:\n\nFisher, Aaron, and Edward H. Kennedy. 2021. “Visually Communicating and Teaching Intuition for Influence Functions.” The American Statistician 75 (2): 162-172.\nKennedy, Edward H. 2024. “Semiparametric Doubly Robust Targeted Double Machine Learning: A Review.” In Handbook of Statistical Methods for Precision Medicine, 207-236.\n\n\n\n\n\n\n\n\nPoster Session Friday, December 4th"
-  },
-  {
-    "objectID": "schedule.html#week-14-working-with-big-datasets",
-    "href": "schedule.html#week-14-working-with-big-datasets",
-    "title": "Schedule",
-    "section": "Week 14: Working with “Big” Datasets",
-    "text": "Week 14: Working with “Big” Datasets\nMonday, December 7 & Wednesday, December 9\nTopics:\n\nEstimation with out-of-memory data\nStochastic gradient descent\nLossless compression in regression\n\nReadings:\n\nToulis, Panos, and Edoardo M. Airoldi. 2015. “Scalable Estimation Strategies Based on Stochastic Approximations: Classical Results and New Insights.” Statistics and Computing 25 (4): 781-795.\nWong, Jeffrey, Eskil Forsell, Randall A. Lewis, Tobias Mao, and Matthew Wardrop. 2021. “You Only Compress Once: Optimal Data Compression for Estimating Linear Models.” arXiv preprint arXiv:2102.11297."
-  },
-  {
-    "objectID": "lectures.html",
-    "href": "lectures.html",
-    "title": "Lectures",
-    "section": "",
-    "text": "Lecture slides are available as self-contained .html files made with RevealJS from a Quarto .qmd file. You can choose to print these to a PDF document by using the “PDF Export Mode” in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the .qmd file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday’s lectures.\nLinks become active as the materials for each week are posted.\n\n\n\n\nWeek 1 Github Repository\nWeek 1 .html slides\n\n\n\n\n\nWeek 2 Github Repository\nWeek 2 .html slides\n\n\n\n\n\nWeek 3 Github Repository\nWeek 3 .html slides\n\n\n\n\n\nWeek 4 Github Repository\nWeek 4 .html slides\n\n\n\n\n\nWeek 5 Github Repository\nWeek 5 .html slides\n\n\n\n\n\nWeek 6 Github Repository\nWeek 6 .html slides\n\n\n\n\n\nWeek 7 Github Repository\nWeek 7 .html slides\n\n\n\n\n\nWeek 8 Github Repository\nWeek 8 .html slides\n\n\n\n\n\nWeek 9 Github Repository\nWeek 9 .html slides\n\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted"
-  },
-  {
-    "objectID": "lectures.html#lecture-slides",
-    "href": "lectures.html#lecture-slides",
-    "title": "Lectures",
-    "section": "",
-    "text": "Lecture slides are available as self-contained .html files made with RevealJS from a Quarto .qmd file. You can choose to print these to a PDF document by using the “PDF Export Mode” in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the .qmd file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday’s lectures.\nLinks become active as the materials for each week are posted.\n\n\n\n\nWeek 1 Github Repository\nWeek 1 .html slides\n\n\n\n\n\nWeek 2 Github Repository\nWeek 2 .html slides\n\n\n\n\n\nWeek 3 Github Repository\nWeek 3 .html slides\n\n\n\n\n\nWeek 4 Github Repository\nWeek 4 .html slides\n\n\n\n\n\nWeek 5 Github Repository\nWeek 5 .html slides\n\n\n\n\n\nWeek 6 Github Repository\nWeek 6 .html slides\n\n\n\n\n\nWeek 7 Github Repository\nWeek 7 .html slides\n\n\n\n\n\nWeek 8 Github Repository\nWeek 8 .html slides\n\n\n\n\n\nWeek 9 Github Repository\nWeek 9 .html slides\n\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted"
-  },
-  {
-    "objectID": "assignments.html",
-    "href": "assignments.html",
-    "title": "Assignments",
-    "section": "",
-    "text": "Assignment\nAssigned\nDue\n\n\n\n\nProblem Set 1\nSept 9 (Week 1)\nSept 23 (Week 3)\n\n\nProblem Set 2\nSun Sept 27\nFri Oct 9 (Week 5)\n\n\nMidterm 1\n–\nIn class, Oct 7 (Week 5)\n\n\nProblem Set 3\nOct 7 (Week 5)\nOct 21 (Week 7)\n\n\nReplication project memo\n–\nOct 21 (Week 7)\n\n\nProblem Set 4\nOct 21 (Week 7)\nMon Nov 9 (Week 10)\n\n\nMidterm 2\n–\nIn class, Nov 11 (Week 10)\n\n\nReplication poster\n–\nMEAD poster session, Fri Dec 4\n\n\n\nProblem sets are generally assigned and due on Wednesdays. The replication project memo is ungraded; see the Syllabus for what it should contain."
-  },
-  {
-    "objectID": "assignments.html#schedule",
-    "href": "assignments.html#schedule",
-    "title": "Assignments",
-    "section": "",
-    "text": "Assignment\nAssigned\nDue\n\n\n\n\nProblem Set 1\nSept 9 (Week 1)\nSept 23 (Week 3)\n\n\nProblem Set 2\nSun Sept 27\nFri Oct 9 (Week 5)\n\n\nMidterm 1\n–\nIn class, Oct 7 (Week 5)\n\n\nProblem Set 3\nOct 7 (Week 5)\nOct 21 (Week 7)\n\n\nReplication project memo\n–\nOct 21 (Week 7)\n\n\nProblem Set 4\nOct 21 (Week 7)\nMon Nov 9 (Week 10)\n\n\nMidterm 2\n–\nIn class, Nov 11 (Week 10)\n\n\nReplication poster\n–\nMEAD poster session, Fri Dec 4\n\n\n\nProblem sets are generally assigned and due on Wednesdays. The replication project memo is ungraded; see the Syllabus for what it should contain."
-  },
-  {
-    "objectID": "assignments.html#problem-sets",
-    "href": "assignments.html#problem-sets",
-    "title": "Assignments",
-    "section": "Problem Sets",
-    "text": "Problem Sets\nProblem sets are distributed as .qmd files along with their rendered .html form. You should edit the provided .qmd file and render to .html when submitting the assignment. Additional files (e.g. datasets) are located in sub-folders. For convenience, all the combined files are also distributed as a .zip compressed archive.\nSubmit both your rendered .html file and the .qmd source that produced it on Gradescope, saved as Yourlastname_Yourfirstinitial_psetN.html and Yourlastname_Yourfirstinitial_psetN.qmd.\nLinks become active as each problem set is assigned.\n\nProblem Set 1\nAssigned Wednesday, September 9 – due Wednesday, September 23\n\nProblem Set 1 .html\nProblem Set 1 Github Repository\nProblem Set 1 .zip archive\n\n\n\nProblem Set 2\nAssigned Sunday, September 27 – due Friday, October 9\n\nProblem Set 2 .html\nProblem Set 2 Github Repository\nProblem Set 2 .zip archive\n\n\n\nProblem Set 3\nAssigned Wednesday, October 7 – due Wednesday, October 21\n\nProblem Set 3 .html\nProblem Set 3 Github Repository\nProblem Set 3 .zip archive\n\n\n\nProblem Set 4\nAssigned Wednesday, October 21 – due Monday, November 9\n\nProblem Set 4 .html\nProblem Set 4 Github Repository\nProblem Set 4 .zip archive"
-  },
-  {
-    "objectID": "assignments.html#exams",
-    "href": "assignments.html#exams",
-    "title": "Assignments",
-    "section": "Exams",
-    "text": "Exams\nBoth exams are in person, closed-book, pen-and-paper examinations involving both theory questions and practical interpretation of sample code and results. Together they are worth 40% of the course grade. There is no final exam during the university exam period.\n\nMidterm 1: in class on Wednesday, October 7, covering material through Week 4.\nMidterm 2: in class on Wednesday, November 11, covering material from Weeks 5-8."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "PoliSci 818",
-    "section": "",
-    "text": "Data Analysis with Statistical Models\nLikelihood, Bayesian and Machine Learning methods for description and prediction\nPoliSci 818 • Fall 2026University of Wisconsin-Madison\n\n\n\n\n\n\n\nInstructor\n\n   Anton Strezhnev\n   North Hall 322D\n   strezhnev@wisc.edu\n\n\n\nCourse details\n\n   Mondays & Wednesdays\n   9/9/2026 - 12/9/2026\n   9:30am - 10:45am\n   Sterling Hall 1339\n\n\n\nContacting me\nSlack is the best way to get in touch with me. My dedicated office hours are 9AM-11AM on Tuesdays if you want to meet in-person. I am also generally in my office on weekdays during normal hours and my door is open, so you are welcome to drop in. You can also feel free to contact me to confirm availability or to schedule a virtual meeting via Zoom."
-  },
-  {
-    "objectID": "resources.html",
-    "href": "resources.html",
-    "title": "Resources",
-    "section": "",
-    "text": "These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. Regression and Other Stories. Cambridge University Press, 2020.\n\nFree online version and examples\n\nGelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. Bayesian Data Analysis. 3rd Edition. Chapman and Hall/CRC, 2013.\n\nFree PDF available\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. An Introduction to Statistical Learning. Springer, 2013.\n\nFree PDF available\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd Edition. Springer, 2009.\n\nFree PDF available\n\nMcElreath, Richard. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd Edition. Chapman and Hall/CRC, 2020.\n\nUW-Madison library eBook\nCourse materials and lectures\n\nAronow, P. M., and Benjamin T. Miller. Foundations of Agnostic Statistics. Cambridge University Press, 2019.\n\nUW-Madison library eBook\n\nEvans, Michael J., and Jeffrey S. Rosenthal. Probability and Statistics: The Science of Uncertainty. 2nd Edition. W.H. Freeman, 2010.\n\nFree PDF available\n\nRasmussen, Carl Edward, and Christopher K. I. Williams. Gaussian Processes for Machine Learning. MIT Press, 2006.\n\nFree PDF available"
-  },
-  {
-    "objectID": "resources.html#textbooks",
-    "href": "resources.html#textbooks",
-    "title": "Resources",
-    "section": "",
-    "text": "These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. Regression and Other Stories. Cambridge University Press, 2020.\n\nFree online version and examples\n\nGelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. Bayesian Data Analysis. 3rd Edition. Chapman and Hall/CRC, 2013.\n\nFree PDF available\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. An Introduction to Statistical Learning. Springer, 2013.\n\nFree PDF available\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd Edition. Springer, 2009.\n\nFree PDF available\n\nMcElreath, Richard. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd Edition. Chapman and Hall/CRC, 2020.\n\nUW-Madison library eBook\nCourse materials and lectures\n\nAronow, P. M., and Benjamin T. Miller. Foundations of Agnostic Statistics. Cambridge University Press, 2019.\n\nUW-Madison library eBook\n\nEvans, Michael J., and Jeffrey S. Rosenthal. Probability and Statistics: The Science of Uncertainty. 2nd Edition. W.H. Freeman, 2010.\n\nFree PDF available\n\nRasmussen, Carl Edward, and Christopher K. I. Williams. Gaussian Processes for Machine Learning. MIT Press, 2006.\n\nFree PDF available"
-  },
-  {
-    "objectID": "resources.html#software",
-    "href": "resources.html#software",
-    "title": "Resources",
-    "section": "Software",
-    "text": "Software\n\nR and RStudio\nThis course uses R for all programming assignments. You are welcome to use the RStudio Interactive Development Environment (IDE) to write code and edit the assignment write-up. Due to the extensive integration of Quarto into Posit-developed IDEs, I encourage using either RStudio or the more recent Positron IDE.\n\nR: Download from https://www.r-project.org\nRStudio: Download from https://posit.co/download/rstudio-desktop/\nPositron: Download from https://positron.posit.co/\n\n\nRecommended Guides for R Programming\n\nR For Data Science Available at https://r4ds.hadley.nz/\nData Visualization: A Practical Introduction Available at https://socviz.co/\n\n\n\n\nStan\nWe will use Stan for specifying and estimating Bayesian models. Stan is written in C++ but has bindings for a variety of programming languages. In this course we will use two interfaces to Stan from R: RStan and brms. Running Stan locally requires a working C++ toolchain – consult the installation guide for the specific requirements of your operating system.\n\nInstallation guide: https://mc-stan.org/install/\nStan user’s guide: https://mc-stan.org/docs/stan-users-guide/\nbrms: https://paulbuerkner.com/brms/\n\n\n\nQuarto and Markdown\nThe assignments are distributed as .qmd Quarto files. Quarto is the successor to R Markdown and lets you present your analysis, code, figures and written discussion all in a single document. It uses Markdown syntax for formatting text and supports embedded R code chunks that execute when you render the document.\nTo complete assignments, you will edit the provided .qmd file, adding your code and written responses, then render it to an HTML file for submission. Both your .html output and .qmd file will be submitted via Gradescope.\n\nQuarto: Download from https://quarto.org/docs/get-started/\nQuarto Guide: https://quarto.org/docs/guide/\nMarkdown Basics: https://quarto.org/docs/authoring/markdown-basics.html\nNote also the chapter on Quarto in R For Data Science"
-  },
-  {
     "objectID": "slides/week1/week1_intro_and_review.html#welcome",
     "href": "slides/week1/week1_intro_and_review.html#welcome",
     "title": "Week 1: Course Introduction and Review",
@@ -2196,6 +2021,594 @@
     "title": "Week 1: Course Introduction and Review",
     "section": "References",
     "text": "References\n\n\nAronow, P. M., and Benjamin T. Miller. 2019. Foundations of Agnostic Statistics. Cambridge: Cambridge University Press. https://doi.org/10.1017/9781316831762.\n\n\nBox, George E. P. 1976. “Science and Statistics.” Journal of the American Statistical Association 71 (356): 791–99. https://doi.org/10.1080/01621459.1976.10480949.\n\n\nBreiman, Leo. 2001. “Statistical Modeling: The Two Cultures.” Statistical Science 16 (3): 199–231. https://doi.org/10.1214/ss/1009213726.\n\n\nEvans, Michael J., and Jeffrey S. Rosenthal. 2010. Probability and Statistics: The Science of Uncertainty. 2nd ed. New York: W.H. Freeman. https://utstat.toronto.edu/mikevans/jeffrosenthal/.\n\n\nGelman, Andrew, John B. Carlin, Hal S. Stern, David B. Dunson, Aki Vehtari, and Donald B. Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton, FL: Chapman and Hall/CRC. http://www.stat.columbia.edu/~gelman/book/.\n\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press. https://avehtari.github.io/ROS-Examples/index.html.\n\n\nHealy, Kieran. 2025. Modern Plain Text Computing. https://mptc.io/.\n\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer. https://www.statlearning.com/.\n\n\nKing, Gary. 1995. “Replication, Replication.” PS: Political Science & Politics 28 (3): 444–52. https://doi.org/10.2307/420301.\n\n\nMcElreath, Richard. 2020. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd ed. Boca Raton, FL: Chapman and Hall/CRC. https://xcelab.net/rm/."
+  },
+  {
+    "objectID": "resources.html",
+    "href": "resources.html",
+    "title": "Resources",
+    "section": "",
+    "text": "These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. Regression and Other Stories. Cambridge University Press, 2020.\n\nFree online version and examples\n\nGelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. Bayesian Data Analysis. 3rd Edition. Chapman and Hall/CRC, 2013.\n\nFree PDF available\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. An Introduction to Statistical Learning. Springer, 2013.\n\nFree PDF available\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd Edition. Springer, 2009.\n\nFree PDF available\n\nMcElreath, Richard. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd Edition. Chapman and Hall/CRC, 2020.\n\nUW-Madison library eBook\nCourse materials and lectures\n\nAronow, P. M., and Benjamin T. Miller. Foundations of Agnostic Statistics. Cambridge University Press, 2019.\n\nUW-Madison library eBook\n\nEvans, Michael J., and Jeffrey S. Rosenthal. Probability and Statistics: The Science of Uncertainty. 2nd Edition. W.H. Freeman, 2010.\n\nFree PDF available\n\nRasmussen, Carl Edward, and Christopher K. I. Williams. Gaussian Processes for Machine Learning. MIT Press, 2006.\n\nFree PDF available"
+  },
+  {
+    "objectID": "resources.html#textbooks",
+    "href": "resources.html#textbooks",
+    "title": "Resources",
+    "section": "",
+    "text": "These textbooks provide a number of the readings that will be used through the course of the semester. Each is available either as a free online version or in digital form via UW-Madison library access.\n\nGelman, Andrew, Jennifer Hill, and Aki Vehtari. Regression and Other Stories. Cambridge University Press, 2020.\n\nFree online version and examples\n\nGelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. Bayesian Data Analysis. 3rd Edition. Chapman and Hall/CRC, 2013.\n\nFree PDF available\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. An Introduction to Statistical Learning. Springer, 2013.\n\nFree PDF available\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd Edition. Springer, 2009.\n\nFree PDF available\n\nMcElreath, Richard. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd Edition. Chapman and Hall/CRC, 2020.\n\nUW-Madison library eBook\nCourse materials and lectures\n\nAronow, P. M., and Benjamin T. Miller. Foundations of Agnostic Statistics. Cambridge University Press, 2019.\n\nUW-Madison library eBook\n\nEvans, Michael J., and Jeffrey S. Rosenthal. Probability and Statistics: The Science of Uncertainty. 2nd Edition. W.H. Freeman, 2010.\n\nFree PDF available\n\nRasmussen, Carl Edward, and Christopher K. I. Williams. Gaussian Processes for Machine Learning. MIT Press, 2006.\n\nFree PDF available"
+  },
+  {
+    "objectID": "resources.html#software",
+    "href": "resources.html#software",
+    "title": "Resources",
+    "section": "Software",
+    "text": "Software\n\nR and RStudio\nThis course uses R for all programming assignments. You are welcome to use the RStudio Interactive Development Environment (IDE) to write code and edit the assignment write-up. Due to the extensive integration of Quarto into Posit-developed IDEs, I encourage using either RStudio or the more recent Positron IDE.\n\nR: Download from https://www.r-project.org\nRStudio: Download from https://posit.co/download/rstudio-desktop/\nPositron: Download from https://positron.posit.co/\n\n\nRecommended Guides for R Programming\n\nR For Data Science Available at https://r4ds.hadley.nz/\nData Visualization: A Practical Introduction Available at https://socviz.co/\n\n\n\n\nStan\nWe will use Stan for specifying and estimating Bayesian models. Stan is written in C++ but has bindings for a variety of programming languages. In this course we will use two interfaces to Stan from R: RStan and brms. Running Stan locally requires a working C++ toolchain – consult the installation guide for the specific requirements of your operating system.\n\nInstallation guide: https://mc-stan.org/install/\nStan user’s guide: https://mc-stan.org/docs/stan-users-guide/\nbrms: https://paulbuerkner.com/brms/\n\n\n\nQuarto and Markdown\nThe assignments are distributed as .qmd Quarto files. Quarto is the successor to R Markdown and lets you present your analysis, code, figures and written discussion all in a single document. It uses Markdown syntax for formatting text and supports embedded R code chunks that execute when you render the document.\nTo complete assignments, you will edit the provided .qmd file, adding your code and written responses, then render it to an HTML file for submission. Both your .html output and .qmd file will be submitted via Gradescope.\n\nQuarto: Download from https://quarto.org/docs/get-started/\nQuarto Guide: https://quarto.org/docs/guide/\nMarkdown Basics: https://quarto.org/docs/authoring/markdown-basics.html\nNote also the chapter on Quarto in R For Data Science"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "PoliSci 818",
+    "section": "",
+    "text": "Data Analysis with Statistical Models\nLikelihood, Bayesian and Machine Learning methods for description and prediction\nPoliSci 818 • Fall 2026University of Wisconsin-Madison\n\n\n\n\n\n\n\nInstructor\n\n   Anton Strezhnev\n   North Hall 322D\n   strezhnev@wisc.edu\n\n\n\nCourse details\n\n   Mondays & Wednesdays\n   9/9/2026 - 12/9/2026\n   9:30am - 10:45am\n   Sterling Hall 1339\n\n\n\nContacting me\nSlack is the best way to get in touch with me. My dedicated office hours are 9AM-11AM on Tuesdays if you want to meet in-person. I am also generally in my office on weekdays during normal hours and my door is open, so you are welcome to drop in. You can also feel free to contact me to confirm availability or to schedule a virtual meeting via Zoom."
+  },
+  {
+    "objectID": "assignments.html",
+    "href": "assignments.html",
+    "title": "Assignments",
+    "section": "",
+    "text": "Assignment\nAssigned\nDue\n\n\n\n\nProblem Set 1\nSept 9 (Week 1)\nSept 23 (Week 3)\n\n\nProblem Set 2\nSun Sept 27\nFri Oct 9 (Week 5)\n\n\nMidterm 1\n–\nIn class, Oct 7 (Week 5)\n\n\nProblem Set 3\nOct 7 (Week 5)\nOct 21 (Week 7)\n\n\nReplication project memo\n–\nOct 21 (Week 7)\n\n\nProblem Set 4\nOct 21 (Week 7)\nMon Nov 9 (Week 10)\n\n\nMidterm 2\n–\nIn class, Nov 11 (Week 10)\n\n\nReplication poster\n–\nMEAD poster session, Fri Dec 4\n\n\n\nProblem sets are generally assigned and due on Wednesdays. The replication project memo is ungraded; see the Syllabus for what it should contain."
+  },
+  {
+    "objectID": "assignments.html#schedule",
+    "href": "assignments.html#schedule",
+    "title": "Assignments",
+    "section": "",
+    "text": "Assignment\nAssigned\nDue\n\n\n\n\nProblem Set 1\nSept 9 (Week 1)\nSept 23 (Week 3)\n\n\nProblem Set 2\nSun Sept 27\nFri Oct 9 (Week 5)\n\n\nMidterm 1\n–\nIn class, Oct 7 (Week 5)\n\n\nProblem Set 3\nOct 7 (Week 5)\nOct 21 (Week 7)\n\n\nReplication project memo\n–\nOct 21 (Week 7)\n\n\nProblem Set 4\nOct 21 (Week 7)\nMon Nov 9 (Week 10)\n\n\nMidterm 2\n–\nIn class, Nov 11 (Week 10)\n\n\nReplication poster\n–\nMEAD poster session, Fri Dec 4\n\n\n\nProblem sets are generally assigned and due on Wednesdays. The replication project memo is ungraded; see the Syllabus for what it should contain."
+  },
+  {
+    "objectID": "assignments.html#problem-sets",
+    "href": "assignments.html#problem-sets",
+    "title": "Assignments",
+    "section": "Problem Sets",
+    "text": "Problem Sets\nProblem sets are distributed as .qmd files along with their rendered .html form. You should edit the provided .qmd file and render to .html when submitting the assignment. Additional files (e.g. datasets) are located in sub-folders. For convenience, all the combined files are also distributed as a .zip compressed archive.\nSubmit both your rendered .html file and the .qmd source that produced it on Gradescope, saved as Yourlastname_Yourfirstinitial_psetN.html and Yourlastname_Yourfirstinitial_psetN.qmd.\nLinks become active as each problem set is assigned.\n\nProblem Set 1\nAssigned Wednesday, September 9 – due Wednesday, September 23\n\nProblem Set 1 .html\nProblem Set 1 Github Repository\nProblem Set 1 .zip archive\n\n\n\nProblem Set 2\nAssigned Sunday, September 27 – due Friday, October 9\n\nProblem Set 2 .html\nProblem Set 2 Github Repository\nProblem Set 2 .zip archive\n\n\n\nProblem Set 3\nAssigned Wednesday, October 7 – due Wednesday, October 21\n\nProblem Set 3 .html\nProblem Set 3 Github Repository\nProblem Set 3 .zip archive\n\n\n\nProblem Set 4\nAssigned Wednesday, October 21 – due Monday, November 9\n\nProblem Set 4 .html\nProblem Set 4 Github Repository\nProblem Set 4 .zip archive"
+  },
+  {
+    "objectID": "assignments.html#exams",
+    "href": "assignments.html#exams",
+    "title": "Assignments",
+    "section": "Exams",
+    "text": "Exams\nBoth exams are in person, closed-book, pen-and-paper examinations involving both theory questions and practical interpretation of sample code and results. Together they are worth 40% of the course grade. There is no final exam during the university exam period.\n\nMidterm 1: in class on Wednesday, October 7, covering material through Week 4.\nMidterm 2: in class on Wednesday, November 11, covering material from Weeks 5-8."
+  },
+  {
+    "objectID": "lectures.html",
+    "href": "lectures.html",
+    "title": "Lectures",
+    "section": "",
+    "text": "Lecture slides are available as self-contained .html files made with RevealJS from a Quarto .qmd file. You can choose to print these to a PDF document by using the “PDF Export Mode” in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the .qmd file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday’s lectures.\nLinks become active as the materials for each week are posted.\n\n\n\n\nWeek 1 Github Repository\nWeek 1 .html slides\n\n\n\n\n\nWeek 2 Github Repository\nWeek 2 .html slides\n\n\n\n\n\nWeek 3 Github Repository\nWeek 3 .html slides\n\n\n\n\n\nWeek 4 Github Repository\nWeek 4 .html slides\n\n\n\n\n\nWeek 5 Github Repository\nWeek 5 .html slides\n\n\n\n\n\nWeek 6 Github Repository\nWeek 6 .html slides\n\n\n\n\n\nWeek 7 Github Repository\nWeek 7 .html slides\n\n\n\n\n\nWeek 8 Github Repository\nWeek 8 .html slides\n\n\n\n\n\nWeek 9 Github Repository\nWeek 9 .html slides\n\n\n\n\n\nWeek 10 Github Repository\nWeek 10 .html slides\n\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted"
+  },
+  {
+    "objectID": "lectures.html#lecture-slides",
+    "href": "lectures.html#lecture-slides",
+    "title": "Lectures",
+    "section": "",
+    "text": "Lecture slides are available as self-contained .html files made with RevealJS from a Quarto .qmd file. You can choose to print these to a PDF document by using the “PDF Export Mode” in the Tools menu accessed via the settings button in the lower left-hand side of the page. You are also welcome to directly download the .qmd file and supporting data/images/etc. from the Github repository. Slides are organized by week and combine Monday and Wednesday’s lectures.\nLinks become active as the materials for each week are posted.\n\n\n\n\nWeek 1 Github Repository\nWeek 1 .html slides\n\n\n\n\n\nWeek 2 Github Repository\nWeek 2 .html slides\n\n\n\n\n\nWeek 3 Github Repository\nWeek 3 .html slides\n\n\n\n\n\nWeek 4 Github Repository\nWeek 4 .html slides\n\n\n\n\n\nWeek 5 Github Repository\nWeek 5 .html slides\n\n\n\n\n\nWeek 6 Github Repository\nWeek 6 .html slides\n\n\n\n\n\nWeek 7 Github Repository\nWeek 7 .html slides\n\n\n\n\n\nWeek 8 Github Repository\nWeek 8 .html slides\n\n\n\n\n\nWeek 9 Github Repository\nWeek 9 .html slides\n\n\n\n\n\nWeek 10 Github Repository\nWeek 10 .html slides\n\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted\n\n\n\nTo be posted"
+  },
+  {
+    "objectID": "schedule.html",
+    "href": "schedule.html",
+    "title": "Schedule",
+    "section": "",
+    "text": "A schedule of topics and readings is provided below. Each week will cover a single topic or group of topics. You should treat the readings as a reference and as a more detailed exposition of the topics discussed in lecture. Consult the readings when you want to know more or want a slightly different approach to explaining a particular topic.\nMonday lectures will typically introduce the core theory for the week’s topic while Wednesday lectures will go into greater detail and work through applications. You should make sure to review the readings prior to that week’s lectures with an aim towards completing them before Wednesday’s lecture.\nAll hyperlinks to papers are either to the published version of the paper (if published) or to the working paper. You should use your university library access to obtain the full version if the article is not open access. Likewise, textbook readings will be to the free/open version of the book (if available) or to the UW-Madison university library eBook."
+  },
+  {
+    "objectID": "schedule.html#week-1-course-introduction-and-review",
+    "href": "schedule.html#week-1-course-introduction-and-review",
+    "title": "Schedule",
+    "section": "Week 1: Course Introduction and Review",
+    "text": "Week 1: Course Introduction and Review\nWednesday, September 9\nTopics:\n\nWhat is a statistical model and what is it good for?\nReview of regression\n\nReadings:\n\nReview: Chapters 1-7; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\n\n\n\n\n\n\n\nProblem Set 1 assigned Wednesday, September 9 – due Wednesday, September 23."
+  },
+  {
+    "objectID": "schedule.html#week-2-introduction-to-likelihood-inference",
+    "href": "schedule.html#week-2-introduction-to-likelihood-inference",
+    "title": "Schedule",
+    "section": "Week 2: Introduction to Likelihood Inference",
+    "text": "Week 2: Introduction to Likelihood Inference\nMonday, September 14 & Wednesday, September 16\nTopics:\n\nWhat is a “parametric” model?\nThe likelihood function\nMaximum likelihood estimation\n\nReadings:\n\nChapter 5 (“Parametric Models”); Aronow, P. M. and Benjamin T. Miller. 2019. Foundations of Agnostic Statistics. Cambridge: Cambridge University Press.\nChapter 6 (“Likelihood Inference”); Evans, Michael J., and Jeffrey S. Rosenthal. 2010. Probability and Statistics: The Science of Uncertainty, 2nd ed. New York: W.H. Freeman."
+  },
+  {
+    "objectID": "schedule.html#week-3-generalized-linear-models",
+    "href": "schedule.html#week-3-generalized-linear-models",
+    "title": "Schedule",
+    "section": "Week 3: Generalized Linear Models",
+    "text": "Week 3: Generalized Linear Models\nMonday, September 21 & Wednesday, September 23\nTopics:\n\nProperties of maximum likelihood estimators\nThe generalized linear model framework\nBinary outcome models\n\nReadings:\n\nChapters 13-14; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\n\n\n\n\n\n\n\nProblem Set 1 due Wednesday, September 23. Problem Set 2 assigned Sunday, September 27 – due Friday, October 9."
+  },
+  {
+    "objectID": "schedule.html#week-4-more-likelihood-models",
+    "href": "schedule.html#week-4-more-likelihood-models",
+    "title": "Schedule",
+    "section": "Week 4: More Likelihood Models",
+    "text": "Week 4: More Likelihood Models\nMonday, September 28 & Wednesday, September 30\nTopics:\n\nDuration models (parametric, semi-parametric (Cox) and non-parametric approaches)\nEvent count models (Poisson regression and quasi-MLE methods)\n\nReadings:\n\nChapter 15; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\nClark, T. G., M. J. Bradburn, S. B. Love, and D. G. Altman. 2003. “Survival Analysis Part I: Basic Concepts and First Analyses.” British Journal of Cancer 89 (2): 232-238.\nStensrud, Mats J., and Miguel A. Hernán. 2020. “Why Test for Proportional Hazards?” JAMA 323 (14): 1401-1402.\nChapter 8; Wooldridge, Jeffrey M. 1999. “Quasi-Likelihood Methods for Count Data.” In Handbook of Applied Econometrics, vol. 2, 352-406."
+  },
+  {
+    "objectID": "schedule.html#week-5-bayesian-inference",
+    "href": "schedule.html#week-5-bayesian-inference",
+    "title": "Schedule",
+    "section": "Week 5: Bayesian Inference",
+    "text": "Week 5: Bayesian Inference\nMonday, October 5\nTopics:\n\nPrinciples of posterior inference\nHow to write a Bayesian model\nQuantities of interest: posterior mode, posterior mean, credible intervals\n\nReadings:\n\nChapter 9; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\nChapters 10-11; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton: Chapman and Hall/CRC.\n\n\n\n\n\n\n\nProblem Set 3 assigned Wednesday, October 7 – due Wednesday, October 21. Problem Set 2 due Friday, October 9.\n\n\n\n\n\n\n\n\n\n\nMidterm 1 In-Class, Wednesday, October 7th"
+  },
+  {
+    "objectID": "schedule.html#week-6-estimating-bayesian-models",
+    "href": "schedule.html#week-6-estimating-bayesian-models",
+    "title": "Schedule",
+    "section": "Week 6: Estimating Bayesian Models",
+    "text": "Week 6: Estimating Bayesian Models\nMonday, October 12 & Wednesday, October 14\nTopics:\n\nAnalytically tractable solutions through conjugate priors\nMarkov Chain Monte Carlo methods\nIntroduction to MCMC in Stan\n\nReadings:\n\nChapters 3 and 9; McElreath, Richard. 2020. Statistical Rethinking: A Bayesian Course with Examples in R and Stan. 2nd ed. Boca Raton: Chapman and Hall/CRC."
+  },
+  {
+    "objectID": "schedule.html#week-7-multilevel-regression-models",
+    "href": "schedule.html#week-7-multilevel-regression-models",
+    "title": "Schedule",
+    "section": "Week 7: Multilevel Regression Models",
+    "text": "Week 7: Multilevel Regression Models\nMonday, October 19 & Wednesday, October 21\nTopics:\n\nPartial pooling through priors\nMethods for model validation\nMultilevel regression and post-stratification (MRP)\n\nReadings:\n\nChapter 11 and Appendix A; Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. Regression and Other Stories. Cambridge: Cambridge University Press.\nChapter 15; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton: Chapman and Hall/CRC.\nPark, David K., Andrew Gelman, and Joseph Bafumi. 2004. “Bayesian Multilevel Estimation with Poststratification: State-Level Estimates from National Polls.” Political Analysis 12 (4): 375-385.\n\n\n\n\n\n\n\nProblem Set 3 due Wednesday, October 21. Problem Set 4 assigned Wednesday, October 21 – due Monday, November 9.\n\n\n\n\n\n\n\n\n\nReplication project memo due Wednesday, October 21"
+  },
+  {
+    "objectID": "schedule.html#week-8-mixture-models-and-the-em-algorithm",
+    "href": "schedule.html#week-8-mixture-models-and-the-em-algorithm",
+    "title": "Schedule",
+    "section": "Week 8: Mixture Models and the EM Algorithm",
+    "text": "Week 8: Mixture Models and the EM Algorithm\nMonday, October 26 & Wednesday, October 28\nTopics:\n\nExploratory data analysis and clustering models\nMLE and MAP estimation via the “Expectation-Maximization” algorithm\n\nReadings:\n\nChapters 13 and 22; Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. Bayesian Data Analysis. 3rd ed. Boca Raton: Chapman and Hall/CRC."
+  },
+  {
+    "objectID": "schedule.html#week-9-item-response-theory-and-ideal-point-models",
+    "href": "schedule.html#week-9-item-response-theory-and-ideal-point-models",
+    "title": "Schedule",
+    "section": "Week 9: Item Response Theory and Ideal Point Models",
+    "text": "Week 9: Item Response Theory and Ideal Point Models\nMonday, November 2 & Wednesday, November 4\nTopics:\n\nLatent trait models\n“Ideal point” models in legislative voting\n\nReadings:\n\nMartin, Andrew D., and Kevin M. Quinn. 2002. “Dynamic Ideal Point Estimation via Markov Chain Monte Carlo for the U.S. Supreme Court, 1953-1999.” Political Analysis 10 (2): 134-153.\nClinton, Joshua, Simon Jackman, and Douglas Rivers. 2004. “The Statistical Analysis of Roll Call Data.” American Political Science Review 98 (2): 355-370.\nImai, Kosuke, James Lo, and Jonathan Olmsted. 2016. “Fast Estimation of Ideal Points with Massive Data.” American Political Science Review 110 (4): 631-656."
+  },
+  {
+    "objectID": "schedule.html#week-10-regularization-and-model-selection",
+    "href": "schedule.html#week-10-regularization-and-model-selection",
+    "title": "Schedule",
+    "section": "Week 10: Regularization and Model Selection",
+    "text": "Week 10: Regularization and Model Selection\nMonday, November 9\nTopics:\n\nVariable selection and penalized regression (Ridge, LASSO)\nCross-fitting and out-of-sample validation\n\nReadings:\n\nChapters 6-7; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer.\n\n\n\n\n\n\n\nProblem Set 4 due Monday, November 9.\n\n\n\n\n\n\n\n\n\n\nMidterm 2 In-Class, Wednesday, November 11th"
+  },
+  {
+    "objectID": "schedule.html#week-11-flexible-regression-trees-and-forests",
+    "href": "schedule.html#week-11-flexible-regression-trees-and-forests",
+    "title": "Schedule",
+    "section": "Week 11: Flexible Regression – Trees and Forests",
+    "text": "Week 11: Flexible Regression – Trees and Forests\nMonday, November 16 & Wednesday, November 18\nTopics:\n\nRegression trees\nAggregation via sums of trees + regularization via BART\nBagging, boosting, random forests\n\nReadings:\n\nChapter 8; James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer.\nChapters 9-10 and 15; Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2009. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd ed. New York: Springer.\nHill, Jennifer, Antonio Linero, and Jared Murray. 2020. “Bayesian Additive Regression Trees: A Review and Look Forward.” Annual Review of Statistics and Its Application 7: 251-278."
+  },
+  {
+    "objectID": "schedule.html#week-12-flexible-regression-kernels-and-gaussian-processes",
+    "href": "schedule.html#week-12-flexible-regression-kernels-and-gaussian-processes",
+    "title": "Schedule",
+    "section": "Week 12: Flexible Regression – Kernels and Gaussian Processes",
+    "text": "Week 12: Flexible Regression – Kernels and Gaussian Processes\nMonday, November 23\n\n\n\n\n\n\nThanksgiving recess runs November 26-29. Class meets as usual on Monday this week. Wednesday is cancelled.\n\n\n\nTopics:\n\nInfinite dimensional function spaces\nKernel ridge regression\nGaussian process regression\n\nReadings:\n\nHainmueller, Jens, and Chad Hazlett. 2014. “Kernel Regularized Least Squares: Reducing Misspecification Bias with a Flexible and Interpretable Machine Learning Approach.” Political Analysis 22 (2): 143-168.\nChapters 2 and 4; Rasmussen, Carl Edward, and Christopher K. I. Williams. 2006. Gaussian Processes for Machine Learning. Cambridge, MA: MIT Press."
+  },
+  {
+    "objectID": "schedule.html#week-13-causal-inference-with-flexible-regression",
+    "href": "schedule.html#week-13-causal-inference-with-flexible-regression",
+    "title": "Schedule",
+    "section": "Week 13: Causal Inference with Flexible Regression",
+    "text": "Week 13: Causal Inference with Flexible Regression\nMonday, November 30 & Wednesday, December 2\nTopics:\n\nEfficient semiparametric estimation of statistical functionals\nInfluence functions\n“Doubly-robust”/“Neyman-orthogonal” estimators\n\nReadings:\n\nFisher, Aaron, and Edward H. Kennedy. 2021. “Visually Communicating and Teaching Intuition for Influence Functions.” The American Statistician 75 (2): 162-172.\nKennedy, Edward H. 2024. “Semiparametric Doubly Robust Targeted Double Machine Learning: A Review.” In Handbook of Statistical Methods for Precision Medicine, 207-236.\n\n\n\n\n\n\n\n\nPoster Session Friday, December 4th"
+  },
+  {
+    "objectID": "schedule.html#week-14-working-with-big-datasets",
+    "href": "schedule.html#week-14-working-with-big-datasets",
+    "title": "Schedule",
+    "section": "Week 14: Working with “Big” Datasets",
+    "text": "Week 14: Working with “Big” Datasets\nMonday, December 7 & Wednesday, December 9\nTopics:\n\nEstimation with out-of-memory data\nStochastic gradient descent\nLossless compression in regression\n\nReadings:\n\nToulis, Panos, and Edoardo M. Airoldi. 2015. “Scalable Estimation Strategies Based on Stochastic Approximations: Classical Results and New Insights.” Statistics and Computing 25 (4): 781-795.\nWong, Jeffrey, Eskil Forsell, Randall A. Lewis, Tobias Mao, and Matthew Wardrop. 2021. “You Only Compress Once: Optimal Data Compression for Estimating Linear Models.” arXiv preprint arXiv:2102.11297."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#regularization",
+    "href": "slides/week10/week10_regularization.html#regularization",
+    "title": "Week 10: Regularization",
+    "section": "Regularization",
+    "text": "Regularization\n\n\\[\n\\DeclareMathOperator*{\\argmin}{arg\\,min}\n\\DeclareMathOperator*{\\argmax}{arg\\,max}\n\\]"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#previously",
+    "href": "slides/week10/week10_regularization.html#previously",
+    "title": "Week 10: Regularization",
+    "section": "Previously",
+    "text": "Previously\n\nMixture models\n\nA discrete latent variable: cluster membership\nMLE/MAP estimation via Expectation-Maximization\n\nItem response theory\n\nA continuous latent trait that drives discrete responses\nLogit/probit regression with unobserved regressors\nIdentification via priors (or constraints) that fix the location and scale of the latent space"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#this-week",
+    "href": "slides/week10/week10_regularization.html#this-week",
+    "title": "Week 10: Regularization",
+    "section": "This week",
+    "text": "This week\n\nFlexible regression\n\nEstimating \\(E[Y_i | X_i]\\) when \\(X_i\\) is continuous and we don’t want to assume a restrictive specification\nBasis expansions: polynomials, step functions, splines\n\nRegularization\n\nThe bias-variance trade-off\nRidge (\\(L_2\\)) and lasso (\\(L_1\\)) penalties\nRidge on a spline’s slope changes: a penalty on curvature\nChoosing the penalty via cross-validation\nConnection to Bayes - penalties are priors\n\nRunning example: Age and the 2020 presidential vote in the 2023 CES"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#going-forward",
+    "href": "slides/week10/week10_regularization.html#going-forward",
+    "title": "Week 10: Regularization",
+    "section": "Going forward",
+    "text": "Going forward\n\nMidterm 2 - In class, Wednesday, November 11\nWeek 11 - Flexible Regression: Trees and Forests\nWeek 12 - Flexible Regression: Kernels and Gaussian Processes\nWeek 13 - Causal Inference when adjusting with flexible regression models\nWeek 14 - Working with “Big” Datasets"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#flexible-regression",
+    "href": "slides/week10/week10_regularization.html#flexible-regression",
+    "title": "Week 10: Regularization",
+    "section": "Flexible regression",
+    "text": "Flexible regression\n\nWe’ve spent a lot of time estimating the conditional expectation function (CEF) \\(E[Y|X] = f(X)\\).\n\nBut so far we’ve emphasized methods where we know the true functional form (e.g. a linear CEF)\n\\[E[Y|X] = X^{\\prime}\\beta\\]\nLinearity is trivially satisfied when \\(X\\) is discrete (a dummy for every value), but a potentially problematic assumption when \\(X\\) is continuous.\n\nWe want to keep the convenience of a model that is linear in the parameters, but transform \\(X\\) to capture non-linear relationships between \\(Y\\) and \\(X\\).\nDefine the linear basis expansion for a set of \\(M\\) basis functions \\(h_m(X)\\)\n\\[f(X) = \\sum_{m=1}^M \\beta_m h_m(X)\\]\n\nOnce we pick the \\(h_m()\\), this is “just” a regression of \\(Y\\) on \\(h_1(X), h_2(X), \\dotsc, h_M(X)\\)."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#example-age-and-the-2020-vote",
+    "href": "slides/week10/week10_regularization.html#example-age-and-the-2020-vote",
+    "title": "Week 10: Regularization",
+    "section": "Example: Age and the 2020 vote",
+    "text": "Example: Age and the 2020 vote\n\nHow does vote choice vary with age?\n\nAge “effects”: people become more conservative as they age\nCohort “effects”: the political events that occur when a cohort comes of age have persistent effects (Boomer, Gen-X, Millennial, Zoomer) (Ghitza, Gelman, and Auerbach 2023)\nFunctional form between age and political attitudes not clear ex-ante!\n\nData: the 2023 Cooperative Election Study (Schaffner et al. 2024)\n\n\\(Y_i\\): recalled 2020 presidential vote (1 = Trump, 0 = Biden) among respondents who voted\n\\(X_i\\): age in years (2023 minus birth year)\nWe use the CES survey weights throughout, so the fits are weighted least squares. To keep the notation simple, the math is written unweighted."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#example-age-and-the-2020-vote-1",
+    "href": "slides/week10/week10_regularization.html#example-age-and-the-2020-vote-1",
+    "title": "Week 10: Regularization",
+    "section": "Example: Age and the 2020 vote",
+    "text": "Example: Age and the 2020 vote\n\nces_raw &lt;- read_dta(\"../week8/data/CCES23_Common_OUTPUT.dta.gz\") # the file from Week 8\ncount(ces_raw, presvote20post) # value labels are in the Stata file; see the questionnaire\n\n# A tibble: 8 × 2\n  presvote20post                      n\n  &lt;dbl+lbl&gt;                       &lt;int&gt;\n1  1 [Joe Biden]                   9468\n2  2 [Donald Trump]                8229\n3  3 [Jo Jorgensen]                 176\n4  4 [Howie Hawkins]                 75\n5  5 [Other]                        142\n6  6 [Did not vote for President]  6398\n7  8 [skipped]                       11\n8 NA                                  1\n\n\n\nces &lt;- ces_raw %&gt;%\n  mutate(age = 2023 - birthyr) %&gt;%\n  filter(presvote20post %in% 1:2, age &lt;= 90) %&gt;% # Biden or Trump voters; only a handful are over 90\n  mutate(trump = as.numeric(presvote20post == 2),\n         w = commonweight / mean(commonweight)) # survey weights, rescaled to average 1\ntibble(n = nrow(ces), unweighted = mean(ces$trump), weighted = weighted.mean(ces$trump, ces$w))\n\n# A tibble: 1 × 3\n      n unweighted weighted\n  &lt;int&gt;      &lt;dbl&gt;    &lt;dbl&gt;\n1 17675      0.465    0.470"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#example-age-and-the-2020-vote-2",
+    "href": "slides/week10/week10_regularization.html#example-age-and-the-2020-vote-2",
+    "title": "Week 10: Regularization",
+    "section": "Example: Age and the 2020 vote",
+    "text": "Example: Age and the 2020 vote\n\nPoints are the (weighted) share voting Trump at each age, sized by the number of respondents. The line is a (weighted) linear fit."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#polynomial-basis",
+    "href": "slides/week10/week10_regularization.html#polynomial-basis",
+    "title": "Week 10: Regularization",
+    "section": "Polynomial basis",
+    "text": "Polynomial basis\n\nA common set of basis functions to choose is the global polynomial basis\n\nYou’ve probably already done this when you’ve included squared terms in your regressions!\n\nFor example, for a univariate \\(X\\), the basis for a global cubic polynomial is:\n\\[h_1(X) = 1, \\quad h_2(X) = X, \\quad h_3(X) = X^2, \\quad h_4(X) = X^3\\]\nA \\(K\\)th order polynomial requires \\(K+1\\) parameters\nHowever, there are some drawbacks to using a global polynomial - each observation influences the entire curve.\n\nHigh-order polynomials are notoriously unstable at the edges of the data."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#polynomial-basis-1",
+    "href": "slides/week10/week10_regularization.html#polynomial-basis-1",
+    "title": "Week 10: Regularization",
+    "section": "Polynomial basis",
+    "text": "Polynomial basis\n\ncubic_fit &lt;- lm(trump ~ poly(age, 3), data = ces, weights = w) # poly() uses an orthogonal version of the same basis\npoly15_fit &lt;- lm(trump ~ poly(age, 15), data = ces, weights = w)"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#step-functions",
+    "href": "slides/week10/week10_regularization.html#step-functions",
+    "title": "Week 10: Regularization",
+    "section": "Step functions",
+    "text": "Step functions\n\nInstead of a single global polynomial, fit local averages within regions of \\(X\\) defined by cutpoints \\(\\xi_1 &lt; \\xi_2 &lt; \\dotsc &lt; \\xi_M\\):\n\\[h_1(X) = I(X &lt; \\xi_1), \\quad h_2(X) = I(\\xi_1 \\le X &lt; \\xi_2), \\quad \\dotsc, \\quad h_{M+1}(X) = I(\\xi_M \\le X)\\]\nNatural cutpoints here: generations: Gen Z (\\(\\le 26\\) in 2023), Millennials (27-42), Gen X (43-58), Boomers (59-77), Silent (78+)\n\n\ngen_knots &lt;- c(26, 42, 58, 77) # the last age in each generation\nstep_fit &lt;- lm(trump ~ cut(age, c(-Inf, gen_knots, Inf)), data = ces, weights = w)"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#step-functions-1",
+    "href": "slides/week10/week10_regularization.html#step-functions-1",
+    "title": "Week 10: Regularization",
+    "section": "Step functions",
+    "text": "Step functions"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#piecewise-linear-functions",
+    "href": "slides/week10/week10_regularization.html#piecewise-linear-functions",
+    "title": "Week 10: Regularization",
+    "section": "Piecewise linear functions",
+    "text": "Piecewise linear functions\n\nStep functions are discontinuous: a 42-year-old and a 43-year-old get very different predictions.\nInstead, fit a line within each region, and force the lines to connect at the cutpoints (called knots):\n\\[f(X) = \\beta_0 + \\beta_1 X + \\sum_{k=1}^{K} \\beta_{k+1} (X - \\xi_k)_+\\]\nwhere \\((\\cdot)_+\\) denotes \\(\\max(\\cdot, 0)\\).\nThis is a linear spline in the truncated power basis. Each term \\((X - \\xi_k)_+\\) is zero to the left of knot \\(\\xi_k\\) and a line with slope 1 to its right.\nInterpretation:\n\n\\(\\beta_1\\) is the slope to the left of the first knot.\n\\(\\beta_{k+1}\\) is the change in the slope at knot \\(\\xi_k\\).\nThe slope between \\(\\xi_k\\) and \\(\\xi_{k+1}\\) is \\(\\beta_1 + \\beta_2 + \\dotsc + \\beta_{k+1}\\)."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#linear-splines",
+    "href": "slides/week10/week10_regularization.html#linear-splines",
+    "title": "Week 10: Regularization",
+    "section": "Linear splines",
+    "text": "Linear splines\n\ntp_basis &lt;- function(x, knots) { # truncated power basis: one column (x - knot)_+ per knot\n  outer(x, knots, function(x, k) pmax(x - k, 0)) %&gt;% `colnames&lt;-`(paste0(\"(age-\", knots, \")+\"))\n}\ngen_spline &lt;- lm(trump ~ age + tp_basis(age, gen_knots), data = ces, weights = w)\ncoef(gen_spline) %&gt;% setNames(c(\"(Intercept)\", \"age\", colnames(tp_basis(0, gen_knots))))\n\n(Intercept)         age   (age-26)+   (age-42)+   (age-58)+   (age-77)+ \n    0.09792     0.00854    -0.00287     0.00139    -0.00467     0.01573"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#higher-order-splines",
+    "href": "slides/week10/week10_regularization.html#higher-order-splines",
+    "title": "Week 10: Regularization",
+    "section": "Higher-order splines",
+    "text": "Higher-order splines\n\nA degree-\\(d\\) spline with knots \\(\\xi_1, \\dotsc, \\xi_K\\) is a piecewise polynomial that…\n\n…is a polynomial of degree \\(d\\) between each pair of knots\n…has continuous derivatives of order \\(0, 1, \\dotsc, d-1\\) at each knot\n\nIf we also forced the \\(d\\)th derivative to be continuous, we’d recover a global polynomial.\nThe most common choice is the cubic spline (\\(d = 3\\)): continuous first and second derivatives, so the knots are hard to see.\n\nTruncated power basis: \\(1, X, X^2, X^3, (X - \\xi_1)^3_+, \\dotsc, (X - \\xi_K)^3_+\\), so \\(K + 4\\) parameters.\n\nNatural splines add the constraint that the function is linear beyond the boundary knots, which limits edge behavior (where there’s no data).\nWhen the degree and the knots are fixed in advance, these are called regression splines\n\nGiven a particular basis, estimation is done via OLS (or MLE for GLMs w/ other link functions)"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#b-splines",
+    "href": "slides/week10/week10_regularization.html#b-splines",
+    "title": "Week 10: Regularization",
+    "section": "B-splines",
+    "text": "B-splines\n\nThe truncated power basis is easy to interpret but numerically unstable.\nThe B-spline basis spans the same set of functions, but each basis function is non-zero only over a few neighboring knots.\n\nDefined recursively: higher-order B-splines are weighted averages of neighboring lower-order ones (see T. Hastie, Tibshirani, and Friedman (2009), Chapter 5 appendix).\nSame fitted values as the truncated power basis with the same knots, just different coefficients.\n\nIn R, bs() (B-splines) and ns() (natural splines) in the splines package build the basis for you.\n\nYou can include them in a formula like any other transformation of a regressor."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#b-splines-1",
+    "href": "slides/week10/week10_regularization.html#b-splines-1",
+    "title": "Week 10: Regularization",
+    "section": "B-splines",
+    "text": "B-splines\n\ncubic_spline &lt;- lm(trump ~ bs(age, knots = gen_knots), data = ces, weights = w) # degree = 3 by default\nnatural_spline &lt;- lm(trump ~ ns(age, knots = gen_knots), data = ces, weights = w)"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#how-many-knots-where",
+    "href": "slides/week10/week10_regularization.html#how-many-knots-where",
+    "title": "Week 10: Regularization",
+    "section": "How many knots? Where?",
+    "text": "How many knots? Where?\n\nHow many knots should we pick?\n\nBias-variance trade-off\nMany knots \\(\\leadsto\\) more parameters \\(\\leadsto\\) more variance\nFewer knots \\(\\leadsto\\) function can’t “bend” as much if it needs to \\(\\leadsto\\) more bias\n\nOne extreme: a knot at every age, \\(\\xi = 22, 23, \\dotsc, 89\\) (\\(K = 68\\) knots, 70 parameters).\n\nEquivalent to regressing on a dummy for each age."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#how-many-knots-where-1",
+    "href": "slides/week10/week10_regularization.html#how-many-knots-where-1",
+    "title": "Week 10: Regularization",
+    "section": "How many knots? Where?",
+    "text": "How many knots? Where?\n\nknots &lt;- 22:89\nspline_basis &lt;- function(age) cbind(1, age, tp_basis(age, knots)) # intercept, slope, 68 slope changes\nX_age &lt;- spline_basis(ces$age)\nX_grid &lt;- spline_basis(age_grid$age)\nols_beta &lt;- lm.wfit(X_age, ces$trump, ces$w)$coefficients # weighted least squares\nmax(abs(X_grid %*% ols_beta - age_means$trump)) # the fit is just the age-by-age averages\n\n[1] 6.2e-14"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#bias-and-variance",
+    "href": "slides/week10/week10_regularization.html#bias-and-variance",
+    "title": "Week 10: Regularization",
+    "section": "Bias and variance",
+    "text": "Bias and variance\n\nThe knot-at-every-age spline is unbiased for the CEF at each age: it doesn’t impose any shape at all.\n\nBut it’s noisy\n\nRecall that the mean squared error of an estimator \\(\\hat{\\theta}\\) of a parameter \\(\\theta\\) decomposes into the variance and the squared bias\n\\[\\underbrace{E\\big[(\\hat{\\theta} - \\theta)^2\\big]}_{\\text{MSE}} = \\underbrace{E\\big[\\hat{\\theta}^2\\big]-  E\\big[\\hat{\\theta}\\big]^2}_{\\text{Variance}}  + \\underbrace{\\big(E[\\hat{\\theta}] - \\theta\\big)^2}_{\\text{Squared Bias}}\\]\nWe often like unbiasedness because it lets us characterize the remaining error as variance\n\nBut if we just want our estimate to be close to the truth, we might accept some bias in exchange for a large reduction in uncertainty."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#bias-and-variance-1",
+    "href": "slides/week10/week10_regularization.html#bias-and-variance-1",
+    "title": "Week 10: Regularization",
+    "section": "Bias and variance",
+    "text": "Bias and variance\n\nWe’ve already accepted bias for lower variance before:\n\nAn informative prior pulls estimates towards our existing beliefs.\nSharper prior \\(\\leadsto\\) more bias, lower variance.\n\nWhat sort of bias do we want here?\n\nBias the slope changes \\(\\beta_2, \\dotsc, \\beta_{K+1}\\) towards zero\nAll else equal, prefer a curve that doesn’t bend much."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#penalized-regression",
+    "href": "slides/week10/week10_regularization.html#penalized-regression",
+    "title": "Week 10: Regularization",
+    "section": "Penalized regression",
+    "text": "Penalized regression\n\nOLS finds the \\(\\beta\\) that minimizes the residual sum of squares\n\\[\\text{RSS}(\\beta) = \\sum_{i=1}^N (Y_i - X_i^{\\prime}\\beta)^2\\]\nGLMs more generally minimize the negative log-likelihood.\nPenalized regression adds a term to the objective function that penalizes “complex” values of \\(\\beta\\)\n\\[\\hat{\\beta}_\\lambda = \\argmin_\\beta \\text{RSS}(\\beta) + \\lambda \\cdot \\text{Pen}(\\beta)\\]\nwhere \\(\\lambda \\ge 0\\) is a tuning parameter chosen by the researcher.\n\n\\(\\lambda = 0\\): OLS.\n\\(\\lambda \\to \\infty\\): whatever minimizes the penalty."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#penalties",
+    "href": "slides/week10/week10_regularization.html#penalties",
+    "title": "Week 10: Regularization",
+    "section": "Penalties",
+    "text": "Penalties\n\nDifferent penalties encode different notions of “complexity”. We’ll use the \\(L_p\\) norms \\(||\\beta||_p = \\big(\\sum_k |\\beta_k|^p\\big)^{1/p}\\):\n\n\\(L_2\\) (Euclidean) norm, squared: \\(||\\beta||_2^2 = \\sum_k \\beta_k^2\\) - ridge regression (Hoerl and Kennard 1970)\n\\(L_1\\) norm: \\(||\\beta||_1 = \\sum_k |\\beta_k|\\) - the lasso (R. Tibshirani 1996)\n\\(L_0\\) “norm”: the number of non-zero \\(\\beta_k\\) (best subset selection).\n\nWe’ll typically standardize the covariates (mean 0, variance 1) first, so that the penalty doesn’t depend on their units.\n\nAnd we don’t penalize the intercept - since the intercept is essentially just de-meaning the outcome."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#ridge-regression-on-the-knots",
+    "href": "slides/week10/week10_regularization.html#ridge-regression-on-the-knots",
+    "title": "Week 10: Regularization",
+    "section": "Ridge regression on the knots",
+    "text": "Ridge regression on the knots\n\nFor the knot-at-every-age spline, we’ll penalize the squared slope changes:\n\\[\\min_{\\beta} \\sum_{i=1}^N \\bigg(Y_i - \\beta_0 - \\beta_1 X_i - \\sum_{k=1}^{K} \\beta_{k+1} (X_i - \\xi_k)_+\\bigg)^2 + \\lambda \\sum_{j=2}^{K+1} \\beta_j^2\\]\nWhat are the two extremes:\n\n\\(\\lambda = 0\\): the age-by-age averages.\n\\(\\lambda \\to \\infty\\): the least squares line (not a flat line at zero).\n\nIn matrix form, with \\(D = \\text{diag}(0, 0, 1, \\dotsc, 1)\\):\n\\[\\hat{\\beta}_\\lambda = \\argmin_\\beta (Y - X\\beta)^{\\prime}(Y - X\\beta) + \\lambda \\beta^{\\prime} D \\beta\\]\nTake the derivative and set it to zero: \\(-2X^{\\prime}(Y - X\\beta) + 2\\lambda D\\beta = 0\\), so\n\\[\\hat{\\beta}_\\lambda = (X^{\\prime}X + \\lambda D)^{-1}X^{\\prime}Y\\]\n\nLeast squares with \\(\\lambda D\\) added to \\(X^{\\prime}X\\)"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#ridge-regression-on-the-knots-1",
+    "href": "slides/week10/week10_regularization.html#ridge-regression-on-the-knots-1",
+    "title": "Week 10: Regularization",
+    "section": "Ridge regression on the knots",
+    "text": "Ridge regression on the knots\n\nStraightforward implementation\n\n\nD &lt;- diag(c(0, 0, rep(1, length(knots))))\nridge_beta &lt;- function(lambda, X = X_age, y = ces$trump, w = ces$w) {\n  solve(crossprod(X, w * X) + lambda * D, crossprod(X, w * y))\n}"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#what-is-the-ridge-penalty-doing",
+    "href": "slides/week10/week10_regularization.html#what-is-the-ridge-penalty-doing",
+    "title": "Week 10: Regularization",
+    "section": "What is the ridge penalty doing?",
+    "text": "What is the ridge penalty doing?\n\n\\(\\beta_{k+1}\\) is the change in slope at knot \\(\\xi_k\\). With knots \\(h\\) apart (here, \\(h = 1\\) year), that’s a second difference:\n\\[\\beta_{k+1} = \\frac{f(\\xi_{k+1}) - f(\\xi_k)}{h} - \\frac{f(\\xi_k) - f(\\xi_{k-1})}{h} = \\frac{f(\\xi_{k+1}) - 2f(\\xi_k) + f(\\xi_{k-1})}{h}\\]\nThe ridge penalty on the slope changes is a penalty on how much \\(f\\) bends.\n\nA straight line has no curvature, so it’s never penalized.\n“Wiggly” functions bend a lot, so they’re penalized a lot.\n\nSmoothing splines search over all functions \\(f\\), with the penalty \\(\\lambda \\int f^{\\prime\\prime}(x)^2 dx\\).\n\nThe solution is a natural cubic spline with a knot at every unique \\(X_i\\) (Schoenberg 1964; Green and Silverman 1994).\nWith a knot at every age, it’s essentially this ridge regression\nIn R: smooth.spline(), or s() in the gam package."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#effective-degrees-of-freedom",
+    "href": "slides/week10/week10_regularization.html#effective-degrees-of-freedom",
+    "title": "Week 10: Regularization",
+    "section": "Effective degrees of freedom",
+    "text": "Effective degrees of freedom\n\nPenalized fits are linear smoothers - that is, they can be expressed as a linear function of \\(Y\\)\n\\[\\hat{Y} = X(X^{\\prime}X + \\lambda P)^{-1}X^{\\prime}Y = S_\\lambda Y\\]\nFor least squares (\\(\\lambda = 0\\)), \\(S_0\\) is the projection (“hat”) matrix.\n\nIt’s trace (sum of the diagonals) is equal to the number of parameters!\n\nDefine the effective degrees of freedom of a penalized fit as \\(\\text{df}_\\lambda = \\text{tr}(S_\\lambda)\\)."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#effective-degrees-of-freedom-1",
+    "href": "slides/week10/week10_regularization.html#effective-degrees-of-freedom-1",
+    "title": "Week 10: Regularization",
+    "section": "Effective degrees of freedom",
+    "text": "Effective degrees of freedom\n\nedf &lt;- function(lambda, X = X_age, w = ces$w) {\n  XtWX &lt;- crossprod(X, w * X)\n  sum(diag(solve(XtWX + lambda * D, XtWX))) # tr(S) = tr((X'X + lambda D)^-1 X'X), with weights\n}\ntibble(lambda = c(0, 1e3, 1e5, 1e7, 1e9)) %&gt;% mutate(edf = map_dbl(lambda, edf)) %&gt;%\n  mutate(lambda = format(lambda, scientific = F, big.mark = \",\")) %&gt;% kable()\n\n\n\n\nlambda\nedf\n\n\n\n\n0\n70.00\n\n\n1,000\n18.80\n\n\n100,000\n6.26\n\n\n10,000,000\n2.59\n\n\n1,000,000,000\n2.01\n\n\n\n\n\n\nPenalizing the 68 slope changes takes us continuously from 70 parameters (the age-by-age averages) to the 2 of a straight line."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#smoothing-splines-in-practice-gam",
+    "href": "slides/week10/week10_regularization.html#smoothing-splines-in-practice-gam",
+    "title": "Week 10: Regularization",
+    "section": "Smoothing splines in practice: gam()",
+    "text": "Smoothing splines in practice: gam()\n\nThe gam package (T. J. Hastie and Tibshirani 1990) fits smoothing splines inside a regression formula: s(age, df = 4).\n\nInstead of \\(\\lambda\\), you choose the smooth’s effective degrees of freedom (not counting the intercept), and gam() finds the \\(\\lambda\\) that gives it.\ndf is the tuning parameter: small df is close to a line, large df is close to the age-by-age averages.\n\nThe weights argument works like it does in lm().\nYou can add more smooth terms (s(age) + s(income)) and ordinary covariates: a generalized additive model."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#smoothing-splines-in-practice-gam-1",
+    "href": "slides/week10/week10_regularization.html#smoothing-splines-in-practice-gam-1",
+    "title": "Week 10: Regularization",
+    "section": "Smoothing splines in practice: gam()",
+    "text": "Smoothing splines in practice: gam()\n\nage_gam &lt;- gam(trump ~ s(age, df = 4), data = ces, weights = w) # df = 4 is the default\nfit_gam &lt;- function(df, data = ces) { # to loop over df, write it into the formula itself\n  gam(as.formula(paste(\"trump ~ s(age, df =\", df, \")\")), data = data, weights = w)\n}"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#bayesian-interpretation",
+    "href": "slides/week10/week10_regularization.html#bayesian-interpretation",
+    "title": "Week 10: Regularization",
+    "section": "Bayesian interpretation",
+    "text": "Bayesian interpretation\n\nPenalized regression has an interpretation as Bayesian regression. Consider our normal model:\n\\[Y_i |X_i, \\beta \\sim \\text{Normal}(X_i^{\\prime}\\beta, \\sigma^2)\\]\nAnd put a normal prior on the penalized coefficients: \\(\\beta_j \\sim \\text{Normal}(0, \\tau^2)\\) for \\(j = 2, \\dotsc, K+1\\), flat on \\(\\beta_0, \\beta_1\\).\nThe log-posterior is, up to constants\n\\[\\log p(\\beta | \\mathbf{X}, Y) = - \\frac{1}{2\\sigma^2}\\sum_{i=1}^N  (Y_i - X_i^{\\prime}\\beta)^2  - \\frac{1}{2\\tau^2} \\sum_{j=2}^{K+1} \\beta_j^2\\]"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#bayesian-interpretation-1",
+    "href": "slides/week10/week10_regularization.html#bayesian-interpretation-1",
+    "title": "Week 10: Regularization",
+    "section": "Bayesian interpretation",
+    "text": "Bayesian interpretation\n\nMultiplying by \\(-2\\sigma^2\\)\n\\[-2\\sigma^2 \\log p(\\beta | \\mathbf{X}, Y) = \\sum_{i=1}^N  (Y_i - X_i^{\\prime}\\beta)^2  + \\frac{\\sigma^2}{\\tau^2} \\sum_{j=2}^{K+1} \\beta_j^2\\]\nWith \\(\\lambda = \\sigma^2/\\tau^2\\), this is the ridge objective. The ridge estimate is the posterior mode\n\nBig \\(\\lambda\\) \\(\\leftrightarrow\\) a tight prior that slope changes are small."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#choosing-lambda",
+    "href": "slides/week10/week10_regularization.html#choosing-lambda",
+    "title": "Week 10: Regularization",
+    "section": "Choosing \\(\\lambda\\)",
+    "text": "Choosing \\(\\lambda\\)\n\nThe in-sample fit always prefers \\(\\lambda = 0\\): least squares minimizes the RSS by definition.\n\nWe need an estimate of out-of-sample error: how well does the fit predict observations it wasn’t estimated on?\n\n\\(K\\)-fold cross-validation:\n\nRandomly split the observations into \\(K\\) “folds” (commonly \\(K = 5\\) or \\(10\\)).\nFor each fold \\(k\\): fit the model on the other \\(K - 1\\) folds, and compute the squared error of the predictions in fold \\(k\\).\nAverage the squared errors across all observations. Repeat for every \\(\\lambda\\) and pick the smallest.\n\n\nEvery observation is used for fitting (\\(K - 1\\) times) and for evaluation (once)."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#choosing-lambda-1",
+    "href": "slides/week10/week10_regularization.html#choosing-lambda-1",
+    "title": "Week 10: Regularization",
+    "section": "Choosing \\(\\lambda\\)",
+    "text": "Choosing \\(\\lambda\\)\n\nLeave-one-out CV (\\(K = N\\)) sounds expensive, but for linear smoothers there’s a straightforward expression using the “hat matrix” and the residuals (like in linear regression!)\n\\[\\text{CV}_{\\text{LOO}}(\\lambda) = \\frac{1}{N}\\sum_{i=1}^N \\bigg(\\frac{Y_i - \\hat{Y}_i}{1 - [S_\\lambda]_{ii}}\\bigg)^2\\]"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#cross-validation-by-hand",
+    "href": "slides/week10/week10_regularization.html#cross-validation-by-hand",
+    "title": "Week 10: Regularization",
+    "section": "Cross-validation by hand",
+    "text": "Cross-validation by hand\n\nset.seed(53703)\nfolds &lt;- sample(rep(1:10, length.out = nrow(ces)))\nwmse &lt;- function(err, w = ces$w) sum(w * err^2) / sum(w) # weighted mean squared error\ncv_ridge &lt;- function(lambda) {\n  err &lt;- numeric(nrow(ces))\n  for (k in 1:10) {\n    in_k &lt;- folds == k\n    beta_k &lt;- ridge_beta(lambda, X = X_age[!in_k, ], y = ces$trump[!in_k], w = ces$w[!in_k])\n    err[in_k] &lt;- ces$trump[in_k] - X_age[in_k, ] %*% beta_k\n  }\n  wmse(err)\n}\nlambda_grid &lt;- 10^seq(0, 9, by = .25)\ncv_error &lt;- map_dbl(lambda_grid, cv_ridge)\nlambda_cv &lt;- lambda_grid[which.min(cv_error)]\nlambda_cv\n\n[1] 1e+05\n\nedf(lambda_cv)\n\n[1] 6.26"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#cross-validation-by-hand-1",
+    "href": "slides/week10/week10_regularization.html#cross-validation-by-hand-1",
+    "title": "Week 10: Regularization",
+    "section": "Cross-validation by hand",
+    "text": "Cross-validation by hand\n\n\\(\\lambda = 0\\) is the age-by-age averages and \\(\\lambda \\to \\infty\\) is the straight line. Cross-validation picks something in between, with 6.3 effective degrees of freedom."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#penalized-regression-with-glmnet",
+    "href": "slides/week10/week10_regularization.html#penalized-regression-with-glmnet",
+    "title": "Week 10: Regularization",
+    "section": "Penalized regression with glmnet",
+    "text": "Penalized regression with glmnet\n\nThe standard R package for penalized regression is glmnet (Friedman, Hastie, and Tibshirani 2010), which minimizes\n\\[\\frac{1}{2N}\\sum_{i=1}^N (Y_i - \\beta_0 - X_i^{\\prime}\\beta)^2 + \\lambda\\bigg[\\frac{1 - \\alpha}{2}||\\beta||_2^2 + \\alpha ||\\beta||_1\\bigg]\\]\n\nalpha = 0 is ridge, alpha = 1 is the lasso, and values in between are the elastic net.\nWorks for other GLM families (family = \"binomial\", \"poisson\", …) by swapping the RSS for the negative log-likelihood."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#penalized-regression-with-glmnet-1",
+    "href": "slides/week10/week10_regularization.html#penalized-regression-with-glmnet-1",
+    "title": "Week 10: Regularization",
+    "section": "Penalized regression with glmnet",
+    "text": "Penalized regression with glmnet\n\nSome important defaults:\n\nstandardize = TRUE: covariates are rescaled to have variance 1 before penalizing, so that the penalty doesn’t depend on their units.\nThe intercept is never penalized. Other coefficients can be left unpenalized with penalty.factor = 0.\nFits the whole path of solutions for a decreasing sequence of \\(\\lambda\\) values. cv.glmnet() picks \\(\\lambda\\) by \\(K\\)-fold cross-validation.\nSurvey weights go in weights =."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#penalized-regression-with-glmnet-2",
+    "href": "slides/week10/week10_regularization.html#penalized-regression-with-glmnet-2",
+    "title": "Week 10: Regularization",
+    "section": "Penalized regression with glmnet",
+    "text": "Penalized regression with glmnet\n\nRidge on the knots: don’t standardize (the penalty should be on the slope changes themselves), and don’t penalize age\n\n\nZ_age &lt;- X_age[, -1] # glmnet adds its own intercept\npen &lt;- c(0, rep(1, length(knots))) # 0 = leave age unpenalized\nridge_cv &lt;- cv.glmnet(Z_age, ces$trump, weights = ces$w, alpha = 0, penalty.factor = pen,\n                      standardize = FALSE, foldid = folds)\nridge_cv\n\n\nCall:  cv.glmnet(x = Z_age, y = ces$trump, weights = ces$w, foldid = folds,      alpha = 0, penalty.factor = pen, standardize = FALSE) \n\nMeasure: Mean-Squared Error \n\n    Lambda Index Measure      SE Nonzero\nmin    3.4    26    0.24 0.00115      69\n1se   35.2     1    0.24 0.00111      69\n\n\n\nlambda.min minimizes the CV error. lambda.1se is the largest \\(\\lambda\\) whose CV error is within one standard error of the minimum (a more conservative choice)."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#visualizing-the-penalty",
+    "href": "slides/week10/week10_regularization.html#visualizing-the-penalty",
+    "title": "Week 10: Regularization",
+    "section": "Visualizing the penalty",
+    "text": "Visualizing the penalty\n\nPenalized regression can also be written as a constrained optimization problem: find the \\(\\beta\\) that minimizes\n\\[\\text{RSS} = \\sum_{i=1}^N (Y_i - X_i^{\\prime}\\beta)^2 \\quad \\text{subject to} \\quad \\sum_{k=1}^K \\beta_k^2 \\le s\\]\nEach \\(\\lambda\\) in the penalized form corresponds to some budget \\(s\\) in the constrained form.\n\nWe prefer the penalized form for computation, but the constrained form shows how the penalty acts on the solution."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#visualizing-the-penalty-1",
+    "href": "slides/week10/week10_regularization.html#visualizing-the-penalty-1",
+    "title": "Week 10: Regularization",
+    "section": "Visualizing the penalty",
+    "text": "Visualizing the penalty\n\n\n\n\nSource: T. Hastie, Tibshirani, and Friedman (2009), Figure 3.11"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#the-lasso",
+    "href": "slides/week10/week10_regularization.html#the-lasso",
+    "title": "Week 10: Regularization",
+    "section": "The lasso",
+    "text": "The lasso\n\nRidge regression shrinks coefficients towards zero, but it doesn’t set any of them to exactly zero.\n\nIn other words, it does not do model selection.\n\nWe might like a penalty that produces sparse solutions, ones where many coefficients are exactly zero.\n\nThe \\(L_1\\) penalty accomplishes this!\nThe least absolute shrinkage and selection operator, or lasso (R. Tibshirani 1996), replaces the squared coefficients with their absolute values\n\n\\[\\sum_{i=1}^N (Y_i - X_i^{\\prime}\\beta)^2 + \\lambda\\sum_{k=1}^K |\\beta_k|\\]"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#visualizing-the-lasso",
+    "href": "slides/week10/week10_regularization.html#visualizing-the-lasso",
+    "title": "Week 10: Regularization",
+    "section": "Visualizing the lasso",
+    "text": "Visualizing the lasso\n\n\n\n\nSource: T. Hastie, Tibshirani, and Friedman (2009), Figure 3.11"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#bayesian-lasso",
+    "href": "slides/week10/week10_regularization.html#bayesian-lasso",
+    "title": "Week 10: Regularization",
+    "section": "Bayesian lasso",
+    "text": "Bayesian lasso\n\nThe lasso is also the posterior mode under a particular prior on \\(\\beta\\).\n\nInstead of the normal, the prior is the Laplace (double-exponential) distribution with location \\(0\\) and scale \\(b\\)\n\n\\[p(\\beta_k) = \\frac{1}{2b} \\exp\\bigg\\{ -\\frac{|\\beta_k|}{b}\\bigg\\}\\]\n\n\\(-\\log p(\\beta_k) = |\\beta_k|/b + \\text{const}\\): the \\(L_1\\) penalty.\n\nCompared to the normal, the Laplace has a sharper peak at zero and heavier tails.\n\nStrong pull towards exactly zero for small coefficients, less shrinkage of large ones.\n\nCareful: the posterior mode is sparse, but the posterior mean under a Laplace prior is not (Park and Casella 2008).\n\nThe sparsity of the lasso is a feature of the optimization."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#the-lasso-on-the-knots",
+    "href": "slides/week10/week10_regularization.html#the-lasso-on-the-knots",
+    "title": "Week 10: Regularization",
+    "section": "The lasso on the knots",
+    "text": "The lasso on the knots\n\nWhat does the lasso do with our 68 slope changes?\n\nRidge shrinks all the slope changes. The fit bends a little bit everywhere.\nThe lasso sets most of them to exactly zero. The fit is piecewise linear with a few kinks, and the data choose where they are!\n\nPenalizing the \\(L_1\\) norm of a function’s slope changes is called \\(\\ell_1\\) trend filtering (Kim et al. 2009; R. J. Tibshirani 2014)\n\nA smooth curve with the knots chosen adaptively."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#the-lasso-on-the-knots-1",
+    "href": "slides/week10/week10_regularization.html#the-lasso-on-the-knots-1",
+    "title": "Week 10: Regularization",
+    "section": "The lasso on the knots",
+    "text": "The lasso on the knots\n\nlasso_cv &lt;- cv.glmnet(Z_age, ces$trump, weights = ces$w, alpha = 1, penalty.factor = pen,\n                      standardize = FALSE, foldid = folds)\nlasso_beta &lt;- coef(lasso_cv, s = \"lambda.min\")\nknots[lasso_beta[-(1:2)] != 0] # the knots with non-zero slope changes\n\n [1] 34 35 36 37 53 54 55 56 59 66 68 69 75 77 78"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#comparing-the-fits",
+    "href": "slides/week10/week10_regularization.html#comparing-the-fits",
+    "title": "Week 10: Regularization",
+    "section": "Comparing the fits",
+    "text": "Comparing the fits\n\n10-fold cross-validation error for every fit, using the same folds\n\n\ncv_fit &lt;- function(fit_fun) { # fit_fun: data -&gt; fitted model with a predict() method\n  err &lt;- numeric(nrow(ces))\n  for (k in 1:10) {\n    in_k &lt;- folds == k\n    err[in_k] &lt;- ces$trump[in_k] - predict(fit_fun(ces[!in_k, ]), ces[in_k, ])\n  }\n  wmse(err)\n}\n\n\ncv_table &lt;- tibble(\n  Method = c(\"Intercept only\", \"Linear\", \"Cubic polynomial\", \"15th order polynomial\",\n             \"Linear spline, generational knots\", \"Cubic spline, generational knots\",\n             \"Linear spline, knot at every age\", \"Ridge on the knots (CV)\",\n             \"Lasso on the knots (CV)\", \"Smoothing spline, gam() (df by CV)\"),\n  `CV error` = c(cv_fit(function(d) lm(trump ~ 1, data = d, weights = w)),\n                 cv_fit(function(d) lm(trump ~ age, data = d, weights = w)),\n                 cv_fit(function(d) lm(trump ~ poly(age, 3), data = d, weights = w)),\n                 cv_fit(function(d) lm(trump ~ poly(age, 15), data = d, weights = w)),\n                 cv_fit(function(d) lm(trump ~ age + tp_basis(age, gen_knots), data = d, weights = w)),\n                 cv_fit(function(d) lm(trump ~ bs(age, knots = gen_knots), data = d, weights = w)),\n                 cv_fit(function(d) lm(trump ~ age + tp_basis(age, knots), data = d, weights = w)),\n                 min(cv_error), min(lasso_cv$cvm),\n                 min(sapply(2:15, function(k) cv_fit(function(d) fit_gam(k, d))))))"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#comparing-the-fits-1",
+    "href": "slides/week10/week10_regularization.html#comparing-the-fits-1",
+    "title": "Week 10: Regularization",
+    "section": "Comparing the fits",
+    "text": "Comparing the fits\n\ncv_table %&gt;% mutate(`vs. best (x 10,000)` = sprintf(\"%.1f\", 1e4 * (`CV error` - min(`CV error`))),\n                    `CV error` = sprintf(\"%.5f\", `CV error`)) %&gt;% kable(align = \"lrr\")\n\n\n\n\nMethod\nCV error\nvs. best (x 10,000)\n\n\n\n\nIntercept only\n0.24919\n90.9\n\n\nLinear\n0.24026\n1.6\n\n\nCubic polynomial\n0.24028\n1.8\n\n\n15th order polynomial\n0.24056\n4.7\n\n\nLinear spline, generational knots\n0.24018\n0.8\n\n\nCubic spline, generational knots\n0.24028\n1.9\n\n\nLinear spline, knot at every age\n0.24139\n12.9\n\n\nRidge on the knots (CV)\n0.24010\n0.0\n\n\nLasso on the knots (CV)\n0.24012\n0.2\n\n\nSmoothing spline, gam() (df by CV)\n0.24010\n0.0\n\n\n\n\n\n\nFor ridge, the lasso and gam(), the tuning parameter (\\(\\lambda\\) or df) was chosen to minimize this same CV error, so their numbers are slightly optimistic."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#many-predictors",
+    "href": "slides/week10/week10_regularization.html#many-predictors",
+    "title": "Week 10: Regularization",
+    "section": "Many predictors",
+    "text": "Many predictors\n\nRegularization matters most when the model has many parameters relative to the data size.\n\nReal models have lots of covariates, interactions, and flexible terms for each of them.\n\nLet’s predict the 2020 vote with everything else in the CES that isn’t just party ID:\n\nMain effects for gender, education, race, Hispanic identity, state, region, urbanicity, employment, student status, marital status, children, home ownership, income, religion, religiosity (three measures), born-again status, military service, health insurance, sexual orientation, immigration background, internet access, media use, recent retirement or childbirth\nTwo-way interactions among 12 core demographics\nAge as a linear spline (a knot every two years), with a separate age curve for each category of gender, education, race, urbanicity, religiosity and region\n\nEvery categorical variable enters as a set of dummies. “Skipped” and “not asked” are kept as their own categories."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#many-predictors-1",
+    "href": "slides/week10/week10_regularization.html#many-predictors-1",
+    "title": "Week 10: Regularization",
+    "section": "Many predictors",
+    "text": "Many predictors\n\ncovs &lt;- c(\"gender4\", \"educ\", \"race\", \"hispanic\", \"inputstate\", \"region\", \"urbancity\", \"employ\", \"student\", \"marstat\",\n          \"child18\", \"ownhome\", \"faminc_new\", \"religpew\", \"pew_bornagain\", \"pew_religimp\", \"pew_churatd\", \"pew_prayer\",\n          \"milstat_1\", \"milstat_3\", \"healthins_2\", \"sexuality\", \"immstat\", \"internethome\",\n          \"CC23_300_1\", \"CC23_300_2\", \"CC23_300_3\", \"CC23_300_4\", \"CC23_305_4\", \"CC23_305_6\")\ncore &lt;- c(\"gender4\", \"educ\", \"race\", \"urbancity\", \"marstat\", \"pew_religimp\", \"region\", \"ownhome\", \"child18\",\n          \"faminc_new\", \"religpew\", \"employ\")\nby_age &lt;- c(\"gender4\", \"educ\", \"race\", \"urbancity\", \"pew_religimp\", \"region\") # each gets its own age curve\nces_covs &lt;- ces %&gt;% select(all_of(covs)) %&gt;%\n  mutate(across(everything(), ~ fct_na_value_to_level(fct_drop(as_factor(.x)), \"missing\")))\nX_main_int &lt;- sparse.model.matrix(reformulate(c(\".\", paste0(\"(\", paste(core, collapse = \" + \"), \")^2\"))), ces_covs)[, -1]\nage_basis &lt;- cbind(age = ces$age, tp_basis(ces$age, seq(22, 88, by = 2)))\nD_by &lt;- sparse.model.matrix(reformulate(by_age), ces_covs)[, -1]\nX_age_by &lt;- do.call(cbind, lapply(colnames(D_by), function(v) {\n  Matrix(age_basis * D_by[, v], sparse = TRUE, dimnames = list(NULL, paste0(colnames(age_basis), \":\", v)))\n}))\nX_big &lt;- cbind(Matrix(age_basis, sparse = TRUE), X_main_int, X_age_by)\nX_big &lt;- X_big[, colSums(X_big != 0) &gt;= 50] # drop columns that are non-zero for fewer than 50 respondents\ndim(X_big)\n\n[1] 17675  1898"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#many-predictors-least-squares",
+    "href": "slides/week10/week10_regularization.html#many-predictors-least-squares",
+    "title": "Week 10: Regularization",
+    "section": "Many predictors: least squares",
+    "text": "Many predictors: least squares\n\n1,898 predictors. Weighted least squares, with the same 10 folds\n\n\nX_dense &lt;- cbind(1, as.matrix(X_big))\nerr_ols &lt;- err_null &lt;- numeric(nrow(ces))\nfor (k in 1:10) {\n  in_k &lt;- folds == k\n  b &lt;- lm.wfit(X_dense[!in_k, ], ces$trump[!in_k], ces$w[!in_k])$coefficients\n  err_ols[in_k] &lt;- ces$trump[in_k] - X_dense[in_k, ] %*% replace_na(b, 0) # NA = collinear column\n  err_null[in_k] &lt;- ces$trump[in_k] - weighted.mean(ces$trump[!in_k], ces$w[!in_k])\n}\nrm(X_dense)\nc(intercept_only = wmse(err_null), least_squares = wmse(err_ols))\n\nintercept_only  least_squares \n         0.249          0.192"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#many-predictors-ridge-and-lasso",
+    "href": "slides/week10/week10_regularization.html#many-predictors-ridge-and-lasso",
+    "title": "Week 10: Regularization",
+    "section": "Many predictors: ridge and lasso",
+    "text": "Many predictors: ridge and lasso\n\nbig_ridge &lt;- cv.glmnet(X_big, ces$trump, weights = ces$w, alpha = 0, foldid = folds)\nbig_lasso &lt;- cv.glmnet(X_big, ces$trump, weights = ces$w, alpha = 1, foldid = folds)\n\n\nmap_dfr(list(Ridge = big_ridge, Lasso = big_lasso), .id = \"Method\", function(fit) {\n  tibble(lambda = c(\"lambda.min\", \"lambda.1se\"),\n         `CV error` = fit$cvm[match(c(fit$lambda.min, fit$lambda.1se), fit$lambda)],\n         `Non-zero coefficients` = fit$nzero[match(c(fit$lambda.min, fit$lambda.1se), fit$lambda)])\n}) %&gt;% mutate(`CV error` = sprintf(\"%.4f\", `CV error`)) %&gt;% kable(align = \"llrr\")\n\n\n\n\nMethod\nlambda\nCV error\nNon-zero coefficients\n\n\n\n\nRidge\nlambda.min\n0.1692\n1898\n\n\nRidge\nlambda.1se\n0.1708\n1898\n\n\nLasso\nlambda.min\n0.1667\n386\n\n\nLasso\nlambda.1se\n0.1681\n213\n\n\n\n\n\n\nLeast squares: 0.192. Intercept only: 0.249."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#many-predictors-the-lasso-path",
+    "href": "slides/week10/week10_regularization.html#many-predictors-the-lasso-path",
+    "title": "Week 10: Regularization",
+    "section": "Many predictors: the lasso path",
+    "text": "Many predictors: the lasso path\n\n\nCoefficients enter as \\(\\lambda\\) falls. Right: the CV error (with \\(\\pm\\) 1 SE) and the number of non-zero coefficients along the top."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#many-predictors-what-gets-selected",
+    "href": "slides/week10/week10_regularization.html#many-predictors-what-gets-selected",
+    "title": "Week 10: Regularization",
+    "section": "Many predictors: what gets selected?",
+    "text": "Many predictors: what gets selected?\n\nlasso_coefs &lt;- coef(big_lasso, s = \"lambda.1se\")[-1, 1]\nselected &lt;- lasso_coefs[lasso_coefs != 0]\ntibble(term = names(selected), coef = selected) %&gt;% arrange(-abs(coef)) %&gt;% head(10) %&gt;% kable(digits = 3)\n\n\n\n\nterm\ncoef\n\n\n\n\nreligpewMuslim\n-0.226\n\n\nsexualityGay man\n-0.190\n\n\nraceBlack:pew_religimpNot at all important\n0.180\n\n\npew_religimpNot at all important\n-0.148\n\n\nurbancityRural area\n0.124\n\n\nreligpewJewish:pew_religimpSomewhat important\n-0.112\n\n\nreligpewAtheist\n-0.111\n\n\npew_bornagainNo\n-0.110\n\n\neducHigh school graduate:raceAsian\n-0.108\n\n\nsexualityBisexual\n-0.102"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#lasso-as-variable-selection",
+    "href": "slides/week10/week10_regularization.html#lasso-as-variable-selection",
+    "title": "Week 10: Regularization",
+    "section": "Lasso as variable selection",
+    "text": "Lasso as variable selection\n\nVariable selection is a common problem in statistics\n\nWe assume a world where among our covariates \\(X\\), some “matter” but most don’t.\nEx-ante, we have no idea which covariates are the relevant ones!\n\nClassical approaches\n\nForward selection - Start with an empty model and add variables one-by-one.\nBackward selection - Start with a full model and remove the least useful variables one-by-one.\n\nThe lasso can be thought of as an alternative to these techniques\n\nAdvantages in computational time/feasibility as well as potential predictive benefits from shrinkage.\nBut: which variables get selected can be unstable, especially among correlated predictors\nAnd the lasso (by default) selects columns, not variables. How a variable’s influence is split across main effects, interactions and basis functions depends on how we built the design matrix."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#post-lasso-ols",
+    "href": "slides/week10/week10_regularization.html#post-lasso-ols",
+    "title": "Week 10: Regularization",
+    "section": "Post-lasso OLS",
+    "text": "Post-lasso OLS\n\nWhat if we took the columns the lasso selected and just ran (weighted) least squares?\n\n\nX_sel &lt;- cbind(1, as.matrix(X_big[, names(selected)]))\npost_lasso &lt;- lm.wfit(X_sel, ces$trump, ces$w)$coefficients\ntibble(term = names(selected), lasso = selected, post_lasso = post_lasso[-1]) %&gt;%\n  arrange(-abs(lasso)) %&gt;% head(6) %&gt;% kable(digits = 3)\n\n\n\n\nterm\nlasso\npost_lasso\n\n\n\n\nreligpewMuslim\n-0.226\n-0.288\n\n\nsexualityGay man\n-0.190\n-0.232\n\n\nraceBlack:pew_religimpNot at all important\n0.180\n0.281\n\n\npew_religimpNot at all important\n-0.148\n-0.145\n\n\nurbancityRural area\n0.124\n0.141\n\n\nreligpewJewish:pew_religimpSomewhat important\n-0.112\n-0.133\n\n\n\n\n\n\n91% of the 213 coefficients are larger in magnitude after refitting.\n\nWhy? The lasso shrinks the coefficients it keeps towards zero.\nRefitting also shifts weight between the selected columns."
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#summary",
+    "href": "slides/week10/week10_regularization.html#summary",
+    "title": "Week 10: Regularization",
+    "section": "Summary",
+    "text": "Summary\n\nBasis expansions let us fit flexible CEFs with linear regression\n\nSplines: piecewise polynomials joined smoothly at knots.\nMore knots \\(\\leadsto\\) less bias, more variance.\n\nPenalized regression: trading off bias for lower variance\n\nRidge (\\(L_2\\)): shrinks all coefficients. Lasso (\\(L_1\\)): shrinks coefficients and sets some to \\(0\\).\nPenalties are priors: normal for ridge, Laplace for the lasso.\n\nPenalized splines: lots of knots + a penalty\n\nA ridge penalty on a spline’s slope changes is a penalty on its curvature.\n\nChoose \\(\\lambda\\) out-of-sample"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#next-week",
+    "href": "slides/week10/week10_regularization.html#next-week",
+    "title": "Week 10: Regularization",
+    "section": "Next week",
+    "text": "Next week\n\nMidterm 2 - In class, Wednesday, November 11\nFlexible regression: trees and forests\n\nRegression trees\nAggregation via sums of trees + regularization via BART\nBagging, boosting, random forests\n\nReadings: Chapter 8 of James et al. (2013); Chapters 9-10 and 15 of T. Hastie, Tibshirani, and Friedman (2009)"
+  },
+  {
+    "objectID": "slides/week10/week10_regularization.html#references",
+    "href": "slides/week10/week10_regularization.html#references",
+    "title": "Week 10: Regularization",
+    "section": "References",
+    "text": "References\n\n\nFriedman, Jerome, Trevor Hastie, and Robert Tibshirani. 2010. “Regularization Paths for Generalized Linear Models via Coordinate Descent.” Journal of Statistical Software 33 (1): 1–22. https://doi.org/10.18637/jss.v033.i01.\n\n\nGhitza, Yair, Andrew Gelman, and Jonathan Auerbach. 2023. “The Great Society, Reagan’s Revolution, and Generations of Presidential Voting.” American Journal of Political Science 67 (3): 520–37. https://doi.org/10.1111/ajps.12713.\n\n\nGreen, P. J., and B. W. Silverman. 1994. Nonparametric Regression and Generalized Linear Models: A Roughness Penalty Approach. London: Chapman; Hall.\n\n\nHastie, Trevor J., and Robert J. Tibshirani. 1990. Generalized Additive Models. London: Chapman; Hall.\n\n\nHastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2009. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. 2nd ed. New York: Springer. https://hastie.su.domains/ElemStatLearn/.\n\n\nHoerl, Arthur E., and Robert W. Kennard. 1970. “Ridge Regression: Biased Estimation for Nonorthogonal Problems.” Technometrics 12 (1): 55–67. https://doi.org/10.1080/00401706.1970.10488634.\n\n\nJames, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2013. An Introduction to Statistical Learning. New York: Springer. https://www.statlearning.com/.\n\n\nKim, Seung-Jean, Kwangmoo Koh, Stephen Boyd, and Dimitry Gorinevsky. 2009. “\\(\\ell_1\\) Trend Filtering.” SIAM Review 51 (2): 339–60. https://doi.org/10.1137/070690274.\n\n\nPark, Trevor, and George Casella. 2008. “The Bayesian Lasso.” Journal of the American Statistical Association 103 (482): 681–86. https://doi.org/10.1198/016214508000000337.\n\n\nSchaffner, Brian, Stephen Ansolabehere, Jeremy Pope, and Marissa Shih. 2024. “CES Common Content, 2023.” Harvard Dataverse. https://doi.org/10.7910/DVN/JQJTCC.\n\n\nSchoenberg, I. J. 1964. “Spline Functions and the Problem of Graduation.” Proceedings of the National Academy of Sciences 52 (4): 947–50. https://doi.org/10.1073/pnas.52.4.947.\n\n\nTibshirani, Robert. 1996. “Regression Shrinkage and Selection via the Lasso.” Journal of the Royal Statistical Society: Series B (Methodological) 58 (1): 267–88. https://doi.org/10.1111/j.2517-6161.1996.tb02080.x.\n\n\nTibshirani, Ryan J. 2014. “Adaptive Piecewise Polynomial Estimation via Trend Filtering.” The Annals of Statistics 42 (1): 285–323. https://doi.org/10.1214/13-AOS1189."
   },
   {
     "objectID": "slides/week3/week3_generalized_linear_models.html#generalized-linear-models",
