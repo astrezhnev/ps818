@@ -469,14 +469,31 @@ ggplot(ridge_curves, aes(x = age, y = fit)) +
   - A straight line has no curvature, so it's never penalized.
   - "Wiggly" functions bend a lot, so they're penalized a lot.
 
-- **Smoothing splines** search over **all** functions $f$, with the penalty $\lambda \int f^{\prime\prime}(x)^2 dx$. 
-  - The solution is a natural cubic spline with a knot at every unique $X_i$ [@schoenberg1964spline; @green1994nonparametric]. 
-  - With a knot at every age, it's **essentially this ridge regression**
-  - In R: `smooth.spline()`, or `s()` in the `gam` package.
+:::
+
+## Smoothing splines
+
+::: {.incremental}
+
+- What happens as the knots get closer together ($h \to 0$)?
+
+  $$\frac{\beta_{k+1}}{h} = \frac{f(\xi_{k+1}) - 2f(\xi_k) + f(\xi_{k-1})}{h^2} \approx f''(\xi_k)$$
+
+- So the ridge penalty is a Riemann sum for the integrated squared second derivative:
+
+  $$\lambda \sum_k \beta_{k+1}^2 = \lambda h \sum_k \bigg(\frac{\beta_{k+1}}{h}\bigg)^2 h \approx \lambda h \int f''(x)^2 \, dx$$
+
+- In the limit we get the **smoothing spline**, which searches over **all** functions $f$:
+
+  $$\min_f \sum_{i=1}^N \big(Y_i - f(X_i)\big)^2 + \lambda \int f''(x)^2 \, dx$$
+
+- The solution is a **natural cubic spline** with a knot at every unique $X_i$ [@schoenberg1964spline; @green1994nonparametric].
+
+- In R: `smooth.spline()`, or `s()` in the `gam` package.
 
 :::
 
-## Effective degrees of freedom
+## Effective number of parameters
 
 ::: {.incremental}
 
@@ -485,20 +502,20 @@ ggplot(ridge_curves, aes(x = age, y = fit)) +
   $$\hat{Y} = X(X^{\prime}X + \lambda P)^{-1}X^{\prime}Y = S_\lambda Y$$
 
 - For least squares ($\lambda = 0$), $S_0$ is the projection ("hat") matrix.
-  - It's trace (sum of the diagonals) is equal to the number of parameters!
+  - Its trace (sum of the diagonals) is equal to the number of parameters!
 
-- Define the **effective degrees of freedom** of a penalized fit as $\text{df}_\lambda = \text{tr}(S_\lambda)$.
+- Define the **effective number of parameters** of a penalized fit as $p_\lambda = \text{tr}(S_\lambda)$.
 
 :::
 
-## Effective degrees of freedom
+## Effective number of parameters
 
 ```{r}
-edf <- function(lambda, X = X_age, w = ces$w) {
+eff_params <- function(lambda, X = X_age, w = ces$w) {
   XtWX <- crossprod(X, w * X)
   sum(diag(solve(XtWX + lambda * D, XtWX))) # tr(S) = tr((X'X + lambda D)^-1 X'X), with weights
 }
-tibble(lambda = c(0, 1e3, 1e5, 1e7, 1e9)) %>% mutate(edf = map_dbl(lambda, edf)) %>%
+tibble(lambda = c(0, 1e3, 1e5, 1e7, 1e9)) %>% mutate(eff_params = map_dbl(lambda, eff_params)) %>%
   mutate(lambda = format(lambda, scientific = F, big.mark = ",")) %>% kable()
 ```
 
@@ -509,7 +526,7 @@ tibble(lambda = c(0, 1e3, 1e5, 1e7, 1e9)) %>% mutate(edf = map_dbl(lambda, edf))
 ::: {.incremental}
 
 - The `gam` package [@hastie1990gam] fits **smoothing splines** inside a regression formula: `s(age, df = 4)`.
-  - Instead of $\lambda$, you choose the smooth's **effective degrees of freedom** (not counting the intercept), and `gam()` finds the $\lambda$ that gives it.
+  - Instead of $\lambda$, you choose the smooth's **effective number of parameters** (`gam()` calls it `df`; not counting the intercept), and `gam()` finds the $\lambda$ that gives it.
   - `df` is the tuning parameter: small `df` is close to a line, large `df` is close to the age-by-age averages.
 
 - The `weights` argument works like it does in `lm()`.
@@ -572,7 +589,8 @@ ggplot(gam_curves, aes(x = age, y = fit)) +
 
 ::: {.incremental}
 
-- The in-sample fit **always** prefers $\lambda = 0$: least squares minimizes the RSS by definition.
+- We'll choose $\lambda$ to optimize a measure of **fit**.
+  - In-sample fit always chooses $\lambda = 0$.
   - We need an estimate of **out-of-sample** error: how well does the fit predict observations it **wasn't** estimated on?
 
 - **$K$-fold cross-validation**:
@@ -587,7 +605,8 @@ ggplot(gam_curves, aes(x = age, y = fit)) +
 
 ::: {.incremental}
 
-- **Leave-one-out** CV ($K = N$) sounds expensive, but for linear smoothers there's a straightforward expression using the "hat matrix" and the residuals (like in linear regression!)
+- **Leave-one-out** CV ($K = N$)
+  - For linear smoothers, there's a straightforward expression using the "hat matrix" and the residuals (like in linear regression!)
 
   $$\text{CV}_{\text{LOO}}(\lambda) = \frac{1}{N}\sum_{i=1}^N \bigg(\frac{Y_i - \hat{Y}_i}{1 - [S_\lambda]_{ii}}\bigg)^2$$
 
@@ -612,12 +631,12 @@ lambda_grid <- 10^seq(0, 9, by = .25)
 cv_error <- map_dbl(lambda_grid, cv_ridge)
 lambda_cv <- lambda_grid[which.min(cv_error)]
 lambda_cv
-edf(lambda_cv)
+eff_params(lambda_cv)
 ```
 
 ## Cross-validation by hand
 
-- $\lambda = 0$ is the age-by-age averages and $\lambda \to \infty$ is the straight line. Cross-validation picks something in between, with `r round(edf(lambda_cv), 1)` effective degrees of freedom.
+- $\lambda = 0$ is the age-by-age averages and $\lambda \to \infty$ is the straight line. Cross-validation picks something in between, with `r round(eff_params(lambda_cv), 1)` effective parameters.
 
 ```{r, echo=F, fig.align="center", fig.width=10, fig.height=5.3}
 tibble(lambda = lambda_grid, cv = cv_error) %>%
@@ -655,7 +674,7 @@ tibble(lambda = lambda_grid, cv = cv_error) %>%
 
 ## Penalized regression with `glmnet`
 
-- Ridge on the knots: don't standardize (the penalty should be on the slope changes themselves), and don't penalize `age`
+- Ridge on the knots
 
 ```{r}
 Z_age <- X_age[, -1] # glmnet adds its own intercept
@@ -665,7 +684,7 @@ ridge_cv <- cv.glmnet(Z_age, ces$trump, weights = ces$w, alpha = 0, penalty.fact
 ridge_cv
 ```
 
-- `lambda.min` minimizes the CV error. `lambda.1se` is the **largest** $\lambda$ whose CV error is within one standard error of the minimum (a more conservative choice).
+- `lambda.min` minimizes the CV error. `lambda.1se` is the **largest** $\lambda$ whose CV error is within one standard error of the minimum (a choice that is *sparser*).
 
 ## Visualizing the penalty
 
@@ -749,10 +768,10 @@ ridge_cv
 
 - What does the lasso do with our 68 slope changes?
   - Ridge shrinks **all** the slope changes. The fit bends a little bit everywhere.
-  - The lasso sets **most** of them to exactly zero. The fit is piecewise linear with a few kinks, and the data choose where they are!
+  - The lasso sets **most** of them to exactly zero. The fit is piecewise linear with a few kinks.
 
 - Penalizing the $L_1$ norm of a function's slope changes is called **$\ell_1$ trend filtering** [@kim2009trend; @tibshirani2014trend]
-  - A smooth curve with the knots chosen **adaptively**.
+  - Knots are chosen **adaptively**.
 
 :::
 
@@ -824,9 +843,7 @@ cv_table %>% mutate(`vs. best (x 10,000)` = sprintf("%.1f", 1e4 * (`CV error` - 
 - Let's predict the 2020 vote with **everything** else in the CES that isn't just party ID:
   - Main effects for gender, education, race, Hispanic identity, state, region, urbanicity, employment, student status, marital status, children, home ownership, income, religion, religiosity (three measures), born-again status, military service, health insurance, sexual orientation, immigration background, internet access, media use, recent retirement or childbirth
   - **Two-way interactions** among 12 core demographics
-  - Age as a linear spline (a knot every two years), with a **separate** age curve for each category of gender, education, race, urbanicity, religiosity and region
-
-- Every categorical variable enters as a set of dummies. "Skipped" and "not asked" are kept as their own categories.
+  - Age as a linear regression spline (a knot every two years), with a **separate** age curve for each category of gender, education, race, urbanicity, religiosity and region
 
 :::
 
