@@ -67,7 +67,8 @@ Links become active as the materials for each week are posted.
 
 ### Week 11: Flexible Regression -- Trees and Forests
 
-*To be posted*
+- [Week 11 Github Repository](https://github.com/astrezhnev/ps818/tree/main/slides/week11/)
+- [Week 11 `.html` slides](https://www.antonstrezhnev.com/ps818/slides/week11/week11_trees.html)
 
 ### Week 12: Flexible Regression -- Kernels and Gaussian Processes
 

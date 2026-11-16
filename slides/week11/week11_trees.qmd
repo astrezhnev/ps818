@@ -1,0 +1,913 @@
+---
+title: "Week 11: Trees and Forests"
+subtitle: "PS 818 - Data Analysis with Statistical Models"
+author:
+  - name: "Anton Strezhnev"
+    affiliation: "University of Wisconsin-Madison"
+    email: strezhnev@wisc.edu
+date: "November 16, 2026"
+date-format: "MMMM D, YYYY"
+editor:
+  render-on-save: true
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    slide-number: true
+    overview: true
+    navigation-mode: vertical
+    progress: false
+    controls: true
+    link-external-newwindow: true
+    footer: "PS 818 - University of Wisconsin-Madison"
+    html-math-method:
+      method: mathjax
+      url: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+embed-resources: true
+bibliography: ../ps818.bib
+csl: ../ps818.csl
+link-citations: true
+
+---
+
+## Trees and Forests {.title-slide}
+
+::: {style="display: none"}
+$$
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+$$
+:::
+
+```{r, echo = F, message=F, warning=F}
+library(tidyverse)
+library(haven)
+library(knitr)
+library(rpart)      # single trees
+library(rpart.plot) # drawing them
+library(grf)        # bagging and random forests
+library(gbm)        # boosting
+library(dbarts)     # BART
+library(glmnet)     # Week 10's ridge and lasso, for comparison
+library(Matrix)
+options(digits=3, knitr.kable.NA = "")
+knitr::opts_chunk$set(echo = T)
+```
+
+## Previously
+
+::: {.incremental}
+
+- **Flexible regression**
+  - Basis expansions: polynomials, step functions, splines
+  - More flexibility $\leadsto$ less bias, more variance
+
+- **Regularization**
+  - Penalized regression: ridge ($L_2$) and lasso ($L_1$)
+  - Penalties are priors
+  - Choose the penalty by **cross-validation**
+
+- **Many predictors**: predicting the 2020 vote in the CES with 1,898 columns
+  - The lasso beat least squares, but only because we generated the inputs to be as flexible as possible.
+:::
+
+## This week
+
+::: {.incremental}
+
+- **Trees**
+  - Recursive partitioning: regression trees
+
+- **Ensembles of trees**
+  - **Bagging** and **random forests**: average many trees
+  - **Boosting**: add up many small trees fit to residuals of the previous trees
+  - **BART**: a sum of small trees keeping the trees small via **priors** on the tree paramters.
+
+- **Running example**: "many predictors" in the CES survey data.
+
+:::
+
+## Going forward
+
+::: {.incremental}
+
+- **Week 12** - Flexible Regression: Kernels and Gaussian Processes
+- **Week 13** - Causal Inference with Flexible Regression
+- **Week 14** - Working with "Big" Datasets
+
+:::
+
+## The data
+
+- The same data as Week 10: 2020 Biden and Trump voters in the 2023 CES. 1 = Trump, 0 = Biden.
+
+```{r}
+ces_raw <- read_dta("../week8/data/CCES23_Common_OUTPUT.dta.gz") # the file from Week 8
+ces <- ces_raw %>%
+  mutate(age = 2023 - birthyr) %>%
+  filter(presvote20post %in% 1:2, age <= 90) %>% # Biden or Trump voters
+  mutate(trump = as.numeric(presvote20post == 2),
+         w = commonweight / mean(commonweight)) # survey weights, rescaled to average 1
+covs <- c("gender4", "educ", "race", "hispanic", "inputstate", "region", "urbancity", "employ", "student", "marstat",
+          "child18", "ownhome", "faminc_new", "religpew", "pew_bornagain", "pew_religimp", "pew_churatd", "pew_prayer",
+          "milstat_1", "milstat_3", "healthins_2", "sexuality", "immstat", "internethome",
+          "CC23_300_1", "CC23_300_2", "CC23_300_3", "CC23_300_4", "CC23_305_4", "CC23_305_6")
+ces_covs <- ces %>% select(all_of(covs)) %>%
+  mutate(across(everything(), ~ fct_na_value_to_level(fct_drop(as_factor(.x)), "missing")))
+dat <- bind_cols(ces %>% select(trump, w, age), ces_covs) %>%
+  mutate(vote = factor(trump, levels = 0:1, labels = c("Biden", "Trump")))
+fml <- reformulate(c("age", covs), "trump") # trump ~ age + gender4 + educ + ...
+```
+
+## The data
+
+- Trees take the **raw** variables. No dummies, interactions, or basis functions.
+
+```{r}
+dim(dat)
+```
+
+- The same 10 folds and the same (weighted) error as Week 10
+
+```{r}
+set.seed(53703)
+folds <- sample(rep(1:10, length.out = nrow(dat)))
+wmse <- function(err, w = dat$w) sum(w * err^2) / sum(w) # weighted mean squared error
+cv_pred <- function(fit_fun) { # fit_fun: (train, test) -> predictions for test
+  pred <- numeric(nrow(dat))
+  for (k in 1:10) pred[folds == k] <- fit_fun(dat[folds != k, ], dat[folds == k, ])
+  pred
+}
+```
+
+```{r, echo=F}
+age_grid <- tibble(age = 21:90)
+age_means <- ces %>% group_by(age) %>% summarize(trump = weighted.mean(trump, w), n = n())
+uw_red <- "#c5050c"; uw_blue <- "#0479A8"
+base_plot <- ggplot() +
+  geom_point(data = age_means, aes(x = age, y = trump, size = n), alpha = .35) +
+  scale_size_area(max_size = 4, guide = "none") +
+  coord_cartesian(ylim = c(0, 1)) +
+  xlab("Age (2023)") + ylab("Share voting Trump (2020)") +
+  theme_bw() + theme(text = element_text(size = 16))
+add_fit <- function(p, fit, col = uw_red, lty = 1, x = age_grid$age) {
+  p + geom_line(data = tibble(age = x, fit = as.vector(fit)), aes(x = age, y = fit),
+                colour = col, linewidth = 1.5, linetype = lty)
+}
+short_split <- function(x, labs, digits, varlen, faclen) { # rpart.plot: shorten and wrap long split labels
+  map_chr(labs, function(l) {
+    parts <- str_split_fixed(l, " = ", 2)
+    if (parts[2] == "") return(l)
+    n_lev <- str_count(parts[2], ",") + 1
+    if (n_lev > 8) return(paste0(str_trim(parts[1]), " = ", n_lev, " levels")) # e.g. a list of states
+    str_wrap(paste0(parts[1], " = ", str_replace_all(parts[2], ",", ", ")), width = 40)
+  })
+}
+draw_tree <- function(tree, ...) rpart.plot(tree, type = 2, under = TRUE, faclen = 0, varlen = 0, box.palette = "BuRd",
+                                            split.fun = short_split, ...)
+```
+
+```{r week10-benchmarks, echo=F, cache=T, cache.extra=rlang::hash(list(ces$trump, ces$w, ces$age, folds))}
+# Week 10's least squares, ridge and lasso on the 1,898-column design matrix, with the same folds
+tp_basis <- function(x, knots) outer(x, knots, function(x, k) pmax(x - k, 0)) %>% `colnames<-`(paste0("(age-", knots, ")+"))
+core <- c("gender4", "educ", "race", "urbancity", "marstat", "pew_religimp", "region", "ownhome", "child18",
+          "faminc_new", "religpew", "employ")
+by_age <- c("gender4", "educ", "race", "urbancity", "pew_religimp", "region")
+X_main_int <- sparse.model.matrix(reformulate(c(".", paste0("(", paste(core, collapse = " + "), ")^2"))), ces_covs)[, -1]
+age_basis <- cbind(age = ces$age, tp_basis(ces$age, seq(22, 88, by = 2)))
+D_by <- sparse.model.matrix(reformulate(by_age), ces_covs)[, -1]
+X_age_by <- do.call(cbind, lapply(colnames(D_by), function(v) {
+  Matrix(age_basis * D_by[, v], sparse = TRUE, dimnames = list(NULL, paste0(colnames(age_basis), ":", v)))
+}))
+X_big <- cbind(Matrix(age_basis, sparse = TRUE), X_main_int, X_age_by)
+X_big <- X_big[, colSums(X_big != 0) >= 50]
+X_dense <- cbind(1, as.matrix(X_big))
+pred_null <- pred_ols <- numeric(nrow(ces))
+for (k in 1:10) {
+  in_k <- folds == k
+  b <- lm.wfit(X_dense[!in_k, ], ces$trump[!in_k], ces$w[!in_k])$coefficients
+  pred_ols[in_k] <- X_dense[in_k, ] %*% replace_na(b, 0)
+  pred_null[in_k] <- weighted.mean(ces$trump[!in_k], ces$w[!in_k])
+}
+rm(X_dense)
+big_ridge <- cv.glmnet(X_big, ces$trump, weights = ces$w, alpha = 0, foldid = folds, keep = TRUE)
+big_lasso <- cv.glmnet(X_big, ces$trump, weights = ces$w, alpha = 1, foldid = folds, keep = TRUE)
+pred_ridge <- big_ridge$fit.preval[, big_ridge$index["min", 1]]
+pred_lasso <- big_lasso$fit.preval[, big_lasso$index["min", 1]]
+week10 <- list(null = pred_null, ols = pred_ols, ridge = pred_ridge, lasso = pred_lasso, ncol = ncol(X_big))
+rm(X_big, X_main_int, X_age_by, D_by, big_ridge, big_lasso, in_k, b, k)
+```
+
+
+## Regression trees
+
+::: {.incremental}
+
+- A **tree** partitions the covariate space into $M$ non-overlapping (hyper-)rectangles $R_1, \dotsc, R_M$, the **leaves**, and predicts a constant in each:
+
+  $$f(X) = \sum_{m=1}^M c_m \mathbf{1}(X \in R_m)$$
+
+- For squared error, the best constant is the (weighted) mean of $Y$ among the observations in the leaf: $\hat{c}_m = \bar{Y}_m$.
+
+- This is a **step function**, but the regions are **chosen from the data**.
+
+- Searching over every possible partition is computationally infeasible. Instead, trees are grown **greedily** by splitting on one variabale at a time [@breiman1984cart].
+
+- For an introduction aimed at political scientists, see @montgomery2018tree.
+
+:::
+
+## Recursive binary splitting
+
+::: {.incremental}
+
+- For a continuous variable $X_j$ and a cutpoint $s$, a split divides the observations into
+
+  $$R_1(j, s) = \{X : X_j < s\} \quad \text{and} \quad R_2(j, s) = \{X : X_j \ge s\}$$
+
+- Choose the variable **and** the cutpoint that minimize the residual sum of squares after the split:
+
+  $$\min_{j, s} \bigg[\sum_{i: X_i \in R_1(j,s)} (Y_i - \bar{Y}_{R_1})^2 + \sum_{i: X_i \in R_2(j,s)} (Y_i - \bar{Y}_{R_2})^2\bigg]$$
+
+- Then repeat **within** each of the two regions, and so on, until a stopping rule (e.g. a minimum number of observations per leaf).
+
+- **Greedy**: each split is the best one available at the stage of the algorithm. 
+  - Can't accept a less optimal split in one stage to get a more optimal one later.
+
+:::
+
+## A regression tree on age
+
+- Every possible cutpoint for age (all respondents)
+
+```{r}
+split_rss <- function(x, s, y = dat$trump, w = dat$w) { # weighted RSS after splitting x at s
+  left <- x < s
+  sum(w[left] * (y[left] - weighted.mean(y[left], w[left]))^2) +
+    sum(w[!left] * (y[!left] - weighted.mean(y[!left], w[!left]))^2)
+}
+cuts <- seq(21.5, 89.5, by = 1)
+rss_age <- map_dbl(cuts, ~ split_rss(dat$age, .x))
+cuts[which.min(rss_age)]
+```
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=3.6}
+tibble(cut = cuts, rss = rss_age) %>% ggplot(aes(x = cut, y = rss)) + geom_line(linewidth = 1.5, colour = uw_red) +
+  geom_vline(xintercept = cuts[which.min(rss_age)], lty = 2) +
+  xlab("Cutpoint for age") + ylab("Weighted RSS after split") +
+  theme_bw() + theme(text = element_text(size = 16))
+```
+
+## A regression tree on age
+
+- Keep splitting (each leaf needs at least 50 respondents), then **prune** back by cross-validation
+
+```{r}
+age_tree <- rpart(trump ~ age, data = dat, weights = w,
+                  control = rpart.control(cp = 0, minbucket = 50, xval = folds))
+age_tree <- prune(age_tree, cp = age_tree$cptable[which.min(age_tree$cptable[, "xerror"]), "CP"])
+sum(age_tree$frame$var == "<leaf>") # number of leaves
+```
+
+- `rpart` takes our fold assignments through `xval`.
+
+## A regression tree on age
+
+- The tree selects a set of cutpoints **automatically**
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=5.3}
+age_cuts <- age_grid$age[which(diff(predict(age_tree, age_grid)) != 0)] + .5 # where the step function jumps
+(base_plot + geom_vline(xintercept = age_cuts, lty = 3, linewidth = .8, colour = "darkgreen")) |>
+  add_fit(predict(age_tree, age_grid))
+```
+
+## Categorical predictors
+
+::: {.incremental}
+
+- For a categorical variable with $L$ levels, a split sends some levels left and the rest right.
+  - There are $2^{L-1} - 1$ ways to do this. For state ($L = 51$), that's about $10^{15}$.
+
+- One trick is to **sort** the levels by their mean outcome.
+  - The best split is one of the $L - 1$ splits of the levels **in that order** [@breiman1984cart; @hastie2009esl].
+  - `rpart` does this automatically
+  - Some forest packages (like `grf`) only take numbers. 
+    - A common approach is to sort the levels **once**, by their mean outcome in the training data, and code them $1, \dotsc, L$.
+
+- Alternatively, just pass in all the unordered dummies ("one-hot encoding") and let the model treat each as a distinct variable.
+
+:::
+
+## One tree for Trump vote
+
+- A regression tree for `trump` with all 31 predictors grown only two levels deep.
+
+```{r}
+tree2 <- rpart(fml, data = dat, weights = w, control = rpart.control(maxdepth = 2, cp = 0))
+```
+
+```{r, echo=F, fig.align="center", fig.width=12, fig.height=5}
+draw_tree(tree2, extra = 100, cex = 1.1)
+```
+
+## Reading a tree
+
+::: {.incremental}
+
+- Each box shows the share voting **Trump** and the share of respondents in the box.
+
+- The first split is on **religious tradition**.
+
+- The second split **depends on the first**:
+  - Among Christians, the next split is **race**.
+  - Among all other respondents, the next split is religious tradition **again**.
+
+- The trees can find **interactions**
+  - In this tree, race only matters as a predictor among Christians.
+
+:::
+
+## One more level
+
+```{r}
+tree3 <- rpart(fml, data = dat, weights = w, control = rpart.control(maxdepth = 3, cp = 0))
+```
+
+```{r, echo=F, fig.align="center", fig.width=13, fig.height=5.5}
+draw_tree(tree3, extra = 100, cex = .95)
+```
+
+## How big should the tree be?
+
+::: {.incremental}
+
+- We can keep splitting until every leaf is tiny.
+  - Small leaves $\leadsto$ low bias, but very high variance (each leaf mean is based on a handful of respondents).
+
+- **Cost-complexity pruning** [@breiman1984cart]: grow a big tree $T_0$, then find the subtree $T \subseteq T_0$ that minimizes
+
+  $$\sum_{m=1}^{|T|} \sum_{i: X_i \in R_m} (Y_i - \bar{Y}_m)^2 + \alpha |T|$$
+
+  where $|T|$ is the number of leaves.
+
+- Another form of penalized regression - here, the penalty is on the **number of leaves**.
+  - $\alpha = 0$: the full tree. $\alpha \to \infty$: no splits at all (the intercept).
+  - Choose $\alpha$ by cross-validation. `rpart` calls $\alpha / \text{RSS}_{\text{root}}$ the **complexity parameter** `cp`.
+
+:::
+
+## Pruning by cross-validation
+
+```{r}
+big_tree <- rpart(fml, data = dat, weights = w,
+                  control = rpart.control(cp = 0, minbucket = 10, xval = folds))
+cp_table <- as_tibble(big_tree$cptable) %>% mutate(leaves = nsplit + 1)
+cp_best <- cp_table$CP[which.min(cp_table$xerror)]
+cp_table %>% slice(c(1, which.min(xerror), n())) %>% select(CP, leaves, xerror)
+```
+
+- `xerror` is the CV error relative to the intercept-only model. The full tree has `r max(cp_table$leaves)` leaves. Cross-validation retains `r cp_table$leaves[which.min(cp_table$xerror)]`.
+
+## Pruning by cross-validation
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=5.5}
+root_mse <- wmse(dat$trump - weighted.mean(dat$trump, dat$w)) # xerror is relative to the root node's (weighted) RSS
+ggplot(cp_table, aes(x = leaves, y = xerror * root_mse)) + geom_line(linewidth = 1.5, colour = uw_red) +
+  geom_vline(xintercept = cp_table$leaves[which.min(cp_table$xerror)], lty = 2) +
+  scale_x_log10() + xlab("Number of leaves (log scale)") + ylab("10-fold CV error (weighted MSE)") +
+  theme_bw() + theme(text = element_text(size = 16))
+```
+
+## The pruned tree
+
+- The CV error of the pruned tree
+
+```{r}
+pred_tree <- cv_pred(function(train, test) {
+  predict(rpart(fml, data = train, weights = w, control = rpart.control(cp = cp_best, minbucket = 10, xval = 0)), test)
+})
+pred_deep <- cv_pred(function(train, test) {
+  predict(rpart(fml, data = train, weights = w, control = rpart.control(cp = 0, minbucket = 10, xval = 0)), test)
+})
+c(pruned_tree = wmse(dat$trump - pred_tree), full_tree = wmse(dat$trump - pred_deep))
+```
+
+- The full tree overfits badly. Pruning it back to `r cp_table$leaves[which.min(cp_table$xerror)]` leaves cuts the CV error substantially.
+
+## Trees: pros and cons
+
+::: {.incremental}
+
+- **Pros**
+  - Small trees are easy to read and explain
+  - Interactions and non-linearities are found automatically
+
+- **Cons**
+  - Step functions are a poor approximation to smooth relationships
+  - **High variance**: a small change in the data can change what gets split on!
+
+:::
+
+## Trees are unstable
+
+- Growing the same tree on bootstrapped samples of the data gives different results!
+
+```{r}
+set.seed(818)
+boot_trees <- map(1:2, function(b) {
+  idx <- sample(nrow(dat), replace = TRUE)
+  rpart(fml, data = dat[idx, ], weights = w, control = rpart.control(maxdepth = 2, cp = 0))
+})
+```
+
+```{r, echo=F, fig.align="center", fig.width=14, fig.height=4.8}
+par(mfrow = c(1, 2))
+for (b in 1:2) draw_tree(boot_trees[[b]], extra = 100, main = paste("Bootstrap sample", b), cex = 1)
+```
+
+- We're splitting first on different variables across these draws.
+
+## Bagging
+
+::: {.incremental}
+
+- **Bootstrap aggregation** [@breiman1996bagging]: grow a deep tree on each of $B$ bootstrap samples, and **average** their predictions
+
+  $$\hat{f}_{\text{bag}}(x) = \frac{1}{B}\sum_{b=1}^B \hat{f}^{*b}(x)$$
+
+- Each tree has low bias and high variance. Averaging keeps the low bias and reduces the variance.
+
+- How much? If each tree's prediction has variance $\sigma^2$ and any two trees have correlation $\rho$:
+
+  $$\text{Var}\big(\hat{f}_{\text{bag}}(x)\big) = \rho \sigma^2 + \frac{1 - \rho}{B}\sigma^2$$
+
+- Bagged trees are correlated
+  - On every bootstrap sample, the same strong predictors (race, religion) are the ones that the method splits on first.
+
+:::
+
+## Random forests
+
+::: {.incremental}
+
+- **Random forests** [@breiman2001random]: bagging plus at **each split** only a random subset $m$ of the $p$ predictors are candidates for splits.
+
+- Strong predictors can't take the top split in every tree.
+  - Trees are less correlated $\leadsto$ smaller $\rho$ $\leadsto$ lower variance of the average.
+  - Each individual tree is worse, but the forest tends to do better.
+
+- $m$ as a **tuning parameter** - common default is $m = p/3$
+  - Also need to set the minimum **node size**
+
+:::
+
+## Out-of-bag error
+
+::: {.incremental}
+
+- Each bootstrap sample leaves out about $(1 - 1/N)^N \approx e^{-1} \approx 37\%$ of the observations.
+
+- **Out-of-bag (OOB)** prediction: predict each observation using only the trees that it wasn't used to estimate.
+  - A built-in estimate of out-of-sample error that doesn't need additional resampling!
+  - "Cross-validation" is built in to the bootstrapping procedure.
+
+- Alternatively, we'll often fit each tree to a **subsample**: a random fraction of the data (e.g. half), drawn **without** replacement. Same idea, and the other half is out of bag. Why?
+  - No duplicates: each tree is fit to **distinct** observations.
+  - Smaller subsamples overlap less, so the trees are less correlated.
+  - Subsampled forests have some nice theoretical properties for inference [@athey2019grf].
+
+:::
+
+## Random forests with `grf`
+
+- `grf` [@athey2019grf] fits random forests.
+  - We'll code each factor's levels in order of their weighted mean outcome in the training data and treat those as *numeric* values that the tree can split on.
+
+```{r}
+encode <- function(train, newdata = train) { # numeric matrix; factor levels sorted by mean outcome in train
+  map_dfc(c("age", covs), function(v) {
+    if (!is.factor(newdata[[v]])) return(tibble(!!v := newdata[[v]]))
+    lev_order <- train %>% group_by(lev = .data[[v]]) %>% summarize(m = weighted.mean(trump, w)) %>% arrange(m)
+    tibble(!!v := match(as.character(newdata[[v]]), as.character(lev_order$lev)))
+  }) %>% as.matrix()
+}
+X_all <- encode(dat)
+rf_oob <- regression_forest(X_all, dat$trump, sample.weights = dat$w, mtry = 5, num.trees = 500,
+                            honesty = FALSE, ci.group.size = 1, seed = 818)
+wmse(dat$trump - predict(rf_oob)$predictions) # predict() with no new data: out-of-bag
+```
+
+- Each tree is grown on half the data, without replacement, and considers `mtry = 5` of the 31 predictors at each split.
+
+## Random forests with `grf`
+
+::: {.incremental}
+
+- Some `grf` options to know about:
+  - `sample.weights`: used in the splits and the leaf means. `sample.fraction = 0.5`: each tree's subsample.
+  - `min.node.size = 5`: minimum node size - trees are grown deep and aren't pruned.
+  - `honesty = FALSE`: by default, `grf` grows **honest** trees, choosing the splits on one half of the subsample and estimating the leaf means on the other. Crucial for **inference**, but we'll leave off for now.
+
+:::
+
+## Random forests: choosing `mtry`
+
+```{r rf-cv, cache=T, cache.extra=rlang::hash(list(dat, folds, deparse(encode)))}
+rf_fit <- function(train, test, mtry) { # the factor coding is learned on the training folds only
+  fit <- regression_forest(encode(train), train$trump, sample.weights = train$w, mtry = mtry, num.trees = 500,
+                           honesty = FALSE, ci.group.size = 1, seed = 818)
+  predict(fit, encode(train, test))$predictions
+}
+mtry_grid <- c(1, 3, 5, 10, 20, 31) # 31 = bagging
+pred_rf_grid <- map(mtry_grid, function(m) cv_pred(function(train, test) rf_fit(train, test, m)))
+rf_cv <- tibble(mtry = mtry_grid, cv_error = map_dbl(pred_rf_grid, ~ wmse(dat$trump - .x)))
+rf_cv
+```
+
+## Random forests: choosing `mtry`
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=5.5}
+ggplot(rf_cv, aes(x = mtry, y = cv_error)) + geom_line(linewidth = 1.5, colour = uw_red) + geom_point(size = 3, colour = uw_red) +
+  geom_hline(yintercept = wmse(dat$trump - pred_tree), lty = 3, colour = "darkgreen", linewidth = 1) +
+  annotate("text", x = 31, y = wmse(dat$trump - pred_tree), label = "Pruned tree", colour = "darkgreen", size = 5.5, hjust = 1, vjust = -.5) +
+  annotate("text", x = 31, y = rf_cv$cv_error[rf_cv$mtry == 31], label = "Bagging", size = 5.5, hjust = 1, vjust = 2) +
+  scale_x_continuous(breaks = mtry_grid) + xlab("mtry (predictors considered at each split)") + ylab("10-fold CV error (weighted MSE)") +
+  theme_bw() + theme(text = element_text(size = 16))
+```
+
+## Variable importance
+
+::: {.incremental}
+
+- How do we figure out which predictors are "relevant" in a forest?
+
+- **Split-based** importance: how often the trees split on $X_j$ (`grf` weights splits near the top more heavily). 
+- **Impurity** importance, the total reduction in RSS from splits on $X_j$.
+- **Permutation** importance: randomly shuffle $X_j$ in held-out data, and measure how much the prediction error goes **up**.
+  - Shuffling breaks the relationship between $X_j$ and $Y$ (and between $X_j$ and the other predictors).
+
+- Split-based measures can be **biased** towards predictors with many possible split points [@strobl2007bias]. Permutation importance on held-out data avoids that, but it's noisier. Correlated predictors can also stand in for each other when one is shuffled.
+
+:::
+
+## Variable importance
+
+- Permutation importance on fold 1, for a forest grown on folds 2-10
+
+```{r rf-importance, cache=T, cache.extra=rlang::hash(list(dat, folds, deparse(encode), rf_cv))}
+mtry_best <- rf_cv$mtry[which.min(rf_cv$cv_error)]
+train <- dat[folds != 1, ]; test <- dat[folds == 1, ]
+rf_imp <- regression_forest(encode(train), train$trump, sample.weights = train$w, mtry = mtry_best,
+                            num.trees = 500, honesty = FALSE, ci.group.size = 1, seed = 818)
+X_test <- encode(train, test)
+err_test <- wmse(test$trump - predict(rf_imp, X_test)$predictions, test$w)
+set.seed(818)
+imp <- list(split = setNames(variable_importance(rf_imp)[, 1], colnames(X_test)),
+            permutation = map_dbl(set_names(colnames(X_test)), function(v) {
+              X_perm <- X_test; X_perm[, v] <- sample(X_perm[, v]) # shuffle one predictor
+              wmse(test$trump - predict(rf_imp, X_perm)$predictions, test$w) - err_test
+            }))
+```
+
+## Variable importance
+
+```{r, echo=F, fig.align="center", fig.width=12, fig.height=5.3}
+var_labels <- setNames(c("Age", map_chr(covs, ~ attr(ces[[.x]], "label"))), c("age", covs))
+imp_plot <- function(type, title) {
+  tibble(var = names(imp[[type]]), importance = imp[[type]] / max(imp[[type]])) %>% slice_max(importance, n = 10) %>%
+    mutate(label = fct_reorder(str_trunc(var_labels[var], 32), importance)) %>%
+    ggplot(aes(x = importance, y = label)) + geom_col(fill = uw_red) + ggtitle(title) +
+    xlab("Importance (relative to the top)") + ylab(NULL) + theme_bw() + theme(text = element_text(size = 15))
+}
+gridExtra::grid.arrange(imp_plot("split", "Split-based (grf)"), imp_plot("permutation", "Permutation (fold 1)"), ncol = 2)
+```
+
+- Both agree on the top three: race, the importance of religion, and religious tradition.
+
+## Partial dependence
+
+::: {.incremental}
+
+- How do we plot the relationship between predictor and outcome? There's no coefficient to interpret!
+
+- The **partial dependence** of $f$ on age [@friedman2001greedy]: set **everyone's** age to $a$, predict, and average
+
+  $$\bar{f}_{\text{age}}(a) = \frac{\sum_{i} w_i \hat{f}(a, X_{i,-\text{age}})}{\sum_i w_i}$$
+
+- Partial dependence is **standardization**: the same formula as the back-door adjustment in causal inference [@zhao2021causal].
+  - If the other predictors block every back-door path from age to the vote, it's the causal effect of age.
+  - But some predictors are **post-treatment** to age! 
+
+- We'll rarely interpret these causally, but they can be useful diagnostic tools!
+
+:::
+
+## Partial dependence
+
+```{r rf-pdp, cache=T, cache.extra=rlang::hash(list(dat, deparse(encode), rf_cv))}
+rf_full <- regression_forest(X_all, dat$trump, sample.weights = dat$w, mtry = mtry_best, num.trees = 500,
+                             honesty = FALSE, ci.group.size = 1, seed = 818)
+set.seed(60639)
+pd_sample <- sample(nrow(dat), 2000) # average over 2,000 respondents to save time
+pd_ages <- seq(21, 90, by = 3)
+pd_rf <- map_dbl(pd_ages, function(a) {
+  X_pd <- X_all[pd_sample, ]; X_pd[, "age"] <- a # everyone gets age a
+  weighted.mean(predict(rf_full, X_pd)$predictions, dat$w[pd_sample])
+})
+```
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4.5}
+add_fit(base_plot, predict(age_tree, age_grid), col = "darkgreen") |> add_fit(pd_rf, x = pd_ages) +
+  annotate("text", x = 23, y = .95, label = "Tree on age alone", colour = "darkgreen", size = 6, hjust = 0) +
+  annotate("text", x = 23, y = .87, label = "Random forest: partial dependence", colour = uw_red, size = 6, hjust = 0)
+```
+
+## Boosting
+
+::: {.incremental}
+
+- Bagging and random forests grow trees **independently** and average them.
+
+- **Boosting** grows trees **sequentially**. Each tree is fit to whatever the previous trees **didn't explain** [@james2013isl]:
+  1. Start with $\hat{f}(x) = \bar{Y}$ and residuals $r_i = Y_i - \bar{Y}$.
+  2. For $b = 1, \dotsc, B$:
+     - Fit a **small** tree $\hat{f}^b$ (depth $d$) to the residuals $r$
+     - Update $\hat{f}(x) \leftarrow \hat{f}(x) + \nu \hat{f}^b(x)$ and $r_i \leftarrow r_i - \nu \hat{f}^b(X_i)$
+  3. The fit is $\hat{f}(x) = \bar{Y} + \sum_{b=1}^B \nu \hat{f}^b(x)$
+
+- Three tuning parameters:
+  - $B$, the number of trees. Unlike random forests, boosting **overfits** if $B$ is too large.
+  - $\nu$, the **shrinkage** - how much should each tree contribute to the prediction, typically $0.01$ to $0.1$.
+  - $d$, the depth of each tree
+
+:::
+
+## Boosting
+
+- Train on folds 2-10 and keep fold 1 as a test set. Depth-2 trees, $\nu = 0.1$, $B = 300$
+
+```{r boost-hand, cache=T, cache.extra=rlang::hash(list(dat, folds, deparse(fml)))}
+train <- dat[folds != 1, ]; test <- dat[folds == 1, ]
+nu <- 0.1; B <- 300
+fit_train <- rep(weighted.mean(train$trump, train$w), nrow(train))
+fit_test <- rep(weighted.mean(train$trump, train$w), nrow(test))
+boost_trees <- list(); err_train <- err_test <- numeric(B)
+for (b in 1:B) {
+  train$r <- train$trump - fit_train # current residuals
+  boost_trees[[b]] <- rpart(update(fml, r ~ .), data = train, weights = w,
+                            control = rpart.control(maxdepth = 2, cp = 0, xval = 0))
+  fit_train <- fit_train + nu * predict(boost_trees[[b]], train)
+  fit_test <- fit_test + nu * predict(boost_trees[[b]], test)
+  err_train[b] <- wmse(train$trump - fit_train, train$w)
+  err_test[b] <- wmse(test$trump - fit_test, test$w)
+}
+```
+
+## Boosting: the first two trees
+
+- The first tree fits the outcome. The second fits to what the first one didn't.
+
+```{r, echo=F, fig.align="center", fig.width=14, fig.height=5}
+par(mfrow = c(1, 2))
+for (b in 1:2) {
+  tree_b <- boost_trees[[b]]
+  tree_b$frame$yval <- round(tree_b$frame$yval, 4) # the root is ~1e-18: residuals average to zero
+  draw_tree(tree_b, digits = 2, main = paste("Tree", b, "(fit to the residuals)"), cex = .85)
+}
+```
+
+## Boosting: error
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=5.5}
+tibble(b = 1:B, train = err_train, test = err_test) %>% pivot_longer(-b) %>%
+  ggplot(aes(x = b, y = value, colour = name)) + geom_line(linewidth = 1.5) +
+  scale_colour_manual(values = c(train = "grey40", test = uw_red), labels = c(test = "Test (fold 1)", train = "Training (folds 2-10)")) +
+  xlab("Number of trees (B)") + ylab("Weighted MSE") + labs(colour = NULL) +
+  theme_bw() + theme(text = element_text(size = 16), legend.position = "top")
+```
+
+## Boosting and regularization
+
+::: {.incremental}
+
+- Each step moves the fit a **small** amount in the direction of a single tree.
+- Boosting is regularized in two ways:
+  - **Shrinkage**: $\nu < 1$ means no single tree takes over.
+  - **Early stopping**: $B$ chosen by cross-validation.
+
+- **Gradient boosting** [@friedman2001greedy] replaces the residuals with the negative gradient of any loss function: the log-likelihood of a logit for binary outcomes, a Poisson for counts, etc.
+  - For a normal regression model, the negative gradient **is** the residual.
+
+:::
+
+## Boosting with `gbm`
+
+- `gbm` grows each tree on a random half of the training data (`bag.fraction = 0.5`). Depth $d \in \{1, 3, 6\}$, up to 2,000 trees, $\nu = 0.05$
+
+```{r gbm-cv, cache=T, cache.extra=rlang::hash(list(dat, folds, deparse(fml)))}
+ntree_grid <- seq(50, 2000, by = 50)
+gbm_cv <- function(depth) {
+  pred <- matrix(NA, nrow(dat), length(ntree_grid))
+  for (k in 1:10) {
+    train <- dat[folds != k, ]
+    set.seed(818)
+    fit <- gbm(fml, data = train, weights = w, distribution = "gaussian", n.trees = 2000,
+               interaction.depth = depth, shrinkage = 0.05, bag.fraction = 0.5, n.minobsinnode = 10)
+    pred[folds == k, ] <- predict(fit, dat[folds == k, ], n.trees = ntree_grid)
+  }
+  pred
+}
+pred_gbm <- map(c(1, 3, 6), gbm_cv)
+gbm_err <- map_dfr(set_names(pred_gbm, c(1, 3, 6)), .id = "depth",
+                   ~ tibble(trees = ntree_grid, cv_error = apply(.x, 2, function(p) wmse(dat$trump - p))))
+gbm_err %>% group_by(depth) %>% slice_min(cv_error)
+```
+
+## Boosting with `gbm`
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=5.5}
+ggplot(gbm_err, aes(x = trees, y = cv_error, colour = depth)) + geom_line(linewidth = 1.5) +
+  geom_hline(yintercept = min(rf_cv$cv_error), lty = 3, colour = "black", linewidth = 1) +
+  annotate("text", x = 1000, y = min(rf_cv$cv_error), label = "Random forest", size = 5.5, hjust = .5, vjust = 1.5) +
+  scale_colour_manual(values = c("1" = "grey60", "3" = uw_red, "6" = "#7a0000")) +
+  coord_cartesian(ylim = c(.155, .185)) +
+  xlab("Number of trees (B)") + ylab("10-fold CV error (weighted MSE)") + labs(colour = "Tree depth") +
+  theme_bw() + theme(text = element_text(size = 16), legend.position = "top")
+```
+
+## Bayesian Additive Regression Trees
+
+::: {.incremental}
+
+- **BART** [@chipman2010bart] is also a sum of small trees, but with a full **probability model**:
+
+  $$Y_i = \sum_{k=1}^{K} g(X_i; T_k, M_k) + \epsilon_i, \quad \epsilon_i \sim \text{Normal}(0, \sigma^2)$$
+
+  - $T_k$ is the structure of tree $k$ (its splits) and $M_k$ the values in its leaves.
+
+- Instead of a learning rate and early stopping, **priors** keep each tree small and avoid having one tree dominate the fit:
+  - A node at depth $d$ splits with prior probability $0.95(1 + d)^{-2}$. Most trees have 2 or 3 leaves (prior probability $\approx 0.83$).
+  - Leaf values are regularized with a $\text{Normal}(0, \sigma^2_\mu)$ prior. $\sigma_\mu$ shrinks as the number of trees $K$ grows (more regularization to counter more flexibility from additional trees)
+  - A scaled inverse-$\chi^2$ prior on $\sigma^2$.
+
+- **Penalties are priors**: the tree prior prunes and the leaf prior shrinks.
+
+:::
+
+## Fitting BART
+
+::: {.incremental}
+
+- MCMC by **Bayesian backfitting**: a Gibbs sampler that updates one tree at a time, given the **partial residuals** of the other $K - 1$ trees.
+  - Like boosting, each tree is fit to what the others miss.
+  - New tree structures are proposed (grow a leaf, prune a split, change a split rule) and accepted or rejected with Metropolis-Hastings.
+
+- For a binary outcome, use a **probit** link: $\Pr(Y_i = 1 | X_i) = \Phi\big(\sum_k g(X_i; T_k, M_k)\big)$, with a latent normal variable for each observation.
+
+- The output is a set of **posterior draws** of $f(x)$, so we get uncertainty for any prediction or summary of the fit.
+
+- The default priors tend to work well [@chipman2010bart; @hill2020bart].
+
+:::
+
+## BART with `dbarts`
+
+- Check the sampler: 4 chains on the full data, tracking a few **functions** of the fit
+
+```{r bart-chains, cache=T, cache.extra=rlang::hash(list(dat, covs))}
+bart_chains <- bart(as.data.frame(dat[, c("age", covs)]), dat$trump, x.test = as.data.frame(dat[1:3, c("age", covs)]),
+                    ntree = 200, nskip = 500, ndpost = 1000, nchain = 4, nthread = 4, combinechains = FALSE,
+                    verbose = FALSE, seed = 818)
+avg_share <- apply(pnorm(bart_chains$yhat.train), c(1, 2), weighted.mean, w = dat$w) # chain x draw
+n_splits <- apply(bart_chains$varcount, c(1, 2), sum)                                  # splits across all 200 trees
+draws <- array(c(t(avg_share), aperm(pnorm(bart_chains$yhat.test), c(2, 1, 3)), t(n_splits)), dim = c(1000, 4, 5),
+               dimnames = list(NULL, NULL, c("avg_share", "resp_1", "resp_2", "resp_3", "n_splits")))
+rm(bart_chains) # the full set of draws is large
+```
+
+- `resp_1`-`resp_3`: predicted probabilities for the same three respondents as the bootstrap slide.
+
+## BART: traceplots
+
+```{r, echo=F, fig.align="center", fig.width=12, fig.height=6}
+bayesplot::color_scheme_set("viridis") # distinct colors, so the chains can be told apart
+bayesplot::mcmc_trace(draws, facet_args = list(ncol = 3)) + theme(text = element_text(size = 15))
+```
+
+## BART: convergence diagnostics
+
+- $\hat{R}$ and effective sample sizes
+
+```{r}
+bart_diag <- posterior::summarise_draws(posterior::as_draws_array(draws), "mean",
+                                        ~ posterior::quantile2(.x, probs = c(.025, .975)), "rhat", "ess_bulk", "ess_tail")
+bart_diag %>% kable(digits = 3)
+```
+
+## Reading the diagnostics
+
+::: {.incremental}
+
+- The average predicted share mixes well: $\hat{R}$ = `r round(bart_diag$rhat[1], 2)`, and `r round(bart_diag$ess_bulk[1])` effective draws out of 4,000.
+
+- Individual predictions and the number of splits mix much more **slowly**: $\hat{R}$ up to `r round(max(bart_diag$rhat[-1]), 2)`, and as few as `r round(min(bart_diag$ess_bulk[-1]))` effective draws.
+  - Each tree changes by one small step (grow, prune, change a rule) per iteration, so the tree structures explore the posterior slowly.
+  - Credible intervals for **individual** respondents would need longer, or more, chains.
+
+:::
+
+## BART: cross-validated error
+
+```{r bart-cv, cache=T, cache.extra=rlang::hash(list(dat, folds, covs))}
+bart_fit <- function(train, test) {
+  fit <- bart(as.data.frame(train[, c("age", covs)]), train$trump, x.test = as.data.frame(test[, c("age", covs)]),
+              ntree = 200, nskip = 500, ndpost = 1000, verbose = FALSE, seed = 818)
+  colMeans(pnorm(fit$yhat.test)) # yhat is on the probit scale: average Pr(Y = 1) over posterior draws
+}
+pred_bart <- cv_pred(bart_fit)
+wmse(dat$trump - pred_bart)
+```
+
+- 200 trees, 500 burn-in and 1,000 posterior draws, and the default priors.
+
+## BART: partial dependence with uncertainty
+
+```{r bart-pdp, cache=T, cache.extra=rlang::hash(list(dat, covs, pd_sample, pd_ages))}
+bart_full <- bart(as.data.frame(dat[, c("age", covs)]), dat$trump, ntree = 200, nskip = 500, ndpost = 1000,
+                  verbose = FALSE, seed = 818, keeptrees = TRUE)
+pd_bart <- map_dfr(pd_ages, function(a) {
+  newdata <- as.data.frame(dat[pd_sample, c("age", covs)]) %>% mutate(age = a)
+  draws <- predict(bart_full, newdata, type = "ev") %*% dat$w[pd_sample] / sum(dat$w[pd_sample]) # one PD per draw
+  tibble(age = a, est = mean(draws), lo = quantile(draws, .025), hi = quantile(draws, .975))
+})
+```
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4}
+(base_plot + geom_ribbon(data = pd_bart, aes(x = age, ymin = lo, ymax = hi), fill = uw_blue, alpha = .3)) |>
+  add_fit(pd_bart$est, x = pd_ages, col = uw_blue) |> add_fit(pd_rf, x = pd_ages) +
+  annotate("text", x = 23, y = .95, label = "BART (95% credible interval)", colour = uw_blue, size = 6, hjust = 0) +
+  annotate("text", x = 23, y = .87, label = "Random forest", colour = uw_red, size = 6, hjust = 0)
+```
+
+## Comparing everything
+
+```{r, echo=F}
+rf_best <- pred_rf_grid[[which.min(rf_cv$cv_error)]]
+gbm_best_depth <- which.min(map_dbl(pred_gbm, ~ min(apply(.x, 2, function(p) wmse(dat$trump - p)))))
+gbm_best <- pred_gbm[[gbm_best_depth]][, which.min(apply(pred_gbm[[gbm_best_depth]], 2, function(p) wmse(dat$trump - p)))]
+waccuracy <- function(pred) sum(dat$w * ((pred > .5) == dat$trump)) / sum(dat$w)
+comparison <- tribble(
+  ~Method, ~pred,
+  "Intercept only", week10$null,
+  paste0("Least squares, ", format(week10$ncol, big.mark = ","), " columns (Week 10)"), week10$ols,
+  "Ridge (Week 10)", week10$ridge,
+  "Lasso (Week 10)", week10$lasso,
+  "Single tree, pruned by CV", pred_tree,
+  "Bagging (mtry = 31)", pred_rf_grid[[which(mtry_grid == 31)]],
+  paste0("Random forest (mtry = ", mtry_best, ")"), rf_best,
+  paste0("Boosting (depth ", c(1, 3, 6)[gbm_best_depth], ")"), gbm_best,
+  "BART", pred_bart
+) %>% mutate(`CV error` = map_dbl(pred, ~ wmse(dat$trump - .x)), `CV accuracy` = map_dbl(pred, waccuracy)) %>% select(-pred)
+comparison %>% mutate(`CV error` = sprintf("%.4f", `CV error`), `CV accuracy` = sprintf("%.1f%%", 100 * `CV accuracy`)) %>%
+  kable(align = "lrr")
+```
+
+- Same 10 folds for every method. Accuracy: predict Trump when the predicted probability is above 0.5.
+- Tuning parameters ($\lambda$, `cp`, `mtry`, $B$ and $d$) were chosen by the **same** CV error, so every row is a bit optimistic.
+
+## Summary
+
+::: {.incremental}
+
+- **Trees** partition the predictors into rectangles and predict a constant in each.
+  - No assumptions on functional form - enough splits can uncover deep interactions.
+  - Interpretable, but high variance.
+  - And risk overfitting if grown too deep!
+
+- **Ensembles** sacrifice interpretability for greater accuracy:
+  - **Averages of trees**: Grow many deep trees on bootstrap samples and average the predictions
+    - De-correlate them by using subsets of predictors at each split
+  - **Sums of trees** - Grow many small trees and add them together. 
+    - Each tree explains a different part of the outcome.
+    - **BART**: Regularization through Bayesian priors on the tree parameters
+
+:::
+
+## Next week
+
+::: {.incremental}
+
+- **Flexible regression: kernels and Gaussian processes**
+  - Infinite-dimensional function spaces
+  - Kernel ridge regression
+  - Gaussian process regression: a prior over **functions**
+
+- Class meets Monday. Wednesday is cancelled for Thanksgiving.
+
+- **Readings**: @hainmueller2014krls; Chapters 2 and 4 of @rasmussen2006gp
+
+:::
+
+## References {.refs-slide}
+
+::: {#refs}
+:::
