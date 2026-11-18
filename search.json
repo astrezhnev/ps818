@@ -2629,7 +2629,7 @@
     "href": "slides/week11/week11_trees.html#previously",
     "title": "Week 11: Trees and Forests",
     "section": "Previously",
-    "text": "Previously\n\nFlexible regression\n\nBasis expansions: polynomials, step functions, splines\nMore flexibility \\(\\leadsto\\) less bias, more variance\n\nRegularization\n\nPenalized regression: ridge (\\(L_2\\)) and lasso (\\(L_1\\))\nPenalties are priors\nChoose the penalty by cross-validation\n\nMany predictors: predicting the 2020 vote in the CES with 1,898 columns\n\nThe lasso beat least squares, but only because we generated the inputs to be as flexible as possible."
+    "text": "Previously\n\nFlexible regression\n\nBasis expansions: polynomials, step functions, splines\nMore flexibility \\(\\leadsto\\) less bias, more variance\n\nRegularization\n\nPenalized regression: ridge (\\(L_2\\)) and lasso (\\(L_1\\))\nPenalties are priors\nChoose the penalty by cross-validation\n\nMany predictors: predicting the 2020 vote in the CES with 1,898 columns"
   },
   {
     "objectID": "slides/week11/week11_trees.html#this-week",
@@ -2664,14 +2664,14 @@
     "href": "slides/week11/week11_trees.html#regression-trees",
     "title": "Week 11: Trees and Forests",
     "section": "Regression trees",
-    "text": "Regression trees\n\nA tree partitions the covariate space into \\(M\\) non-overlapping (hyper-)rectangles \\(R_1, \\dotsc, R_M\\), the leaves, and predicts a constant in each:\n\\[f(X) = \\sum_{m=1}^M c_m \\mathbf{1}(X \\in R_m)\\]\nFor squared error, the best constant is the (weighted) mean of \\(Y\\) among the observations in the leaf: \\(\\hat{c}_m = \\bar{Y}_m\\).\nThis is a step function, but the regions are chosen from the data.\nSearching over every possible partition is computationally infeasible. Instead, trees are grown greedily by splitting on one variabale at a time (Breiman et al. 1984).\nFor an introduction aimed at political scientists, see Montgomery and Olivella (2018)."
+    "text": "Regression trees\n\nA tree \\(T\\) partitions the covariate space into \\(|T|\\) non-overlapping hyper-rectangles \\(R_1, \\dotsc, R_{|T|}\\)\n\nThese are the leaves\nEach leaf predicts a constant \\(\\mu_m\\). Collect them in \\(M = (\\mu_1, \\dotsc, \\mu_{|T|})\\)\n\n\\[g(x; T, M) = \\sum_{m=1}^{|T|} \\mu_m \\mathbf{1}(x \\in R_m)\\]\nFor squared error, the best constant is the mean of \\(Y\\) among the observations in the leaf: \\(\\hat{\\mu}_m = \\bar{Y}_m\\).\nThis is a step function, but the regions are chosen from the data.\nSearching over every possible partition is computationally infeasible. Instead, trees are grown greedily by splitting on one variable at a time (Breiman et al. 1984).\nFor an introduction aimed at political scientists, see Montgomery and Olivella (2018)."
   },
   {
     "objectID": "slides/week11/week11_trees.html#recursive-binary-splitting",
     "href": "slides/week11/week11_trees.html#recursive-binary-splitting",
     "title": "Week 11: Trees and Forests",
     "section": "Recursive binary splitting",
-    "text": "Recursive binary splitting\n\nFor a continuous variable \\(X_j\\) and a cutpoint \\(s\\), a split divides the observations into\n\\[R_1(j, s) = \\{X : X_j &lt; s\\} \\quad \\text{and} \\quad R_2(j, s) = \\{X : X_j \\ge s\\}\\]\nChoose the variable and the cutpoint that minimize the residual sum of squares after the split:\n\\[\\min_{j, s} \\bigg[\\sum_{i: X_i \\in R_1(j,s)} (Y_i - \\bar{Y}_{R_1})^2 + \\sum_{i: X_i \\in R_2(j,s)} (Y_i - \\bar{Y}_{R_2})^2\\bigg]\\]\nThen repeat within each of the two regions, and so on, until a stopping rule (e.g. a minimum number of observations per leaf).\nGreedy: each split is the best one available at the stage of the algorithm.\n\nCan’t accept a less optimal split in one stage to get a more optimal one later."
+    "text": "Recursive binary splitting\n\nFor a continuous variable \\(X_j\\) and a cutpoint \\(s\\), a split divides the observations into\n\\[R_{\\text{left}}(j, s) = \\{x : x_j &lt; s\\} \\quad \\text{and} \\quad R_{\\text{right}}(j, s) = \\{x : x_j \\ge s\\}\\]\nChoose the variable and the cutpoint that minimize the residual sum of squares after the split:\n\\[\\min_{j, s} \\bigg[\\sum_{i: X_i \\in R_{\\text{left}}(j,s)} (Y_i - \\bar{Y}_{\\text{left}})^2 + \\sum_{i: X_i \\in R_{\\text{right}}(j,s)} (Y_i - \\bar{Y}_{\\text{right}})^2\\bigg]\\]\nThen repeat within each of the two regions, and so on, until a stopping rule (e.g. a minimum number of observations per leaf).\nGreedy: each split is the best one available at the stage of the algorithm.\n\nCan’t accept a less optimal split in one stage to get a more optimal one later."
   },
   {
     "objectID": "slides/week11/week11_trees.html#a-regression-tree-on-age",
@@ -2699,7 +2699,7 @@
     "href": "slides/week11/week11_trees.html#categorical-predictors",
     "title": "Week 11: Trees and Forests",
     "section": "Categorical predictors",
-    "text": "Categorical predictors\n\nFor a categorical variable with \\(L\\) levels, a split sends some levels left and the rest right.\n\nThere are \\(2^{L-1} - 1\\) ways to do this. For state (\\(L = 51\\)), that’s about \\(10^{15}\\).\n\nOne trick is to sort the levels by their mean outcome.\n\nThe best split is one of the \\(L - 1\\) splits of the levels in that order (Breiman et al. 1984; Hastie, Tibshirani, and Friedman 2009).\nrpart does this automatically\nSome forest packages (like grf) only take numbers.\n\nA common approach is to sort the levels once, by their mean outcome in the training data, and code them \\(1, \\dotsc, L\\).\n\n\nAlternatively, just pass in all the unordered dummies (“one-hot encoding”) and let the model treat each as a distinct variable."
+    "text": "Categorical predictors\n\nFor a categorical variable with \\(L\\) levels, a split allocates some levels to the left side of the tree and the rest to the right of the tree.\n\nThere are \\(2^{L-1} - 1\\) ways to do this. For state (\\(L = 51\\)), that’s about \\(10^{15}\\).\n\nOne trick is to sort the levels by their mean outcome.\n\nThe best split is one of the \\(L - 1\\) splits of the sorted levels (Breiman et al. 1984; Hastie, Tibshirani, and Friedman 2009).\nrpart does this automatically\nSome packages (like grf for random forests) don’t.\n\nAlternatively, just pass in all the unordered dummies (“one-hot encoding”) and let the model treat each as a distinct variable."
   },
   {
     "objectID": "slides/week11/week11_trees.html#one-tree-for-trump-vote",
@@ -2769,14 +2769,14 @@
     "href": "slides/week11/week11_trees.html#bagging",
     "title": "Week 11: Trees and Forests",
     "section": "Bagging",
-    "text": "Bagging\n\nBootstrap aggregation (Breiman 1996): grow a deep tree on each of \\(B\\) bootstrap samples, and average their predictions\n\\[\\hat{f}_{\\text{bag}}(x) = \\frac{1}{B}\\sum_{b=1}^B \\hat{f}^{*b}(x)\\]\nEach tree has low bias and high variance. Averaging keeps the low bias and reduces the variance.\nHow much? If each tree’s prediction has variance \\(\\sigma^2\\) and any two trees have correlation \\(\\rho\\):\n\\[\\text{Var}\\big(\\hat{f}_{\\text{bag}}(x)\\big) = \\rho \\sigma^2 + \\frac{1 - \\rho}{B}\\sigma^2\\]\nBagged trees are correlated\n\nOn every bootstrap sample, the same strong predictors (race, religion) are the ones that the method splits on first."
+    "text": "Bagging\n\nBootstrap aggregation (Breiman 1996): grow a deep tree on each of \\(B\\) bootstrap samples, and average their predictions\n\\[\\hat{f}_{\\text{bag}}(x) = \\frac{1}{B}\\sum_{b=1}^B \\hat{f}^{*b}(x)\\]\nEach tree has low bias and high variance. Averaging keeps the low bias and reduces the variance.\nHow much? If each tree’s prediction has variance \\(\\tau^2\\) and any two trees have correlation \\(\\rho\\):\n\\[\\text{Var}\\big(\\hat{f}_{\\text{bag}}(x)\\big) = \\rho \\tau^2 + \\frac{1 - \\rho}{B}\\tau^2\\]\nBagged trees are correlated\n\nOn every bootstrap sample, the same strong predictors (race, religion) are the ones that the method splits on first."
   },
   {
     "objectID": "slides/week11/week11_trees.html#random-forests",
     "href": "slides/week11/week11_trees.html#random-forests",
     "title": "Week 11: Trees and Forests",
     "section": "Random forests",
-    "text": "Random forests\n\nRandom forests (Breiman 2001): bagging plus at each split only a random subset \\(m\\) of the \\(p\\) predictors are candidates for splits.\nStrong predictors can’t take the top split in every tree.\n\nTrees are less correlated \\(\\leadsto\\) smaller \\(\\rho\\) \\(\\leadsto\\) lower variance of the average.\nEach individual tree is worse, but the forest tends to do better.\n\n\\(m\\) as a tuning parameter - common default is \\(m = p/3\\)\n\nAlso need to set the minimum node size"
+    "text": "Random forests\n\nRandom forests (Breiman 2001): bagging plus at each split only a random subset of \\(m_{\\text{try}}\\) of the \\(p\\) predictors are candidates for splits.\nStrong predictors can’t take the top split in every tree.\n\nTrees are less correlated \\(\\leadsto\\) smaller \\(\\rho\\) \\(\\leadsto\\) lower variance of the average.\nEach individual tree is worse, but the forest tends to do better.\n\n\\(m_{\\text{try}}\\) as a tuning parameter - common default is \\(m_{\\text{try}} = p/3\\)\n\nAlso need to set the minimum node size"
   },
   {
     "objectID": "slides/week11/week11_trees.html#out-of-bag-error",
@@ -2839,7 +2839,7 @@
     "href": "slides/week11/week11_trees.html#partial-dependence",
     "title": "Week 11: Trees and Forests",
     "section": "Partial dependence",
-    "text": "Partial dependence\n\nHow do we plot the relationship between predictor and outcome? There’s no coefficient to interpret!\nThe partial dependence of \\(f\\) on age (Friedman 2001): set everyone’s age to \\(a\\), predict, and average\n\\[\\bar{f}_{\\text{age}}(a) = \\frac{\\sum_{i} w_i \\hat{f}(a, X_{i,-\\text{age}})}{\\sum_i w_i}\\]\nPartial dependence is standardization: the same formula as the back-door adjustment in causal inference (Zhao and Hastie 2021).\n\nIf the other predictors block every back-door path from age to the vote, it’s the causal effect of age.\nBut some predictors are post-treatment to age!\n\nWe’ll rarely interpret these causally, but they can be useful diagnostic tools!"
+    "text": "Partial dependence\n\nHow do we plot the relationship between predictor and outcome? There’s no coefficient to interpret!\nThe partial dependence of \\(f\\) on age (Friedman 2001): set everyone’s age to \\(a\\), predict, and average\n\\[\\bar{f}_{\\text{age}}(a) = \\frac{1}{N} \\sum_{i=1}^N \\hat{f}(a, X_{i,-\\text{age}})\\]\nPartial dependence is standardization: the same formula as the back-door adjustment in causal inference (Zhao and Hastie 2021).\n\nIf the other predictors block every back-door path from age to the vote, it’s the causal effect of age.\nBut some predictors are post-treatment to age!\n\nWe’ll rarely interpret these causally, but they can be useful diagnostic tools!"
   },
   {
     "objectID": "slides/week11/week11_trees.html#partial-dependence-1",
@@ -2853,7 +2853,7 @@
     "href": "slides/week11/week11_trees.html#boosting",
     "title": "Week 11: Trees and Forests",
     "section": "Boosting",
-    "text": "Boosting\n\nBagging and random forests grow trees independently and average them.\nBoosting grows trees sequentially. Each tree is fit to whatever the previous trees didn’t explain (James et al. 2013):\n\nStart with \\(\\hat{f}(x) = \\bar{Y}\\) and residuals \\(r_i = Y_i - \\bar{Y}\\).\nFor \\(b = 1, \\dotsc, B\\):\n\nFit a small tree \\(\\hat{f}^b\\) (depth \\(d\\)) to the residuals \\(r\\)\nUpdate \\(\\hat{f}(x) \\leftarrow \\hat{f}(x) + \\nu \\hat{f}^b(x)\\) and \\(r_i \\leftarrow r_i - \\nu \\hat{f}^b(X_i)\\)\n\nThe fit is \\(\\hat{f}(x) = \\bar{Y} + \\sum_{b=1}^B \\nu \\hat{f}^b(x)\\)\n\nThree tuning parameters:\n\n\\(B\\), the number of trees. Unlike random forests, boosting overfits if \\(B\\) is too large.\n\\(\\nu\\), the shrinkage - how much should each tree contribute to the prediction, typically \\(0.01\\) to \\(0.1\\).\n\\(d\\), the depth of each tree"
+    "text": "Boosting\n\nBagging and random forests grow trees independently and average them.\nBoosting grows trees sequentially. Each tree is fit to whatever the previous trees didn’t explain (James et al. 2013):\n\nStart with \\(\\hat{f}(x) = \\bar{Y}\\) and residuals \\(r_i = Y_i - \\bar{Y}\\).\nFor \\(b = 1, \\dotsc, B\\):\n\nFit a small tree \\(\\hat{f}^b(x) = g(x; \\hat{T}_b, \\hat{M}_b)\\) (depth \\(d\\)) to the residuals \\(r\\)\nUpdate \\(\\hat{f}(x) \\leftarrow \\hat{f}(x) + \\nu \\hat{f}^b(x)\\) and \\(r_i \\leftarrow r_i - \\nu \\hat{f}^b(X_i)\\)\n\nThe fit is \\(\\hat{f}(x) = \\bar{Y} + \\nu \\sum_{b=1}^B g(x; \\hat{T}_b, \\hat{M}_b)\\)\n\nThree tuning parameters:\n\n\\(B\\), the number of trees. Unlike random forests, boosting overfits if \\(B\\) is too large.\n\\(\\nu\\), the shrinkage - how much should each tree contribute to the prediction, typically \\(0.01\\) to \\(0.1\\).\n\\(d\\), the depth of each tree"
   },
   {
     "objectID": "slides/week11/week11_trees.html#boosting-1",
@@ -2867,7 +2867,14 @@
     "href": "slides/week11/week11_trees.html#boosting-the-first-two-trees",
     "title": "Week 11: Trees and Forests",
     "section": "Boosting: the first two trees",
-    "text": "Boosting: the first two trees\n\nThe first tree fits the outcome. The second fits to what the first one didn’t."
+    "text": "Boosting: the first two trees\n\nThe first tree fits the outcome. The second tree fits to what the first tree didn’t explain."
+  },
+  {
+    "objectID": "slides/week11/week11_trees.html#boosting-later-trees",
+    "href": "slides/week11/week11_trees.html#boosting-later-trees",
+    "title": "Week 11: Trees and Forests",
+    "section": "Boosting: later trees",
+    "text": "Boosting: later trees\n\nLater trees fit to what the main predictors fail to explain."
   },
   {
     "objectID": "slides/week11/week11_trees.html#boosting-error",
@@ -2902,14 +2909,14 @@
     "href": "slides/week11/week11_trees.html#bayesian-additive-regression-trees",
     "title": "Week 11: Trees and Forests",
     "section": "Bayesian Additive Regression Trees",
-    "text": "Bayesian Additive Regression Trees\n\nBART (Chipman, George, and McCulloch 2010) is also a sum of small trees, but with a full probability model:\n\\[Y_i = \\sum_{k=1}^{K} g(X_i; T_k, M_k) + \\epsilon_i, \\quad \\epsilon_i \\sim \\text{Normal}(0, \\sigma^2)\\]\n\n\\(T_k\\) is the structure of tree \\(k\\) (its splits) and \\(M_k\\) the values in its leaves.\n\nInstead of a learning rate and early stopping, priors keep each tree small and avoid having one tree dominate the fit:\n\nA node at depth \\(d\\) splits with prior probability \\(0.95(1 + d)^{-2}\\). Most trees have 2 or 3 leaves (prior probability \\(\\approx 0.83\\)).\nLeaf values are regularized with a \\(\\text{Normal}(0, \\sigma^2_\\mu)\\) prior. \\(\\sigma_\\mu\\) shrinks as the number of trees \\(K\\) grows (more regularization to counter more flexibility from additional trees)\nA scaled inverse-\\(\\chi^2\\) prior on \\(\\sigma^2\\).\n\nPenalties are priors: the tree prior prunes and the leaf prior shrinks."
+    "text": "Bayesian Additive Regression Trees\n\nBART (Chipman, George, and McCulloch 2010) is also a sum of small trees, but with a full probability model:\n\\[Y_i = \\sum_{b=1}^{B} g(X_i; T_b, M_b) + \\epsilon_i, \\quad \\epsilon_i \\sim \\text{Normal}(0, \\sigma^2)\\]\n\nEach \\(g(\\cdot\\,; T_b, M_b)\\) is a tree as before: \\(T_b\\) is its structure (the splits) and \\(M_b\\) the values \\(\\mu_m\\) in its leaves.\n\nInstead of a learning rate and early stopping, priors keep each tree small and avoid having one tree dominate the fit:\n\nA node at depth \\(d\\) splits with prior probability \\(0.95(1 + d)^{-2}\\). Most trees have 2 or 3 leaves (prior probability \\(\\approx 0.83\\)).\nLeaf values are regularized with a \\(\\text{Normal}(0, \\sigma^2_\\mu)\\) prior. \\(\\sigma_\\mu\\) shrinks as the number of trees \\(B\\) grows (more regularization to counter more flexibility from additional trees)\nA scaled inverse-\\(\\chi^2\\) prior on \\(\\sigma^2\\).\n\nPenalties are priors: the tree prior prunes and the leaf prior shrinks."
   },
   {
     "objectID": "slides/week11/week11_trees.html#fitting-bart",
     "href": "slides/week11/week11_trees.html#fitting-bart",
     "title": "Week 11: Trees and Forests",
     "section": "Fitting BART",
-    "text": "Fitting BART\n\nMCMC by Bayesian backfitting: a Gibbs sampler that updates one tree at a time, given the partial residuals of the other \\(K - 1\\) trees.\n\nLike boosting, each tree is fit to what the others miss.\nNew tree structures are proposed (grow a leaf, prune a split, change a split rule) and accepted or rejected with Metropolis-Hastings.\n\nFor a binary outcome, use a probit link: \\(\\Pr(Y_i = 1 | X_i) = \\Phi\\big(\\sum_k g(X_i; T_k, M_k)\\big)\\), with a latent normal variable for each observation.\nThe output is a set of posterior draws of \\(f(x)\\), so we get uncertainty for any prediction or summary of the fit.\nThe default priors tend to work well (Chipman, George, and McCulloch 2010; Hill, Linero, and Murray 2020)."
+    "text": "Fitting BART\n\nMCMC by Bayesian backfitting: a Gibbs sampler that updates one tree at a time, given the partial residuals of the other \\(B - 1\\) trees.\n\nLike boosting, each tree is fit to what the others miss.\nNew tree structures are proposed (grow a leaf, prune a split, change a split rule) and accepted or rejected with Metropolis-Hastings.\n\nFor a binary outcome, use a probit link: \\(\\Pr(Y_i = 1 | X_i) = \\Phi\\big(\\sum_b g(X_i; T_b, M_b)\\big)\\), with a latent normal variable for each observation.\nThe output is a set of posterior draws of \\(f(x)\\), so we get uncertainty for any prediction or summary of the fit.\nThe default priors tend to work well (Chipman, George, and McCulloch 2010; Hill, Linero, and Murray 2020)."
   },
   {
     "objectID": "slides/week11/week11_trees.html#bart-with-dbarts",
