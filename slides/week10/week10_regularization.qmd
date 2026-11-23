@@ -499,7 +499,7 @@ ggplot(ridge_curves, aes(x = age, y = fit)) +
 
 - Penalized fits are **linear smoothers** - that is, they can be expressed as a linear function of $Y$
 
-  $$\hat{Y} = X(X^{\prime}X + \lambda P)^{-1}X^{\prime}Y = S_\lambda Y$$
+  $$\hat{Y} = X(X^{\prime}X + \lambda D)^{-1}X^{\prime}Y = S_\lambda Y$$
 
 - For least squares ($\lambda = 0$), $S_0$ is the projection ("hat") matrix.
   - Its trace (sum of the diagonals) is equal to the number of parameters!

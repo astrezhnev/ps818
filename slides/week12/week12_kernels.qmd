@@ -1,0 +1,715 @@
+---
+title: "Week 12: Kernels and Gaussian Processes"
+subtitle: "PS 818 - Data Analysis with Statistical Models"
+author:
+  - name: "Anton Strezhnev"
+    affiliation: "University of Wisconsin-Madison"
+    email: strezhnev@wisc.edu
+date: "November 23, 2026"
+date-format: "MMMM D, YYYY"
+editor:
+  render-on-save: true
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    slide-number: true
+    overview: true
+    navigation-mode: vertical
+    progress: false
+    controls: true
+    link-external-newwindow: true
+    footer: "PS 818 - University of Wisconsin-Madison"
+    html-math-method:
+      method: mathjax
+      url: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+embed-resources: true
+bibliography: ../ps818.bib
+csl: ../ps818.csl
+link-citations: true
+
+---
+
+## Kernels and Gaussian Processes {.title-slide}
+
+::: {style="display: none"}
+$$
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+$$
+:::
+
+```{r, echo = F, message=F, warning=F}
+library(tidyverse)
+library(knitr)
+library(lubridate)
+library(sf)     # maps
+library(KRLS)   # kernel regularized least squares
+options(digits=3, knitr.kable.NA = "")
+knitr::opts_chunk$set(echo = T)
+```
+
+## Previously
+
+::: {.incremental}
+
+- **Trees**
+  - Recursive partitioning: split the predictors into rectangles and predict a constant in each
+  - Interpretable, but high variance
+
+- **Ensembles of trees**
+  - **Averages** of deep trees: bagging and random forests
+  - **Sums** of small trees: boosting and BART
+
+:::
+
+## This week
+
+::: {.incremental}
+
+- **Kernel methods**
+  - Kernels as regression inputs: searching over a (possibly infinite-dimensional) space of functions
+  - **Kernel regularized least squares**: ridge regression on a kernel matrix
+
+- **Gaussian processes**
+  - The Bayesian interpretation of KRLS
+  - A prior over **functions**
+
+:::
+
+## Going forward
+
+::: {.incremental}
+
+- **Week 13** - Causal Inference with Flexible Regression
+- **Week 14** - Working with "Big" Datasets
+
+:::
+
+## Example: Interpolating spatial data
+
+- A very common problem in spatial statistics is predicting an outcome at any given latitude/longitude coordinate given a finite set of observations at particular coordinates
+  - e.g. What is the estimated average temperature given observations at a number of weather monitoring stations?
+  - Finding the "best" interpolation between the observed points is known as "kriging" in the geostatistics literature
+
+- We'll use a sample of U.S. weather stations as an example:
+
+```{r, eval=F}
+library(sf)
+```
+
+## Example: Interpolating spatial data
+
+- Start by reading in the U.S. shapefile
+
+```{r}
+us_shapefile <- read_rds("data/us_shapefile.rds") %>%
+  filter(!(STUSPS %in% c("AK", "HI", "AS", "GU", "MP", "PR", "VI")))
+```
+
+- Next, read in the NOAA Climate Assessment Database monthly weather station data from January, 2025.
+  - `atmp` is the station's average temperature for the month and `ntmp` its "normal" temperature for January (both in degrees C)
+
+```{r, message=F}
+weather <- read_csv("data/monthly_summary_202501_v2.csv") %>% filter(country == "UNITED_STATES")
+weather <- weather %>% filter(atmp > -99999&ntmp > -99999) # Missing obs hard coded as -99999
+weather <- weather %>% mutate(deviation = atmp - ntmp)
+weather <- weather %>% filter(!(state %in% c("AK", "HI", "AS", "GU", "MP", "UM", "PR", "VI")))
+```
+
+## Example: Interpolating spatial data
+
+- Convert to a plottable object and overlay on the map
+
+```{r}
+# Convert the stations to a plottable object
+weather_sf <- st_as_sf(weather, coords = c("lon", "lat"), crs = st_crs(us_shapefile), remove=F)
+```
+
+## Example: Interpolating spatial data
+
+```{r,  message = F, warning=F, fig.width=9, fig.height=4, fig.align="center", echo=F, dpi=150}
+# Create the ggplot
+ggplot(data = weather_sf) +
+  # Plot the U.S. boundaries
+  geom_sf(data = us_shapefile, fill = "white", color = "black") +
+  # Plot the points
+  geom_point(aes(x=lon, y=lat, colour = deviation)) +
+  scale_colour_viridis_c() +  # You can change the color scale as needed
+  labs(title = "CADB Stations",
+       colour = "Deviation") +
+  theme_minimal()
+```
+
+## Example: Interpolating spatial data
+
+```{r,  message = F, warning=F, fig.width=9, fig.height=4, fig.align="center", echo=F, dpi=150}
+# Create the ggplot
+ggplot(data = weather_sf %>% filter(deviation < quantile(weather$deviation, .99))) +
+  # Plot the U.S. boundaries
+  geom_sf(data = us_shapefile, fill = "white", color = "black") +
+  # Plot the points
+  geom_point(aes(x=lon, y=lat, colour = deviation)) +
+  scale_colour_viridis_c() +  # You can change the color scale as needed
+  labs(title = "CADB Stations (dropped outliers)",
+       colour = "Deviation") +
+  theme_minimal()
+```
+
+## Example: Interpolating spatial data
+
+- We'll make a grid of 50km squares on which to evaluate our predictions
+
+```{r, message=F, warning=F}
+# Set boundaries for U.S. (approximate)
+lat_min <- 24.396308  # Southernmost point (Florida)
+lat_max <- 49.384358  # Northernmost point (Canada border)
+lon_min <- -125.0     # Westernmost point (California)
+lon_max <- -66.93457  # Easternmost point (Maine)
+
+# Approximate 50 km in degrees (this will vary by latitude, but we'll use an average factor)
+lat_interval <- 50 / 110.574  # 1 degree latitude ≈ 110.574 km
+lon_interval <- 50 / (111.320 * cos(mean(c(lat_min, lat_max)) * pi / 180))  # Longitude interval varies with latitude
+
+# Create a sequence of points for latitude and longitude
+latitudes <- seq(lat_min, lat_max, by = lat_interval)
+longitudes <- seq(lon_min, lon_max, by = lon_interval)
+
+# Create a grid of all combinations of latitudes and longitudes
+grid_points <- expand.grid(lat = latitudes, lon = longitudes)
+
+# Convert the grid points to an 'sf' object
+grid_points_sf <- st_as_sf(grid_points, coords = c("lon", "lat"), crs = st_crs(us_shapefile), remove=F)
+
+# Filter grid points to keep only those within the U.S. boundary
+grid_points_within_us <- st_intersection(grid_points_sf, us_shapefile)
+```
+
+## Example: Interpolating spatial data
+
+- A linear regression on latitude, longitude, and their interaction seems to miss a lot of the geographic nuances.
+
+```{r}
+weather_linear <- lm(deviation ~ lat + lon + lat*lon, data=weather)
+grid_points_within_us$linpredict <- predict(weather_linear, newdata=grid_points_within_us)
+```
+
+## Example: Interpolating spatial data
+
+```{r,  message = F, warning=F, fig.width=9, fig.height=4, fig.align="center", echo=F, dpi=150}
+# Create the ggplot
+ggplot(data = grid_points_within_us) +
+  # Plot the U.S. boundaries
+  geom_sf(data = us_shapefile, fill = "white", color = "black") +
+  # Plot the heatmap with grid squares
+  geom_tile(aes(x = lon, y = lat, fill = linpredict), width = lon_interval, height = lat_interval) +
+  scale_fill_viridis_c() +  # You can change the color scale as needed
+  coord_sf(xlim = c(lon_min, lon_max), ylim = c(lat_min, lat_max), expand = FALSE) +
+  labs(title = "Linear regression interpolation",
+       fill = "Deviation") +
+  theme_minimal()
+```
+
+## Optimization over functions
+
+::: {.incremental}
+
+- At the most general level, (nearly) every method we've talked about involves finding a **function** that optimizes some **objective**
+
+- Given a set of $n$ inputs, $\{x_i, y_i\}$, we want to find a function that solves
+
+  $$\hat{f} = \argmin_{f} \ \mathcal{L}\bigg(f, \{x_i, y_i\}_{i=1}^n\bigg)$$
+
+We started with some **severe** constraints on the space of functions over which we search.
+
+- **Linear functions**
+
+  $$f(x) = \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \dotsc$$
+
+
+:::
+
+## Space of functions
+
+::: {.incremental}
+
+- We've considered relaxations that allow our functions to be more **flexible** in form
+
+- **Basis expansions**
+
+  $$f(X) = \sum_{m=1}^M \beta_m h_m(X)$$
+
+
+- **Penalized** basis expansions (e.g. smoothing splines) 
+
+  $$\min_f \sum_{i=1}^N \big(Y_i - f(X_i)\big)^2 + \lambda \int f''(x)^2 \, dx$$
+
+
+:::
+
+## Space of functions
+
+::: {.incremental}
+
+- **Trees** are are also a kind of basis expansion with an adaptively chosen basis: $h_m(x) = \mathbf{1}(x \in R_m)$
+
+  $$g(x; T, M) = \sum_{m=1}^{|T|} \mu_m \mathbf{1}(x \in R_m)$$
+
+- **Ensembles** of trees 
+
+  $$f(x) = \sum_{b=1}^B w_b \, g(x; T_b, M_b)$$
+
+
+:::
+
+## Forests as weighted averages
+
+::: {.incremental}
+
+- One can think of a forest as also a kind of **weighted average** prediction using "similar" observations [@athey2019grf]
+
+  $$\hat{f}(x) = \sum_{i=1}^N \alpha_i(x) Y_i, \quad \alpha_i(x) = \frac{1}{B} \sum_{b=1}^B \frac{\mathbf{1}\big(X_i \in L_b(x)\big)}{|L_b(x)|}$$
+
+  - $L_b(x)$ is the set of tree $b$'s training observations that share a leaf with $x$. 
+  - $\alpha_i(x)$ measures how **similar** $X_i$ is to $x$
+
+- Can we be more flexible than this while still retaining computational feasibility?
+
+:::
+
+## Space of functions defined by kernels
+
+::: {.incremental}
+
+- "Kernel methods" consider searching over a space of functions defined implicitly by a positive-definite kernel function.
+  - Example, the **Gaussian** kernel
+
+    $$K(x, x^\prime) = \exp\bigg(-\frac{||x - x^\prime||^2}{2\sigma^2}\bigg)$$
+
+- The set of functions we'll search over is a **linear combination** of kernels evaluated at the data points.
+
+  $$f(x) = \sum_{i=1}^N c_i K(x, x_i)$$
+
+- What is this space of functions? How "flexible" is it?
+
+:::
+
+## Intuition from ridge regression
+
+::: {.incremental}
+
+- Take any basis expansion $\phi(x) = \big(h_1(x), \dotsc, h_M(x)\big)$, possibly with **more** features than observations ($M > N$). Row $i$ of $\Phi$ is $\phi(x_i)^\prime$.
+
+  $$\hat{\beta} = \argmin_{\beta} \ (\mathbf{y} - \Phi\beta)^\prime(\mathbf{y} - \Phi\beta) + \lambda \beta^\prime\beta$$
+
+- Split any $\beta$ into a combination of the data points plus a leftover $r$ that is orthogonal to every $\phi(x_i)$
+
+  $$\beta = \sum_{i=1}^N c_i \phi(x_i) + r$$
+
+  - The leftover doesn't change any fitted value: $\phi(x_i)^\prime r = 0$
+  - But it adds to the penalty: $\beta^\prime\beta = \big|\big|\sum_i c_i\phi(x_i)\big|\big|^2 + r^\prime r$
+
+- So ridge always sets $r = 0$. The solution is always a combination of the **data points**: $\hat{\beta} = \sum_{i=1}^N \hat{c}_i \phi(x_i)$
+
+:::
+
+## The representer theorem
+
+::: {.incremental}
+
+- The prediction at any $x$ only needs **inner products** between $\phi(x)$ and the data
+
+  $$\hat{f}(x) = \phi(x)^\prime\hat{\beta} = \sum_{i=1}^N \hat{c}_i \, \phi(x)^\prime\phi(x_i) = \sum_{i=1}^N \hat{c}_i K(x, x_i)$$
+
+- So do the fit and the penalty. With $\mathbf{K} = \Phi\Phi^\prime$ we get $\Phi\beta = \mathbf{K}\mathbf{c}$ and $\beta^\prime\beta = \mathbf{c}^\prime\mathbf{K}\mathbf{c}$
+
+- **The kernel trick**: we never need $\phi$ itself, only $K(x, x^\prime) = \phi(x)^\prime\phi(x^\prime)$
+  - The Gaussian kernel corresponds to **infinitely** many features. We could never run that regression, but the $N \times N$ problem in $\mathbf{c}$ is just as easy.
+
+- **Representer theorem**: this works for any loss function. The penalized solution is always a weighted sum of $N$ kernels, one centered at each data point.
+  - The space of functions built this way, with $\mathbf{c}^\prime\mathbf{K}\mathbf{c}$ as its "size", is called a **reproducing kernel Hilbert space** (RKHS)
+
+:::
+
+## Kernel Regularized Least Squares
+
+::: {.incremental}
+
+- Intuitively, what the "kernel trick" allows us to do is design a good functional approximator by way of a conventional ridge regression estimator.
+  - Relatively well-known in machine learning (particularly for classification) throughout the 2000s, but introduced to political science by @hainmueller2014krls and labeled **Kernel regularized least squares**
+
+- Our regression matrix is constructed by creating a total of $N$ columns.
+  - Column $j$ is the kernel evaluated between each observation and $x_j$, so the prediction for $x_i$ is a linear combination of the kernels in row $i$
+
+    $$f(x_i) = c_1K(x_i, x_1) + c_2K(x_i, x_2) + \dotsc c_n K(x_i, x_n)$$
+
+- The regression matrix $\mathbf{K}$ is $N \times N$
+  - We need to regularize!
+
+:::
+
+## Kernel Regularized Least Squares
+
+::: {.incremental}
+
+- For $f(x) = \sum_{i=1}^n c_i K(x, x_i)$, the RKHS norm is $||f||^2_{\mathcal{H}_K} = \mathbf{c}^\prime\mathbf{K}\mathbf{c}$
+
+- So KRLS is a **ridge regression** of $\mathbf{y}$ on the columns of $\mathbf{K}$, with a penalty that also uses $\mathbf{K}$
+
+  $$\hat{\mathbf{c}} = \argmin_{\mathbf{c}} \ (\mathbf{y} - \mathbf{K}\mathbf{c})^\prime(\mathbf{y} - \mathbf{K}\mathbf{c}) + \lambda \mathbf{c}^\prime\mathbf{K}\mathbf{c}$$
+
+- With a closed-form solution
+
+  $$\hat{\mathbf{c}} = (\mathbf{K} + \lambda \mathbf{I})^{-1}\mathbf{y}$$
+
+- Two tuning parameters: the kernel **bandwidth** $\sigma^2$ and the **penalty** $\lambda$
+
+:::
+
+
+## Kernel Regularized Least Squares
+
+- What happens when we fit KRLS with latitude and longitude as the covariate inputs.
+
+```{r, eval=F}
+library(KRLS)
+```
+
+- Estimate the model
+  - `krls()` standardizes each input and uses the kernel $\exp(-||x - x^\prime||^2/\sigma^2)$. Its argument `sigma` is the $\sigma^2$ in that formula.
+  - We use the @hainmueller2014krls approach of setting $\sigma^2$ equal to the number of dimensions in the data (here, 2).
+  - $\lambda$ is chosen by minimizing the leave-one-out error, which has a nice closed form.
+  - `approx = "none"`: since version 1.7, `krls()` silently switches to a low-rank approximation of $\mathbf{K}$ when $N > 500$.
+
+```{r krls, warning=F, cache=T, cache.extra=rlang::hash(list(weather$lat, weather$lon, weather$deviation))}
+krls_reg <- krls(X = model.matrix(~lat + lon, data=weather)[,-1],
+                 y = weather$deviation,
+                 whichkernel = "gaussian",
+                 sigma = 2,
+                 approx = "none",
+                 vcov=F,
+                 derivative=F)
+```
+
+## Kernel Regularized Least Squares
+
+- What do the inputs look like?
+
+```{r}
+dim(krls_reg$K)
+head(krls_reg$K[,1])
+head(krls_reg$K[,2])
+head(krls_reg$K[,3])
+```
+
+## Kernel Regularized Least Squares
+
+- What do the inputs look like?
+
+```{r, fig.align="center"}
+hist(krls_reg$K)
+```
+
+## Kernel Regularized Least Squares
+
+- Predict using the KRLS regression for each of our grid squares.
+
+```{r}
+grid_points_within_us$krlspredict <- predict(krls_reg, newdata= model.matrix(~lat + lon, data=grid_points_within_us)[,-1])$fit
+```
+
+## Kernel Regularized Least Squares
+
+```{r,  message = F, warning=F, fig.width=9, fig.height=4, fig.align="center", echo=F, dpi=150}
+# Create the ggplot
+ggplot(data = grid_points_within_us) +
+  # Plot the U.S. boundaries
+  geom_sf(data = us_shapefile, fill = "white", color = "black") +
+  # Plot the heatmap with grid squares
+  geom_tile(aes(x = lon, y = lat, fill = krlspredict), width = lon_interval, height = lat_interval) +
+  scale_fill_viridis_c() +  # You can change the color scale as needed
+  coord_sf(xlim = c(lon_min, lon_max), ylim = c(lat_min, lat_max), expand = FALSE) +
+  labs(title = "Kernel Regularized Least Squares interpolation",
+       fill = "Deviation") +
+  theme_minimal()
+```
+
+## Kernel Regularized Least Squares
+
+- What if we chose a smaller bandwidth for the Gaussian kernel?
+
+```{r krls2, warning=F, cache=T, cache.extra=rlang::hash(list(weather$lat, weather$lon, weather$deviation))}
+krls_reg_2 <- krls(X = model.matrix(~lat + lon, data=weather)[,-1],
+                 y = weather$deviation,
+                 sigma = 1/5,
+                 whichkernel = "gaussian",
+                 approx = "none",
+                 vcov=F,
+                 derivative=F)
+```
+
+## Kernel Regularized Least Squares
+
+- Predict using the KRLS regression for each of our grid squares.
+
+```{r}
+grid_points_within_us$krlspredict2 <- predict(krls_reg_2, newdata= model.matrix(~lat + lon, data=grid_points_within_us)[,-1])$fit
+```
+
+## Kernel Regularized Least Squares
+
+```{r,  message = F, warning=F, fig.width=9, fig.height=4, fig.align="center", echo=F, dpi=150}
+# Create the ggplot
+ggplot(data = grid_points_within_us) +
+  # Plot the U.S. boundaries
+  geom_sf(data = us_shapefile, fill = "white", color = "black") +
+  # Plot the heatmap with grid squares
+  geom_tile(aes(x = lon, y = lat, fill = krlspredict2), width = lon_interval, height = lat_interval) +
+  scale_fill_viridis_c() +  # You can change the color scale as needed
+  coord_sf(xlim = c(lon_min, lon_max), ylim = c(lat_min, lat_max), expand = FALSE) +
+  labs(title = "Kernel Regularized Least Squares interpolation (smaller bandwidth)",
+       fill = "Deviation") +
+  theme_minimal()
+```
+
+## Gaussian processes: KRLS, but Bayes
+
+::: {.incremental}
+
+- Ridge regression is the posterior mode under a **normal prior** on $\beta$. KRLS has the same Bayesian reading.
+
+- **Prior**: the function values at the data are multivariate normal, with the **kernel** as their covariance
+
+  $$\mathbf{f} = \{f(x_1), \dotsc, f(x_n)\} \sim \text{Normal}(\boldsymbol{\mu}, \mathbf{K}), \qquad \mathbf{K}_{ij} = K(x_i, x_j) = \sigma_0^2\exp\bigg(-\frac{||x_i - x_j||^2}{2l^2}\bigg)$$
+
+  - Holds for **any** finite set of inputs - this is a **Gaussian process** prior: $f \sim \text{GP}(\mu(\cdot), K(\cdot, \cdot))$
+
+- **Likelihood**: $y_i = f(x_i) + \epsilon_i$, with $\epsilon_i \sim \text{Normal}(0, \sigma_y^2)$
+
+- **Posterior mean** at a new input $x^*$, with $\mathbf{k}_* = K(x^*, \mathbf{x})$:
+
+  $$E[f(x^*)|\mathbf{y}] = \mu + \mathbf{k}_*(\mathbf{K} + \sigma_y^2 I)^{-1}(\mathbf{y} - \boldsymbol{\mu}) = \mu + \sum_{i=1}^n \hat{c}_i K(x^*, x_i)$$
+
+  - The KRLS solution, with the penalty parameter as the ratio of signal to noise $\lambda = \sigma_y^2/\sigma_0^2$
+
+
+:::
+
+## What we get from Bayes
+
+::: {.incremental}
+
+- **Uncertainty**: the full posterior of $f(x^*)$ is normal, with variance
+
+  $$Var[f(x^*)|\mathbf{y}] = K(x^*, x^*) - \mathbf{k}_*(\mathbf{K} + \sigma_y^2 I)^{-1}\mathbf{k}_*^\prime$$
+
+
+:::
+
+## GPs for geostatistics
+
+- "kriging" in geostatistics **is** gaussian process regression
+- Same Gaussian kernel as before, but with the inputs in **kilometers** (a flat map projection) instead of standardized latitude and longitude
+  - Previously, we standardized latitude and longitude separately, so a north-south kilometer counted about twice as much as an east-west one (b/c of the shape of the continental U.S.).
+
+```{r}
+stations_km <- st_coordinates(st_transform(weather_sf, 5070)) / 1000 # EPSG 5070: Albers projection, in meters
+grid_km <- st_coordinates(st_transform(grid_points_within_us, 5070)) / 1000
+```
+
+- Write our kernel function
+
+```{r}
+rbf_kernel <- function(x, xprime, sigma0, l) { # matrix of K(x_i, xprime_j), one row per point
+  x <- as.matrix(x); xprime <- as.matrix(xprime)
+  sq_dist <- outer(rowSums(x^2), rowSums(xprime^2), "+") - 2 * tcrossprod(x, xprime)
+  sigma0^2 * exp(-pmax(sq_dist, 0) / (2 * l^2))
+}
+```
+
+
+## Kriging: choosing the hyperparameters
+
+- "Empirical Bayes" - maximize the marginal likelihood $\mathbf{y} \sim \text{Normal}(\boldsymbol{\mu}, \mathbf{K} + \sigma_y^2 I)$
+
+```{r krig-opt, cache=T, cache.extra=rlang::hash(list(stations_km, weather$deviation))}
+gp_neg_loglik <- function(log_par, x, y) { # log_par = log(sigma0, l, sigma_y)
+  par <- exp(log_par)
+  Sigma <- rbf_kernel(x, x, par[1], par[2]) + diag(par[3]^2, length(y))
+  -mvtnorm::dmvnorm(y, rep(mean(y), length(y)), Sigma, log = TRUE)
+}
+krig_opt <- optim(log(c(3, 300, 1)), gp_neg_loglik, x = stations_km, y = weather$deviation)
+krig_par <- setNames(exp(krig_opt$par), c("sigma0", "l", "sigma_y"))
+krig_par
+```
+
+- A smooth surface with an SD of about `r sprintf("%.1f", krig_par["sigma0"])`°C that varies over roughly `r round(krig_par["l"], -1)` km, plus `r sprintf("%.1f", krig_par["sigma_y"])`°C of station-level noise
+
+## Kriging: the posterior
+
+```{r}
+gp_predict <- function(x, y, x_new, sigma0, l, sigma_y) { # posterior mean and SD of f(x_new)
+  K_inv <- solve(rbf_kernel(x, x, sigma0, l) + diag(sigma_y^2, length(y)))
+  k_star <- rbf_kernel(x_new, x, sigma0, l)
+  post_mean <- as.vector(mean(y) + k_star %*% K_inv %*% (y - mean(y)))
+  post_sd <- sqrt(pmax(sigma0^2 - rowSums((k_star %*% K_inv) * k_star), 0))
+  data.frame(fit = post_mean, sd = post_sd, lower = post_mean - 1.96 * post_sd, upper = post_mean + 1.96 * post_sd)
+}
+krig <- gp_predict(stations_km, weather$deviation, grid_km, krig_par["sigma0"], krig_par["l"], krig_par["sigma_y"])
+grid_points_within_us$gp_mean <- krig$fit
+grid_points_within_us$gp_sd <- krig$sd
+```
+
+## Kriging: posterior mean
+
+```{r,  message = F, warning=F, fig.width=9, fig.height=4, fig.align="center", echo=F, dpi=150}
+ggplot(data = grid_points_within_us) +
+  geom_sf(data = us_shapefile, fill = "white", color = "black") +
+  geom_tile(aes(x = lon, y = lat, fill = gp_mean), width = lon_interval, height = lat_interval) +
+  scale_fill_viridis_c() +
+  coord_sf(xlim = c(lon_min, lon_max), ylim = c(lat_min, lat_max), expand = FALSE) +
+  labs(title = "Gaussian process (kriging): posterior mean", fill = "Deviation") +
+  theme_minimal()
+```
+
+## Kriging: posterior SD
+
+```{r,  message = F, warning=F, fig.width=9, fig.height=4, fig.align="center", echo=F, dpi=150}
+ggplot(data = grid_points_within_us) +
+  geom_sf(data = us_shapefile, fill = "white", color = "black") +
+  geom_tile(aes(x = lon, y = lat, fill = gp_sd), width = lon_interval, height = lat_interval) +
+  geom_point(data = weather, aes(x = lon, y = lat), size = .3, colour = "white", alpha = .7) +
+  scale_fill_viridis_c(option = "magma") +
+  coord_sf(xlim = c(lon_min, lon_max), ylim = c(lat_min, lat_max), expand = FALSE) +
+  labs(title = "Gaussian process (kriging): posterior SD (stations in white)", fill = "SD (°C)") +
+  theme_minimal()
+```
+
+- Most certain where stations are dense (the East), least certain in the sparse interior West and along the edges of the map
+
+## Example: Poll averaging
+
+- GPs are also a natural tool for smoothing a **time series**
+  - All 191 national polls of the 2012 presidential race, from April through Election Day
+
+```{r, message=F}
+polls_all <- read_csv("data/all_polls_2012.csv") %>% filter(state == "--") %>% # national polls
+  mutate(end.date = mdy(end.date),
+         obama.2way = obama/(obama + romney),
+         day = as.numeric(end.date - ymd("2012-11-06"))) # 0 = Election Day, -211 = April 9
+actual_2way <- 65915795/(65915795 + 60933504) # Obama's share of the two-party vote (FEC)
+```
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4.2}
+poll_plot <- polls_all %>% ggplot(aes(x = ymd("2012-11-06") + day, y = obama.2way)) + geom_point(alpha = .6) +
+  theme_minimal() + theme(text = element_text(size = 16)) + labs(x = "Poll end date", y = "Obama 2-way Vote Share")
+poll_plot
+```
+
+## Draws from the prior
+
+- What trends does the prior consider plausible?
+  - Consider a prior standard deviation of $\sigma_0 = 0.02$ (2 percentage points) and a length-scale of $l = 14$ days
+
+```{r}
+set.seed(53703)
+sample_days <- seq(-215, 0, by = 1)
+prior_draws <- MASS::mvrnorm(n = 2, mu = rep(mean(polls_all$obama.2way), length(sample_days)),
+                             Sigma = rbf_kernel(sample_days, sample_days, sigma0 = .02, l = 14))
+```
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=4}
+prior_df <- tibble(day = rep(sample_days, 2), obama.2way = c(prior_draws[1, ], prior_draws[2, ]),
+                   draw = rep(c("Draw 1", "Draw 2"), each = length(sample_days)))
+poll_plot + geom_line(data = prior_df, aes(colour = draw), linewidth = 1.5) +
+  scale_colour_manual(values = c("grey50", "#0479A8")) + theme(legend.position = "none") +
+  labs(title = "Two draws from a GP prior")
+```
+
+- "Close" days have similar values of $f$. The length-scale $l$ controls what "closeness" means.
+
+## Smoothing the whole campaign
+
+- We'll use an **empirical bayes** approach to choosing the hyperparameters again: $\sigma_0$, $l$ and $\sigma_y$ selected by maximizing the marginal likelihood
+
+```{r}
+gp_opt_all <- optim(log(c(.02, 14, .02)), gp_neg_loglik, x = polls_all$day, y = polls_all$obama.2way)
+gp_par_all <- setNames(exp(gp_opt_all$par), c("sigma0", "l", "sigma_y"))
+gp_par_all
+days_all <- seq(-215, 0, by = .5)
+gp_all <- data.frame(day = days_all, gp_predict(polls_all$day, polls_all$obama.2way, days_all,
+                                                gp_par_all["sigma0"], gp_par_all["l"], gp_par_all["sigma_y"])) %>%
+  rename(obama.2way = fit)
+```
+
+```{r, echo=F}
+sampling_se <- with(polls_all, sqrt(mean(obama.2way * (1 - obama.2way) / (number.of.observations * (obama + romney) / 100))))
+```
+
+- A length-scale of about `r round(gp_par_all["l"])` days
+- The trend moves by about `r sprintf("%.1f", 100*gp_par_all["sigma0"])` points, and the polls scatter around it by about `r sprintf("%.1f", 100*gp_par_all["sigma_y"])` - most poll-to-poll movement is **noise**.
+  - That's somewhat more than sampling error alone (about `r sprintf("%.1f", 100*sampling_se)` points for these polls)
+
+## Smoothing the whole campaign
+
+```{r, echo=F, fig.align="center", fig.width=10, fig.height=5.5}
+poll_plot +
+  geom_ribbon(data = gp_all, aes(ymin = lower, ymax = upper), fill = "grey", alpha = .5) +
+  geom_line(data = gp_all, colour = "#c5050c", linewidth = 1.5) +
+  annotate("point", x = ymd("2012-11-06"), y = actual_2way, shape = 4, size = 5, stroke = 2, colour = "#0479A8") +
+  annotate("text", x = ymd("2012-11-06"), y = actual_2way, label = "Result  ", hjust = 1, colour = "#0479A8", size = 5) +
+  labs(title = "Gaussian Process Regression (95% credible interval)")
+```
+
+## Election Day
+
+```{r, echo=F}
+gp_eday <- gp_all %>% filter(day == 0)
+```
+
+::: {.incremental}
+
+- The GP's estimate of the poll average on Election Day: `r sprintf("%.1f%%", 100*gp_eday$obama.2way)` (95% interval: `r sprintf("%.1f%%", 100*gp_eday$lower)` to `r sprintf("%.1f%%", 100*gp_eday$upper)`)
+  - Obama's actual two-party vote share: `r sprintf("%.1f%%", 100*actual_2way)`
+
+- Election Day is the **end** of the series:
+  - Far from the data, the GP's mean reverts to the prior mean $\mu$ w/ a wider interval.
+  - For **forecasting**, it matters how we *extrapolate* from the data.
+
+:::
+
+## Random walks are GPs too
+
+::: {.incremental}
+
+- Poll aggregators usually model the trend as a **random walk** [@jackman2005pooling; @linzer2013dynamic]
+
+  $$f(t) = f(t-1) + \epsilon_t$$
+
+- That's just a GP with a different kernel:
+  - Random walk (Brownian motion): $K(s, t) = \sigma_0^2\min(s, t)$
+  - AR(1): $K(s, t) = \sigma_0^2\exp(-|s - t|/l)$
+
+- These kernels are **Markov**: the future depends on the past only through the present.
+  - Methods developed from the time series literature typically much faster (no need to invert an N x N matrix!) - e.g. **Kalman Filtering**
+
+- After the last poll, a random walk keeps the **last level** instead of reverting to the grand mean.
+
+:::
+
+## Next week
+
+::: {.incremental}
+
+- **Causal inference with flexible regression**
+  - Efficient semiparametric estimation of statistical functionals
+  - Influence functions
+  - "Doubly-robust"/"Neyman-orthogonal" estimators
+
+- **Readings**: @fisher2021influence; @kennedy2024review
+
+:::
+
+## References {.refs-slide}
+
+::: {#refs}
+:::

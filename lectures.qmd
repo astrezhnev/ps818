@@ -72,7 +72,8 @@ Links become active as the materials for each week are posted.
 
 ### Week 12: Flexible Regression -- Kernels and Gaussian Processes
 
-*To be posted*
+- [Week 12 Github Repository](https://github.com/astrezhnev/ps818/tree/main/slides/week12/)
+- [Week 12 `.html` slides](https://www.antonstrezhnev.com/ps818/slides/week12/week12_kernels.html)
 
 ### Week 13: Causal Inference with Flexible Regression
 
